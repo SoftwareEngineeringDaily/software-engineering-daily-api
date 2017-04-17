@@ -1,4 +1,5 @@
 import Post from '../models/post.model';
+import Like from '../models/like.model';
 
 /**
  * Load user and append to req.
@@ -77,4 +78,41 @@ function remove(req, res, next) {
     .catch(e => next(e));
 }
 
-export default { load, get, create, update, list, remove };
+/**
+ * Like a post
+ */
+function like(req, res, next, id) {
+  Like.findOne({
+    postId: id,
+    userId: req.user._id,
+  })
+  .then((like) => {
+    if (like) {
+      like.active = !like.active;
+
+      if (like.active) {
+        // raccoon.liked('userId', 'itemId')
+      } else {
+        // raccoon.unliked('userId', 'itemId')
+      }
+
+      return like;
+    }
+
+    let newlike = new Like();
+    newlike.postId = id;
+    newlike.userId = req.user._id;
+    newlike.type = 'upvote'; // @TODO: Make constant
+
+    // raccoon.liked('userId', 'itemId')
+
+    return newlike.save();
+  })
+  .then((like) => {
+    req.like = like; // eslint-disable-line no-param-reassign
+    return next();
+  })
+  .catch(e => next(e));
+}
+
+export default { load, get, create, update, list, remove, like };

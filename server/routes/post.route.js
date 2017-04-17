@@ -1,28 +1,31 @@
 import express from 'express';
 import validate from 'express-validation';
 import paramValidation from '../../config/param-validation';
-import userCtrl from '../controllers/post.controller';
+import ctrl from '../controllers/post.controller';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
 router.route('/')
   /** GET /api/posts - Get list of posts */
-  .get(userCtrl.list)
+  .get(ctrl.list)
 
   /** POST /api/posts - Create new user */
-  .post(validate(paramValidation.createPost), userCtrl.create);
+  .post(validate(paramValidation.createPost), ctrl.create);
 
 router.route('/:postId')
   /** GET /api/posts/:postId - Get user */
-  .get(userCtrl.get)
+  .get(ctrl.get)
 
   /** PUT /api/posts/:postId - Update user */
-  // .put(validate(paramValidation.updatePost), userCtrl.update)
+  // .put(validate(paramValidation.updatePost), ctrl.update)
 
   /** DELETE /api/posts/:postId - Delete user */
-  // .delete(userCtrl.remove);
+  // .delete(ctrl.remove);
+
+router.route('/:postId/like')
+  .post(ctrl.like);
 
 /** Load user when API with postId route parameter is hit */
-router.param('postId', userCtrl.load);
+router.param('postId', ctrl.load);
 
 export default router;
