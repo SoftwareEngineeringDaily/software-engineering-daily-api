@@ -12,20 +12,27 @@ import User from '../models/user.model';
  * @returns {*}
  */
 function login(req, res, next) {
-  // Ideally you'll fetch this from the db
-  // Idea here was to show how jwt works with simplicity
-  if (req.body.username === user.username && req.body.password === user.password) {
-    const token = jwt.sign({
-      username: user.username
-    }, config.jwtSecret);
-    return res.json({
-      token,
-      username: user.username
-    });
-  }
+  let username = req.body.username;
+  let password = req.body.password;
+  let err;
 
-  const err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true);
-  return next(err);
+  User
+    .findOne({'username': username}).exec()
+    .then(function (user) {
+      if (!user) return res.status(404).json({message: 'User not found.'});
+
+      if (!user.validPassword(password)) return res.status(401).json({message: 'Password is incorrect.'});
+
+      let token = jwt.sign(user.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
+
+      return res.status(200).json({
+        token: token,
+      });
+    })
+    .catch(function (err) {
+      err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true);
+      return next(err);
+    });
 }
 
 /**
@@ -54,7 +61,7 @@ function register(req, res, next) {
       return newUser.save()
     })
     .then(function (userSaved) {
-      let token =  jwt.sign(userSaved.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
+      let token = jwt.sign(userSaved.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
 
       return res.status(201).json({
         user: userSaved,

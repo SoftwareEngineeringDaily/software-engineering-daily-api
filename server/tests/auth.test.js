@@ -18,13 +18,21 @@ describe('## Auth APIs', () => {
     username: 'react',
   };
 
+  const invalidLogin = {
+    username: 'react',
+    password: 'wrong',
+  };
+
   let jwtToken;
 
-  after(() => {
-    User.remove({}).exec();
+  afterEach((done) => {
+    User.remove({}).exec()
+      .then(() => {
+        done();
+      });
   })
 
-  describe.only('# POST /api/auth/register', () => {
+  describe('# POST /api/auth/register', () => {
     it('should return bad request error', (done) => {
       request(app)
         .post('/api/auth/register')
@@ -56,13 +64,31 @@ describe('## Auth APIs', () => {
   });
 
   describe('# POST /api/auth/login', () => {
-    it('should return Authentication error', (done) => {
+    it('should return not found with unkown user', (done) => {
       request(app)
         .post('/api/auth/login')
-        .send(invalidUserCredentials)
-        .expect(httpStatus.UNAUTHORIZED)
+        .send(invalidLogin)
+        .expect(httpStatus.NOT_FOUND)
         .then((res) => {
-          expect(res.body.message).to.equal('Authentication error');
+          expect(res.body.message).to.equal('User not found.');
+          done();
+        })
+        .catch(done);
+    });
+
+    it('should return Authentication error', (done) => {
+      request(app)
+        .post('/api/auth/register')
+        .send(validUserCredentials)
+        .expect(httpStatus.CREATED)
+        .then((res) => {
+          return request(app)
+            .post('/api/auth/login')
+            .send(invalidLogin)
+            .expect(httpStatus.UNAUTHORIZED);
+        })
+        .then((res) => {
+          expect(res.body.message).to.equal('Password is incorrect.');
           done();
         })
         .catch(done);
@@ -70,9 +96,15 @@ describe('## Auth APIs', () => {
 
     it('should get valid JWT token', (done) => {
       request(app)
-        .post('/api/auth/login')
+        .post('/api/auth/register')
         .send(validUserCredentials)
-        .expect(httpStatus.OK)
+        .expect(httpStatus.CREATED)
+        .then((res) => {
+          return request(app)
+            .post('/api/auth/login')
+            .send(validUserCredentials)
+            .expect(httpStatus.OK);
+        })
         .then((res) => {
           expect(res.body).to.have.property('token');
           jwt.verify(res.body.token, config.jwtSecret, (err, decoded) => {
