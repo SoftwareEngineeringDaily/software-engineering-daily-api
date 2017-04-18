@@ -2,6 +2,7 @@ import Promise from 'bluebird';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
+import bcrypt from 'bcrypt-nodejs';
 
 /**
  * User Schema
@@ -11,11 +12,15 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  mobileNumber: {
+  password: {
     type: String,
     required: true,
-    match: [/^[1-9][0-9]{9}$/, 'The value of path {PATH} ({VALUE}) is not a valid mobile number.']
   },
+  // mobileNumber: {
+  //   type: String,
+  //   required: true,
+  //   match: [/^[1-9][0-9]{9}$/, 'The value of path {PATH} ({VALUE}) is not a valid mobile number.']
+  // },
   createdAt: {
     type: Date,
     default: Date.now
@@ -33,6 +38,13 @@ const UserSchema = new mongoose.Schema({
  * Methods
  */
 UserSchema.method({
+  generateHash: function(password) {
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+  },
+
+  validPassword: function(password) {
+    return bcrypt.compareSync(password, this.password);
+  },
 });
 
 /**

@@ -4,10 +4,11 @@ import jwt from 'jsonwebtoken';
 import chai, { expect } from 'chai';
 import app from '../../index';
 import config from '../../config/config';
+import User from '../../server/models/user.model';
 
 chai.config.includeStack = true;
 
-describe.only('## Auth APIs', () => {
+describe('## Auth APIs', () => {
   const validUserCredentials = {
     username: 'react',
     password: 'express'
@@ -15,10 +16,44 @@ describe.only('## Auth APIs', () => {
 
   const invalidUserCredentials = {
     username: 'react',
-    password: 'IDontKnow'
   };
 
   let jwtToken;
+
+  after(() => {
+    User.remove({}).exec();
+  })
+
+  describe.only('# POST /api/auth/register', () => {
+    it('should return bad request error', (done) => {
+      request(app)
+        .post('/api/auth/register')
+        .send(invalidUserCredentials)
+        .expect(httpStatus.BAD_REQUEST)
+        .then((res) => {
+          expect(res.body.message).to.equal('"password" is required');
+          done();
+        })
+        .catch(done);
+    });
+
+    it('should get valid JWT token', (done) => {
+      request(app)
+        .post('/api/auth/register')
+        .send(validUserCredentials)
+        .expect(httpStatus.CREATED)
+        .then((res) => {
+          expect(res.body).to.have.property('token');
+          jwt.verify(res.body.token, config.jwtSecret, (err, decoded) => {
+            expect(err).to.not.be.ok; // eslint-disable-line no-unused-expressions
+            expect(decoded.username).to.equal(validUserCredentials.username);
+            jwtToken = `Bearer ${res.body.token}`;
+            done();
+          });
+        })
+        .catch(done);
+    });
+  });
 
   describe('# POST /api/auth/login', () => {
     it('should return Authentication error', (done) => {

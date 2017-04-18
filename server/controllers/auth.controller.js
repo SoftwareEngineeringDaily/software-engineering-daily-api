@@ -2,12 +2,7 @@ import jwt from 'jsonwebtoken';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import config from '../../config/config';
-
-// sample user, used for authentication
-const user = {
-  username: 'react',
-  password: 'express'
-};
+import User from '../models/user.model';
 
 /**
  * Returns jwt token if valid username and password is provided
@@ -34,6 +29,52 @@ function login(req, res, next) {
 }
 
 /**
+ * Returns jwt token if valid username and password is provided
+ * @param req
+ * @param res
+ * @param next
+ * @returns {*}
+ */
+function register(req, res, next) {
+  let username = req.body.username;
+  let password = req.body.password;
+
+  User
+    .findOne({'username': username}).exec()
+    .then(function (user) {
+      if (user) {
+        let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true);
+        return next(err);
+      }
+
+      var newUser = new User();
+      newUser.username = username;
+      newUser.password = newUser.generateHash(password);
+
+      return newUser.save()
+    })
+    .then(function (userSaved) {
+      let token =  jwt.sign(userSaved.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
+
+      return res.status(201).json({
+        user: userSaved,
+        token: token,
+      });
+    })
+    .catch(function (err) {
+      console.log(err)
+      if (err.message === 'User already exists.') {
+        return res.status(401).json({
+          message: err.message,
+        });
+      }
+      // return res.status(400).json({err: err});
+      let error = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true);
+      return next(error);
+    });
+}
+
+/**
  * This is a protected route. Will return random number only if jwt token is provided in header.
  * @param req
  * @param res
@@ -47,4 +88,4 @@ function getRandomNumber(req, res) {
   });
 }
 
-export default { login, getRandomNumber };
+export default { login, getRandomNumber, register };
