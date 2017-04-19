@@ -18,30 +18,9 @@ after((done) => {
   done();
 });
 
-describe('## Post APIs', () => {
-  let user = {
-    username: 'KK123',
-    mobileNumber: '1234567890'
-  };
-
-  describe('# POST /api/users', () => {
-    xit('should create a new user', (done) => {
-      request(app)
-        .post('/api/users')
-        .send(user)
-        .expect(httpStatus.OK)
-        .then((res) => {
-          expect(res.body.username).to.equal(user.username);
-          expect(res.body.mobileNumber).to.equal(user.mobileNumber);
-          user = res.body;
-          done();
-        })
-        .catch(done);
-    });
-  });
-
+describe.only('## Post APIs', () => {
   describe('# GET /api/posts/:postId', () => {
-    it('should get user details', (done) => {
+    it('should get a post details', (done) => {
       let post = new Post();
       post.save()
         .then((post) => {
@@ -69,59 +48,47 @@ describe('## Post APIs', () => {
     });
   });
 
-  describe('# PUT /api/users/:userId', () => {
-    xit('should update user details', (done) => {
-      user.username = 'KK';
+  describe.only('# GET /api/posts/', () => {
+    let firstSet = [];
+
+    it('should get all posts', (done) => {
+      // @TODO: set up test db
+      // let post = new Post();
+      // post.save()
+      //   .then((post) => {
+      //     return request(app)
+      //       .get('/api/posts')
+      //       .expect(httpStatus.OK);
+      //   })
+      //   .then((res) => {
+      //     expect(res.body).to.be.an('array');
+      //     firstSet = res.body;
+      //     done();
+      //   })
+      //   .catch(done);
       request(app)
-        .put(`/api/users/${user._id}`)
-        .send(user)
+        .get('/api/posts')
+        .query({ limit: 10 })
         .expect(httpStatus.OK)
         .then((res) => {
-          expect(res.body.username).to.equal('KK');
-          expect(res.body.mobileNumber).to.equal(user.mobileNumber);
-          done();
-        })
-        .catch(done);
-    });
-  });
-
-  describe('# GET /api/users/', () => {
-    it('should get all users', (done) => {
-      let post = new Post();
-      post.save()
-        .then((post) => {
-          return request(app)
-            .get('/api/posts')
-            .expect(httpStatus.OK);
-        })
-        .then((res) => {
           expect(res.body).to.be.an('array');
+          firstSet = res.body;
           done();
         })
         .catch(done);
     });
 
     it('should get all users (with limit and skip)', (done) => {
+      console.log(firstSet[0].title.rendered)
+      let createdAtBefore = firstSet[firstSet.length - 1].date;
       request(app)
         .get('/api/posts')
-        .query({ limit: 10, skip: 1 })
+        .query({ limit: 10, createdAtBefore })
         .expect(httpStatus.OK)
         .then((res) => {
           expect(res.body).to.be.an('array');
-          done();
-        })
-        .catch(done);
-    });
-  });
-
-  describe('# DELETE /api/users/', () => {
-    xit('should delete user', (done) => {
-      request(app)
-        .delete(`/api/users/${user._id}`)
-        .expect(httpStatus.OK)
-        .then((res) => {
-          expect(res.body.username).to.equal('KK');
-          expect(res.body.mobileNumber).to.equal(user.mobileNumber);
+          console.log(res.body)
+          expect(res.body).to.not.eql(firstSet);
           done();
         })
         .catch(done);

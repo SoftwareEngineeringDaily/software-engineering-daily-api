@@ -61,8 +61,12 @@ function update(req, res, next) {
  * @returns {Post[]}
  */
 function list(req, res, next) {
-  const { limit = 50, skip = 0 } = req.query;
-  Post.list({ limit, skip })
+  const { limit = 50, skip = 0, createdAtBefore = null } = req.query;
+
+  let query = { limit };
+  if (createdAtBefore) query.createdAtBefore = createdAtBefore;
+
+  Post.list(query)
     .then(users => res.json(users))
     .catch(e => next(e));
 }

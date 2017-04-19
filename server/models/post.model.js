@@ -50,10 +50,13 @@ PostSchema.statics = {
    * @param {number} limit - Limit number of users to be returned.
    * @returns {Promise<Post[]>}
    */
-  list({ skip = 0, limit = 50 } = {}) {
-    return this.find()
+  list({ skip = 0, limit = 50, createdAtBefore = null } = {}) {
+
+    let query = { };
+    if (createdAtBefore) query.createdAtBefore = {$lt: createdAtBefore};
+    console.log(query)
+    return this.find(query)
       .sort({ createdAt: -1 })
-      .skip(+skip)
       .limit(+limit)
       .exec();
   }
