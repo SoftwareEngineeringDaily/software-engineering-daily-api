@@ -10,6 +10,9 @@ const router = express.Router(); // eslint-disable-line new-cap
 router.route('/')
   .get(ctrl.list);
 
+  router.route('/recommendations')
+    .get(expressJwt({ secret: config.jwtSecret }), ctrl.recommendations);
+
 router.route('/:postId')
   .get(ctrl.get);
 

@@ -60,6 +60,8 @@
     "method-override": "^2.3.5",
     "mongoose": "4.7.4",
     "morgan": "1.7.0",
+    "raccoon": "^0.2.8",
+    "redis": "^2.7.1",
     "winston": "2.3.0"
   },
   "devDependencies": {

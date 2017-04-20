@@ -1,3 +1,5 @@
+import raccoon from 'raccoon';
+
 import Post from '../models/post.model';
 import Vote from '../models/vote.model';
 
@@ -43,12 +45,13 @@ function list(req, res, next) {
  */
 function upvote(req, res, next) {
   let post = req.post;
-
   Vote.findOne({
     postId: post._id,
     userId: req.user._id,
   })
   .then((vote) => {
+    let userIdString = req.user._id.toString();
+    let postIdString = post._id.toString();
     if (vote) {
       vote.active = !vote.active;
 
@@ -58,9 +61,9 @@ function upvote(req, res, next) {
       }
 
       if (vote.active) {
-        // raccoon.voted('userId', 'itemId')
+        raccoon.liked(userIdString, postIdString);
       } else {
-        // raccoon.unvoted('userId', 'itemId')
+        raccoon.unliked(userIdString, postIdString);
       }
 
       return vote.save();
@@ -71,7 +74,7 @@ function upvote(req, res, next) {
     newvote.userId = req.user._id;
     newvote.direction = 'upvote'; // @TODO: Make constant
 
-    // raccoon.voted('userId', 'itemId')
+    raccoon.liked(userIdString, postIdString);
 
     return newvote.save();
   })
@@ -79,7 +82,9 @@ function upvote(req, res, next) {
     req.vote = vote; // eslint-disable-line no-param-reassign
     return res.json(vote)
   })
-  .catch(e => next(e));
+  .catch((e) => {
+    next(e);
+  });
 }
 
 function downvote(req, res, next) {
@@ -99,9 +104,9 @@ function downvote(req, res, next) {
       }
 
       if (vote.active) {
-        // raccoon.voted('userId', 'itemId')
+        raccoon.disliked(req.user._id.toString(), post._id.toString());
       } else {
-        // raccoon.unvoted('userId', 'itemId')
+        raccoon.undisliked(req.user._id.toString(), post._id.toString());
       }
 
       return vote.save();
@@ -112,7 +117,7 @@ function downvote(req, res, next) {
     newvote.userId = req.user._id;
     newvote.direction = 'downvote'; // @TODO: Make constant
 
-    // raccoon.voted('userId', 'itemId')
+    raccoon.disliked(req.user._id.toString(), post._id.toString());
 
     return newvote.save();
   })
@@ -123,4 +128,17 @@ function downvote(req, res, next) {
   .catch(e => next(e));
 }
 
-export default { load, get, list, upvote, downvote };
+// @TODO: maybe this should be in a recommendation controller
+function recommendations (req, res, next) {
+  let numberOfRecommendations = 10;
+  raccoon.recommendFor(req.user._id.toString(), numberOfRecommendations)
+  .then((recommendations) => {
+    return res.json(recommendations);
+  })
+  .catch((e) => {
+    next(e);
+  });
+}
+
+
+export default { load, get, list, upvote, downvote, recommendations };

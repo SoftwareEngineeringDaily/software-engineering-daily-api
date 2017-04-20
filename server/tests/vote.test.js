@@ -38,8 +38,7 @@ describe('## Vote APIs', () => {
         expect(res.body).to.have.property('token');
         userToken = res.body.token;
         let post = new Post();
-        // return post.save()
-        return Post.findOne().exec();
+        return post.save();
       })
       .then((post) => {
         postId = post._id;
@@ -51,11 +50,71 @@ describe('## Vote APIs', () => {
   after((done) => {
     User.remove({}).exec()
       .then(() => {
+        return Post.remove({}).exec();
+      })
+      .then(() => {
         done();
       });
   });
 
-  describe.only('# POST /api/users', () => {
+  describe.only('# GET /api/posts/recommendations', () => {
+    let user2;
+    let post2;
+    const validUserCredentials2 = {
+      username: 'react2',
+      password: 'express'
+    };
+
+    before((done) => {
+      request(app)
+        .post('/api/auth/register')
+        .send(validUserCredentials2)
+        .expect(httpStatus.CREATED)
+        .then((res) => {
+          expect(res.body).to.have.property('token');
+          user2 = res.body.token;
+          let postnew = new Post();
+          return postnew.save();
+        })
+        .then((post) => {
+          post2 = post._id;
+          done();
+        })
+        .catch(done);
+    });
+
+    it('gets recommendations', (done) => {
+      request(app)
+        .post(`/api/posts/${postId}/upvote`)
+        .set('Authorization', 'Bearer ' + user2)
+        .expect(httpStatus.OK)
+        .then(() => {
+          return request(app)
+            .post(`/api/posts/${post2}/upvote`)
+            .set('Authorization', 'Bearer ' + user2)
+            .expect(httpStatus.OK);
+        })
+        .then(() => {
+          return request(app)
+            .post(`/api/posts/${postId}/upvote`)
+            .set('Authorization', 'Bearer ' + userToken)
+            .expect(httpStatus.OK);
+        })
+        .then(() => {
+          return request(app)
+            .get('/api/posts/recommendations')
+            .set('Authorization', 'Bearer ' + userToken)
+            .expect(httpStatus.OK);
+        })
+        .then((res) => {
+          console.log(res.body)
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# POST /api/users', () => {
     it('errors when not logged in', (done) => {
       request(app)
         .post(`/api/posts/${postId}/upvote`)

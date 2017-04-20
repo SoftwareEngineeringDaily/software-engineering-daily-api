@@ -20,6 +20,8 @@ const envVarsSchema = Joi.object({
     .description('JWT Secret required to sign'),
   MONGO_HOST: Joi.string().required()
     .description('Mongo DB host url'),
+  MONGO_HOST_TEST: Joi.string().required()
+    .description('Mongo DB test host url'),
   MONGO_PORT: Joi.number()
     .default(27017)
 }).unknown()
@@ -37,6 +39,7 @@ const config = {
   jwtSecret: envVars.JWT_SECRET,
   mongo: {
     host: envVars.MONGO_HOST,
+    test: envVars.MONGO_HOST_TEST,
     port: envVars.MONGO_PORT
   }
 };
