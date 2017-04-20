@@ -18,7 +18,7 @@ after((done) => {
   done();
 });
 
-describe.only('## Post APIs', () => {
+describe('## Post APIs', () => {
   describe('# GET /api/posts/:postId', () => {
     it('should get a post details', (done) => {
       let post = new Post();
@@ -48,7 +48,7 @@ describe.only('## Post APIs', () => {
     });
   });
 
-  describe.only('# GET /api/posts/', () => {
+  describe('# GET /api/posts/', () => {
     let firstSet = [];
 
     it('should get all posts', (done) => {
@@ -79,7 +79,6 @@ describe.only('## Post APIs', () => {
     });
 
     it('should get all users (with limit and skip)', (done) => {
-      console.log(firstSet[0].title.rendered)
       let createdAtBefore = firstSet[firstSet.length - 1].date;
       request(app)
         .get('/api/posts')
@@ -87,7 +86,6 @@ describe.only('## Post APIs', () => {
         .expect(httpStatus.OK)
         .then((res) => {
           expect(res.body).to.be.an('array');
-          console.log(res.body)
           expect(res.body).to.not.eql(firstSet);
           done();
         })

@@ -4,13 +4,13 @@ import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 
 /**
- * Like Schema
+ * Vote Schema
  */
-const LikeSchema = new mongoose.Schema({
+const VoteSchema = new mongoose.Schema({
   userId: String,
-  postId: String,
-  type: String,
+  postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
   active: {type: Boolean, default: true},
+  direction: String,
 });
 
 /**
@@ -23,17 +23,17 @@ const LikeSchema = new mongoose.Schema({
 /**
  * Methods
  */
-LikeSchema.method({
+VoteSchema.method({
 });
 
 /**
  * Statics
  */
-LikeSchema.statics = {
+VoteSchema.statics = {
   /**
    * Get user
    * @param {ObjectId} id - The objectId of user.
-   * @returns {Promise<Like, APIError>}
+   * @returns {Promise<Vote, APIError>}
    */
   get(id, userId) {
     return this.findOne({id, userId})
@@ -51,7 +51,7 @@ LikeSchema.statics = {
    * List users in descending order of 'createdAt' timestamp.
    * @param {number} skip - Number of users to be skipped.
    * @param {number} limit - Limit number of users to be returned.
-   * @returns {Promise<Like[]>}
+   * @returns {Promise<Vote[]>}
    */
   list({ skip = 0, limit = 50 } = {}, userId) {
     return this.find({userId})
@@ -63,6 +63,6 @@ LikeSchema.statics = {
 };
 
 /**
- * @typedef Like
+ * @typedef Vote
  */
-export default mongoose.model('Like', LikeSchema);
+export default mongoose.model('Vote', VoteSchema);

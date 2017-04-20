@@ -1,13 +1,13 @@
 import Post from '../models/post.model';
-import Like from '../models/like.model';
+import Vote from '../models/vote.model';
 
 /**
  * Load user and append to req.
  */
 function load(req, res, next, id) {
   Post.get(id)
-    .then((user) => {
-      req.user = user; // eslint-disable-line no-param-reassign
+    .then((post) => {
+      req.post = post; // eslint-disable-line no-param-reassign
       return next();
     })
     .catch(e => next(e));
@@ -18,40 +18,7 @@ function load(req, res, next, id) {
  * @returns {Post}
  */
 function get(req, res) {
-  return res.json(req.user);
-}
-
-/**
- * Create new user
- * @property {string} req.body.username - The username of user.
- * @property {string} req.body.mobileNumber - The mobileNumber of user.
- * @returns {Post}
- */
-function create(req, res, next) {
-  const user = new Post({
-    username: req.body.username,
-    mobileNumber: req.body.mobileNumber
-  });
-
-  user.save()
-    .then(savedPost => res.json(savedPost))
-    .catch(e => next(e));
-}
-
-/**
- * Update existing user
- * @property {string} req.body.username - The username of user.
- * @property {string} req.body.mobileNumber - The mobileNumber of user.
- * @returns {Post}
- */
-function update(req, res, next) {
-  const user = req.user;
-  user.username = req.body.username;
-  user.mobileNumber = req.body.mobileNumber;
-
-  user.save()
-    .then(savedPost => res.json(savedPost))
-    .catch(e => next(e));
+  return res.json(req.post);
 }
 
 /**
@@ -72,51 +39,88 @@ function list(req, res, next) {
 }
 
 /**
- * Delete user.
- * @returns {Post}
+ * Vote a post
  */
-function remove(req, res, next) {
-  const user = req.user;
-  user.remove()
-    .then(deletedPost => res.json(deletedPost))
-    .catch(e => next(e));
-}
+function upvote(req, res, next) {
+  let post = req.post;
 
-/**
- * Like a post
- */
-function like(req, res, next, id) {
-  Like.findOne({
-    postId: id,
+  Vote.findOne({
+    postId: post._id,
     userId: req.user._id,
   })
-  .then((like) => {
-    if (like) {
-      like.active = !like.active;
+  .then((vote) => {
+    if (vote) {
+      vote.active = !vote.active;
 
-      if (like.active) {
-        // raccoon.liked('userId', 'itemId')
-      } else {
-        // raccoon.unliked('userId', 'itemId')
+      if (vote.direction !== 'upvote') {
+        vote.direction = 'upvote';
+        vote.active = true;
       }
 
-      return like;
+      if (vote.active) {
+        // raccoon.voted('userId', 'itemId')
+      } else {
+        // raccoon.unvoted('userId', 'itemId')
+      }
+
+      return vote.save();
     }
 
-    let newlike = new Like();
-    newlike.postId = id;
-    newlike.userId = req.user._id;
-    newlike.type = 'upvote'; // @TODO: Make constant
+    let newvote = new Vote();
+    newvote.postId = post._id;
+    newvote.userId = req.user._id;
+    newvote.direction = 'upvote'; // @TODO: Make constant
 
-    // raccoon.liked('userId', 'itemId')
+    // raccoon.voted('userId', 'itemId')
 
-    return newlike.save();
+    return newvote.save();
   })
-  .then((like) => {
-    req.like = like; // eslint-disable-line no-param-reassign
-    return next();
+  .then((vote) => {
+    req.vote = vote; // eslint-disable-line no-param-reassign
+    return res.json(vote)
   })
   .catch(e => next(e));
 }
 
-export default { load, get, create, update, list, remove, like };
+function downvote(req, res, next) {
+  let post = req.post;
+
+  Vote.findOne({
+    postId: post._id,
+    userId: req.user._id,
+  })
+  .then((vote) => {
+    if (vote) {
+      vote.active = !vote.active;
+
+      if (vote.direction !== 'downvote') {
+        vote.direction = 'downvote';
+        vote.active = true;
+      }
+
+      if (vote.active) {
+        // raccoon.voted('userId', 'itemId')
+      } else {
+        // raccoon.unvoted('userId', 'itemId')
+      }
+
+      return vote.save();
+    }
+
+    let newvote = new Vote();
+    newvote.postId = post._id;
+    newvote.userId = req.user._id;
+    newvote.direction = 'downvote'; // @TODO: Make constant
+
+    // raccoon.voted('userId', 'itemId')
+
+    return newvote.save();
+  })
+  .then((vote) => {
+    req.vote = vote; // eslint-disable-line no-param-reassign
+    return res.json(vote)
+  })
+  .catch(e => next(e));
+}
+
+export default { load, get, list, upvote, downvote };

@@ -54,7 +54,7 @@ function register(req, res, next) {
         return next(err);
       }
 
-      var newUser = new User();
+      let newUser = new User();
       newUser.username = username;
       newUser.password = newUser.generateHash(password);
 
