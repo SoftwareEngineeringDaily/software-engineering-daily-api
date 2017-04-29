@@ -1,5 +1,6 @@
 import Promise from 'bluebird';
 import mongoose from 'mongoose';
+import moment from 'moment';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 
@@ -53,7 +54,7 @@ PostSchema.statics = {
   list({ skip = 0, limit = 50, createdAtBefore = null } = {}) {
 
     let query = { };
-    if (createdAtBefore) query.createdAtBefore = {$lt: createdAtBefore};
+    if (createdAtBefore) query.date = {$lt: moment(createdAtBefore).toDate()};
     console.log(query)
     return this.find(query)
       .sort({ createdAt: -1 })
