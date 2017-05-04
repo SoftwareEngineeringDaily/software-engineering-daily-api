@@ -57,7 +57,7 @@ describe('## Vote APIs', () => {
       });
   });
 
-  describe.only('# GET /api/posts/recommendations', () => {
+  describe('# GET /api/posts/recommendations', () => {
     let user2;
     let post2;
     const validUserCredentials2 = {
