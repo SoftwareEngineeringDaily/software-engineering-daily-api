@@ -10,7 +10,7 @@ import Vote from './vote.model';
  */
 const PostSchema = new mongoose.Schema({
   id: String,
-  score: {type: Number, score: 0},
+  score: {type: Number, default: 0},
 });
 
 /**
@@ -53,20 +53,33 @@ PostSchema.statics = {
    * @param {number} limit - Limit number of users to be returned.
    * @returns {Promise<Post[]>}
    */
-  list({ skip = 0, limit = 50, createdAtBefore = null , user = null} = {}) {
+  list({ skip = 0, limit = 50, createdAtBefore = null , user = null, createdAfter = null} = {}) {
 
     let query = { };
-    if (createdAtBefore) query.date = {$lt: moment(createdAtBefore).toDate()};
-
     let posts;
+    let numberOfPages = 0;
+    let dateDirection = -1;
+    if (createdAtBefore) query.date = {$lt: moment(createdAtBefore).toDate()};
+    if (createdAfter) {
+      dateDirection = 1;
+      query.date =  {$gt: moment(createdAfter).toDate()};
+    }
 
-    return this.find(query)
-      .sort({ createdAt: -1 })
-      .limit(+limit)
-      .exec()
+    return this.find().count()
+      .then((count) => {
+        numberOfPages = Math.floor(count/limit)
+
+        return this.find(query)
+          .sort({ date: dateDirection })
+          .limit(limit)
+          .exec()
+      })
       .then((postsFound) => {
         posts = postsFound;
-
+        // Flip direct back
+        if (dateDirection === 1) {
+          posts.reverse();
+        }
         if (!user) return posts;
 
         let postIds = posts.map((post) => {

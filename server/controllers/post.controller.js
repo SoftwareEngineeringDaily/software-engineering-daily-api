@@ -31,10 +31,11 @@ function get(req, res) {
  * @returns {Post[]}
  */
 function list(req, res, next) {
-  const { limit = 50, skip = 0, createdAtBefore = null } = req.query;
+  const { limit = 50, skip = 0, createdAtBefore = null, createdAfter = null } = req.query;
 
   let query = { limit };
   if (createdAtBefore) query.createdAtBefore = createdAtBefore;
+  if (createdAfter) query.createdAfter = createdAfter;
   if (req.user) query.user = req.user;
 
   Post.list(query)
@@ -87,19 +88,14 @@ function upvote(req, res, next) {
     newvote.postId = post._id;
     newvote.userId = req.user._id;
     newvote.direction = 'upvote'; // @TODO: Make constant
-
+    post.score += 1;
     raccoon.liked(userIdString, postIdString);
 
-    return newvote.save();
+    return Bluebird.all([newvote.save(), post.save()]);
   })
   .then((vote) => {
-    if (!vote.length) {
-      req.vote = vote; // eslint-disable-line no-param-reassign
-      return res.json(vote)
-    } else {
-      req.vote = vote[0]; // eslint-disable-line no-param-reassign
-      return res.json(vote[0])
-    }
+    req.vote = vote[0]; // eslint-disable-line no-param-reassign
+    return res.json(vote[0])
   })
   .catch((e) => {
     next(e);
@@ -146,19 +142,15 @@ function downvote(req, res, next) {
     newvote.postId = post._id;
     newvote.userId = req.user._id;
     newvote.direction = 'downvote'; // @TODO: Make constant
+    post.score -= 1;
 
     raccoon.disliked(req.user._id.toString(), post._id.toString());
 
-    return newvote.save();
+    return Bluebird.all([newvote.save(), post.save()]);
   })
   .then((vote) => {
-    if (!vote.length) {
-      req.vote = vote; // eslint-disable-line no-param-reassign
-      return res.json(vote)
-    } else {
-      req.vote = vote[0]; // eslint-disable-line no-param-reassign
-      return res.json(vote[0])
-    }
+    req.vote = vote[0]; // eslint-disable-line no-param-reassign
+    return res.json(vote[0])
   })
   .catch(e => next(e));
 }
