@@ -65,7 +65,15 @@
     "morgan": "1.7.0",
     "raccoon": "^0.2.8",
     "redis": "^2.7.1",
-    "winston": "2.3.0"
+    "winston": "2.3.0",
+
+    "gulp": "3.9.1",
+    "gulp-babel": "6.1.2",
+    "gulp-load-plugins": "^1.2.0",
+    "gulp-newer": "^1.1.0",
+    "gulp-nodemon": "^2.0.6",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-util": "^3.0.7"
   },
   "devDependencies": {
     "babel-cli": "6.18.0",
