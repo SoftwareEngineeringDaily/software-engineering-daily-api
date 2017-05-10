@@ -11,6 +11,7 @@
     "yarn": ">=0.20.3"
   },
   "scripts": {
+    "launch": "yarn build && node dist/index.js",
     "start": "gulp serve",
     "start:debug": "cross-env DEBUG=software-engineering-daily-api:* yarn start",
     "build": "gulp",
