@@ -53,7 +53,7 @@ PostSchema.statics = {
    * @param {number} limit - Limit number of users to be returned.
    * @returns {Promise<Post[]>}
    */
-  list({ skip = 0, limit = 50, createdAtBefore = null , user = null, createdAfter = null} = {}) {
+  list({ skip = 0, limit = 50, createdAtBefore = null , user = null, createdAfter = null, type = null} = {}) {
 
     let query = { };
     let posts;
@@ -65,12 +65,18 @@ PostSchema.statics = {
       query.date =  {$gt: moment(createdAfter).toDate()};
     }
 
+    let sort = { date: dateDirection };
+
+    if (type === 'top') {
+      sort = { score : -1 };
+    }
+
     return this.find().count()
       .then((count) => {
         numberOfPages = Math.floor(count/limit)
 
         return this.find(query)
-          .sort({ date: dateDirection })
+          .sort(sort)
           .limit(limit)
           .exec()
       })

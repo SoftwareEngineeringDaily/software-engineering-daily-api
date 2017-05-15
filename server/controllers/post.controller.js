@@ -1,5 +1,6 @@
 import raccoon from 'raccoon';
 import Bluebird from 'bluebird';
+import mongoose from 'mongoose';
 
 import Post from '../models/post.model';
 import Vote from '../models/vote.model';
@@ -31,11 +32,12 @@ function get(req, res) {
  * @returns {Post[]}
  */
 function list(req, res, next) {
-  const { limit = 50, skip = 0, createdAtBefore = null, createdAfter = null } = req.query;
+  const { limit = 50, skip = 0, createdAtBefore = null, createdAfter = null, type = null } = req.query;
 
   let query = { limit };
   if (createdAtBefore) query.createdAtBefore = createdAtBefore;
   if (createdAfter) query.createdAfter = createdAfter;
+  if (type) query.type = type;
   if (req.user) query.user = req.user;
 
   Post.list(query)
@@ -160,7 +162,14 @@ function recommendations (req, res, next) {
   let numberOfRecommendations = 10;
   raccoon.recommendFor(req.user._id.toString(), numberOfRecommendations)
   .then((recommendations) => {
-    return res.json(recommendations);
+    let ids = recommendations.map((rec) => {
+      return mongoose.Types.ObjectId(rec);
+    });
+
+    return Post.find({_id: {$in: ids}});
+  })
+  .then((posts) => {
+    return res.json(posts);
   })
   .catch((e) => {
     next(e);
