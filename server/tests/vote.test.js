@@ -20,7 +20,7 @@ after((done) => {
   done();
 });
 
-xdescribe.only('## Vote APIs', () => {
+xdescribe('## Vote APIs', () => {
   const validUserCredentials = {
     username: 'react',
     password: 'express'
