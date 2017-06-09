@@ -21,14 +21,14 @@ after((done) => {
 describe('## Post APIs', () => {
   describe('# GET /api/posts/:postId', () => {
     it('should get a post details', (done) => {
-      let post = new Post();
+      const post = new Post();
       post.save()
-        .then((post) => {
+        .then((postFound) => { //eslint-disable-line
           return request(app)
-            .get(`/api/posts/${post._id}`)
+            .get(`/api/posts/${postFound._id}`)
             .expect(httpStatus.OK);
         })
-        .then((res) => {
+        .then((res) => {  //eslint-disable-line
           // expect(res.body.username).to.equal(user.username);
           // expect(res.body.mobileNumber).to.equal(user.mobileNumber);
           done();
@@ -52,24 +52,14 @@ describe('## Post APIs', () => {
     let firstSet = [];
 
     it('should get all posts', (done) => {
-      // @TODO: set up test db
-      // let post = new Post();
-      // post.save()
-      //   .then((post) => {
-      //     return request(app)
-      //       .get('/api/posts')
-      //       .expect(httpStatus.OK);
-      //   })
-      //   .then((res) => {
-      //     expect(res.body).to.be.an('array');
-      //     firstSet = res.body;
-      //     done();
-      //   })
-      //   .catch(done);
-      request(app)
-        .get('/api/posts')
-        .query({ limit: 10 })
-        .expect(httpStatus.OK)
+      const post = new Post();
+      post.save()
+        .then((postFound) => { //eslint-disable-line
+          return request(app)
+            .get('/api/posts')
+            .query({ limit: 10 })
+            .expect(httpStatus.OK);
+        })
         .then((res) => {
           expect(res.body).to.be.an('array');
           firstSet = res.body;
@@ -78,12 +68,16 @@ describe('## Post APIs', () => {
         .catch(done);
     });
 
-    it('should get all users (with limit and skip)', (done) => {
-      let createdAtBefore = firstSet[firstSet.length - 1].date;
-      request(app)
-        .get('/api/posts')
-        .query({ limit: 10, createdAtBefore })
-        .expect(httpStatus.OK)
+    it('should get all posts (with limit and skip)', (done) => {
+      const createdAtBefore = firstSet[firstSet.length - 1].date;
+      const post = new Post();
+      post.save()
+        .then((postFound) => { //eslint-disable-line
+          return request(app)
+            .get('/api/posts')
+            .query({ limit: 10, createdAtBefore })
+            .expect(httpStatus.OK);
+        })
         .then((res) => {
           expect(res.body).to.be.an('array');
           expect(res.body).to.not.eql(firstSet);

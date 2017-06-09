@@ -30,7 +30,7 @@ describe('## Auth APIs', () => {
       .then(() => {
         done();
       });
-  })
+  });
 
   describe('# POST /api/auth/register', () => {
     it('should return bad request error', (done) => {
@@ -81,7 +81,7 @@ describe('## Auth APIs', () => {
         .post('/api/auth/register')
         .send(validUserCredentials)
         .expect(httpStatus.CREATED)
-        .then((res) => {
+        .then((res) => {  //eslint-disable-line
           return request(app)
             .post('/api/auth/login')
             .send(invalidLogin)
@@ -99,7 +99,7 @@ describe('## Auth APIs', () => {
         .post('/api/auth/register')
         .send(validUserCredentials)
         .expect(httpStatus.CREATED)
-        .then((res) => {
+        .then((res) => {  //eslint-disable-line
           return request(app)
             .post('/api/auth/login')
             .send(validUserCredentials)

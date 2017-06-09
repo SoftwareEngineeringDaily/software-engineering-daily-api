@@ -9,7 +9,7 @@ import APIError from '../helpers/APIError';
 const VoteSchema = new mongoose.Schema({
   userId: String,
   postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
-  active: {type: Boolean, default: true},
+  active: { type: Boolean, default: true },
   direction: String,
 });
 
@@ -36,7 +36,7 @@ VoteSchema.statics = {
    * @returns {Promise<Vote, APIError>}
    */
   get(id, userId) {
-    return this.findOne({id, userId})
+    return this.findOne({ id, userId })
       .exec()
       .then((user) => {
         if (user) {
@@ -54,7 +54,7 @@ VoteSchema.statics = {
    * @returns {Promise<Vote[]>}
    */
   list({ skip = 0, limit = 50 } = {}, userId) {
-    return this.find({userId})
+    return this.find({ userId })
       .sort({ createdAt: -1 })
       .skip(+skip)
       .limit(+limit)

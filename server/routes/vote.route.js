@@ -1,7 +1,5 @@
 import express from 'express';
-import validate from 'express-validation';
 import expressJwt from 'express-jwt';
-import paramValidation from '../../config/param-validation';
 import ctrl from '../controllers/vote.controller';
 import config from '../../config/config';
 

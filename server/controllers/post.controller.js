@@ -32,9 +32,10 @@ function get(req, res) {
  * @returns {Post[]}
  */
 function list(req, res, next) {
-  const { limit = 50, skip = 0, createdAtBefore = null, createdAfter = null, type = null } = req.query;
+  const { limit = 50, createdAtBefore = null,
+      createdAfter = null, type = null } = req.query;
 
-  let query = { limit };
+  const query = { limit };
   if (createdAtBefore) query.createdAtBefore = createdAtBefore;
   if (createdAfter) query.createdAfter = createdAfter;
   if (type) query.type = type;
@@ -49,7 +50,7 @@ function list(req, res, next) {
  * Vote a post
  */
 function upvote(req, res, next) {
-  let post = req.post;
+  const post = req.post;
 
   if (!post.score) post.score = 0;
 
@@ -57,9 +58,11 @@ function upvote(req, res, next) {
     postId: post._id,
     userId: req.user._id,
   })
-  .then((vote) => {
-    let userIdString = req.user._id.toString();
-    let postIdString = post._id.toString();
+  .then((voteFound) => {
+    const vote = voteFound;
+    const userIdString = req.user._id.toString();
+    const postIdString = post._id.toString();
+
     if (vote) {
       let incrementValue = 1;
 
@@ -86,7 +89,7 @@ function upvote(req, res, next) {
       return Bluebird.all([vote.save(), post.save()]);
     }
 
-    let newvote = new Vote();
+    const newvote = new Vote();
     newvote.postId = post._id;
     newvote.userId = req.user._id;
     newvote.direction = 'upvote'; // @TODO: Make constant
@@ -97,7 +100,7 @@ function upvote(req, res, next) {
   })
   .then((vote) => {
     req.vote = vote[0]; // eslint-disable-line no-param-reassign
-    return res.json(vote[0])
+    return res.json(vote[0]);
   })
   .catch((e) => {
     next(e);
@@ -105,7 +108,7 @@ function upvote(req, res, next) {
 }
 
 function downvote(req, res, next) {
-  let post = req.post;
+  const post = req.post;
 
   if (!post.score) post.score = 0;
 
@@ -113,7 +116,8 @@ function downvote(req, res, next) {
     postId: post._id,
     userId: req.user._id,
   })
-  .then((vote) => {
+  .then((voteFound) => {
+    const vote = voteFound;
     if (vote) {
       let incrementValue = 1;
 
@@ -140,7 +144,7 @@ function downvote(req, res, next) {
       return Bluebird.all([vote.save(), post.save()]);
     }
 
-    let newvote = new Vote();
+    const newvote = new Vote();
     newvote.postId = post._id;
     newvote.userId = req.user._id;
     newvote.direction = 'downvote'; // @TODO: Make constant
@@ -152,23 +156,23 @@ function downvote(req, res, next) {
   })
   .then((vote) => {
     req.vote = vote[0]; // eslint-disable-line no-param-reassign
-    return res.json(vote[0])
+    return res.json(vote[0]);
   })
   .catch(e => next(e));
 }
 
 // @TODO: maybe this should be in a recommendation controller
-function recommendations (req, res, next) {
-  let numberOfRecommendations = 10;
+function recommendations(req, res, next) {
+  const numberOfRecommendations = 10;
   raccoon.recommendFor(req.user._id.toString(), numberOfRecommendations)
-  .then((recommendations) => {
-    let ids = recommendations.map((rec) => {
-      return mongoose.Types.ObjectId(rec);
+  .then((recommendationsFound) => {
+    const ids = recommendationsFound.map((rec) => {  //eslint-disable-line
+      return mongoose.Types.ObjectId(rec); //eslint-disable-line
     });
 
-    return Post.find({_id: {$in: ids}});
+    return Post.find({ _id: { $in: ids } });
   })
-  .then((posts) => {
+  .then((posts) => { //eslint-disable-line
     return res.json(posts);
   })
   .catch((e) => {
