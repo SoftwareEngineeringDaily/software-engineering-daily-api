@@ -12,25 +12,24 @@ import User from '../models/user.model';
  * @returns {*}
  */
 function login(req, res, next) {
-  let username = req.body.username;
-  let password = req.body.password;
-  let err;
+  const username = req.body.username;
+  const password = req.body.password;
 
   User
-    .findOne({'username': username}).exec()
-    .then(function (user) {
-      if (!user) return res.status(404).json({message: 'User not found.'});
+    .findOne({ username }).exec()
+    .then((user) => {
+      if (!user) return res.status(404).json({ message: 'User not found.' });
 
-      if (!user.validPassword(password)) return res.status(401).json({message: 'Password is incorrect.'});
+      if (!user.validPassword(password)) return res.status(401).json({ message: 'Password is incorrect.' });
 
-      let token = jwt.sign(user.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
+      const token = jwt.sign(user.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
 
       return res.status(200).json({
-        token: token,
+        token,
       });
     })
-    .catch(function (err) {
-      err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true);
+    .catch((err) => {
+      err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
       return next(err);
     });
 }
@@ -43,40 +42,39 @@ function login(req, res, next) {
  * @returns {*}
  */
 function register(req, res, next) {
-  let username = req.body.username;
-  let password = req.body.password;
+  const username = req.body.username;
+  const password = req.body.password;
 
   User
-    .findOne({'username': username}).exec()
-    .then(function (user) {
+    .findOne({ username }).exec()
+    .then((user) => {
       if (user) {
-        let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true);
+        let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
         return next(err);
       }
 
-      let newUser = new User();
+      const newUser = new User();
       newUser.username = username;
       newUser.password = newUser.generateHash(password);
 
-      return newUser.save()
+      return newUser.save();
     })
-    .then(function (userSaved) {
-      let token = jwt.sign(userSaved.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
+    .then((userSaved) => {
+      const token = jwt.sign(userSaved.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
 
       return res.status(201).json({
         user: userSaved,
-        token: token,
+        token,
       });
     })
-    .catch(function (err) {
-      console.log(err)
+    .catch((err) => {
       if (err.message === 'User already exists.') {
         return res.status(401).json({
           message: err.message,
         });
       }
       // return res.status(400).json({err: err});
-      let error = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true);
+      const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true);
       return next(error);
     });
 }

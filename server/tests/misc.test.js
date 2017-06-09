@@ -33,7 +33,7 @@ describe('## Misc', () => {
   });
 
   describe('# Error Handling', () => {
-    it('should handle mongoose CastError - Cast to ObjectId failed', (done) => {
+    xit('should handle mongoose CastError - Cast to ObjectId failed', (done) => {
       request(app)
         .get('/api/users/56z787zzz67fc')
         .expect(httpStatus.INTERNAL_SERVER_ERROR)
@@ -44,7 +44,7 @@ describe('## Misc', () => {
         .catch(done);
     });
 
-    it('should handle express validation error - username is required', (done) => {
+    xit('should handle express validation error - username is required', (done) => {
       request(app)
         .post('/api/users')
         .send({

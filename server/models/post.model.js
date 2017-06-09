@@ -10,7 +10,7 @@ import Vote from './vote.model';
  */
 const PostSchema = new mongoose.Schema({
   id: String,
-  score: {type: Number, default: 0},
+  score: { type: Number, default: 0 },
 });
 
 /**
@@ -53,32 +53,36 @@ PostSchema.statics = {
    * @param {number} limit - Limit number of users to be returned.
    * @returns {Promise<Post[]>}
    */
-  list({ skip = 0, limit = 50, createdAtBefore = null , user = null, createdAfter = null, type = null} = {}) {
-
-    let query = { };
+  list({ limitOption = 50, createdAtBefore = null,
+      user = null, createdAfter = null, type = null } = {}) {
+    const query = { };
     let posts;
-    let numberOfPages = 0;
+    // @TODO use
+    let numberOfPages = 0; //eslint-disable-line
+
     let dateDirection = -1;
-    if (createdAtBefore) query.date = {$lt: moment(createdAtBefore).toDate()};
+    if (createdAtBefore) query.date = { $lt: moment(createdAtBefore).toDate() };
     if (createdAfter) {
       dateDirection = 1;
-      query.date =  {$gt: moment(createdAfter).toDate()};
+      query.date = { $gt: moment(createdAfter).toDate() };
     }
+
+    const limit = parseInt(limitOption, 10);
 
     let sort = { date: dateDirection };
 
     if (type === 'top') {
-      sort = { score : -1 };
+      sort = { score: -1 };
     }
 
     return this.find().count()
       .then((count) => {
-        numberOfPages = Math.floor(count/limit)
+        numberOfPages = Math.floor(count / limit);
 
         return this.find(query)
           .sort(sort)
           .limit(limit)
-          .exec()
+          .exec();
       })
       .then((postsFound) => {
         posts = postsFound;
@@ -88,34 +92,34 @@ PostSchema.statics = {
         }
         if (!user) return posts;
 
-        let postIds = posts.map((post) => {
+        const postIds = posts.map((post) => { //eslint-disable-line
           return post._id;
         });
 
         return Vote.find({
           userId: user._id,
-          postId: {$in: postIds}
+          postId: { $in: postIds },
         }).exec();
       })
       .then((votes) => {
         if (!user) return posts;
 
-        let voteMap = {};
-        for (let index in votes) {
-          let vote = votes[index];
+        const voteMap = {};
+        for (let index in votes) { // eslint-disable-line
+          const vote = votes[index];
           voteMap[vote.postId] = vote;
         }
 
-        let updatedPosts = [];
-        for (let index in posts) {
-          let post = posts[index].toObject();
+        const updatedPosts = [];
+        for (let index in posts) { // eslint-disable-line
+          const post = posts[index].toObject();
           post.upvoted = false;
           post.downvoted = false;
 
           if (!voteMap[post._id]) {
             updatedPosts.push(post);
-            continue;
-          };
+            continue; // eslint-disable-line
+          }
 
           if (voteMap[post._id].direction === 'upvote' && voteMap[post._id].active) {
             post.upvoted = true;
@@ -129,7 +133,7 @@ PostSchema.statics = {
         }
 
         return updatedPosts;
-      })
+      });
   }
 };
 
