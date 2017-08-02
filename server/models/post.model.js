@@ -54,7 +54,7 @@ PostSchema.statics = {
    * @returns {Promise<Post[]>}
    */
   list({ limitOption = 50, createdAtBefore = null,
-      user = null, createdAfter = null, type = null, tags = [] } = {}) {
+      user = null, createdAfter = null, type = null, tags = [], categories = [] } = {}) {
     const query = { };
     let posts;
     // @TODO use
@@ -68,6 +68,7 @@ PostSchema.statics = {
     }
 
     if (tags.length > 0) query.tags = { $all: tags };
+    if (categories.length > 0) query.categories = { $all: categories };
 
     const limit = parseInt(limitOption, 10);
 

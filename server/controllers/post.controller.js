@@ -33,7 +33,7 @@ function get(req, res) {
  */
 function list(req, res, next) {
   const { limit = 50, createdAtBefore = null,
-      createdAfter = null, type = null, tags = null } = req.query;
+      createdAfter = null, type = null, tags = null, categories = null } = req.query;
 
   const query = { limit };
   if (createdAtBefore) query.createdAtBefore = createdAtBefore;
@@ -47,6 +47,15 @@ function list(req, res, next) {
       newTags.push(parseInt(tag, 10));
     });
     query.tags = newTags;
+  }
+
+  if (categories) {
+    query.categories = categories.split(',');
+    let newTags = []; //eslint-disable-line
+    query.categories.forEach((tag) => {
+      newTags.push(parseInt(tag, 10));
+    });
+    query.categories = newTags;
   }
 
   Post.list(query)
