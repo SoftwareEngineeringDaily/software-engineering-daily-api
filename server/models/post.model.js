@@ -53,7 +53,7 @@ PostSchema.statics = {
    * @param {number} limit - Limit number of users to be returned.
    * @returns {Promise<Post[]>}
    */
-  list({ limitOption = 50, createdAtBefore = null,
+  list({ limitOption = 10, createdAtBefore = null,
       user = null, createdAfter = null, type = null, tags = [], categories = [] } = {}) {
     const query = { };
     let posts;
@@ -78,15 +78,19 @@ PostSchema.statics = {
       sort = { score: -1 };
     }
 
-    return this.find().count()
-      .then((count) => {
-        numberOfPages = Math.floor(count / limit);
+    // return this.find().count()
+    //   .then((count) => {
+    //     numberOfPages = Math.floor(count / limit);
+    //
+    //     return this.find(query)
+    //       .sort(sort)
+    //       .limit(limit)
+    //       .exec();
+    //   })
 
-        return this.find(query)
-          .sort(sort)
-          .limit(limit)
-          .exec();
-      })
+    return this.find(query, 'content title date mp3 link score featuredImage upvoted downvoted tags categories')
+      .sort(sort)
+      .limit(limit)
       .then((postsFound) => {
         posts = postsFound;
         // Flip direct back
