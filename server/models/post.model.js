@@ -11,6 +11,12 @@ import Vote from './vote.model';
 const PostSchema = new mongoose.Schema({
   id: String,
   score: { type: Number, default: 0 },
+  title: {
+    rendered: String,
+  },
+  content: {
+    rendered: String,
+  },
 });
 
 /**
@@ -53,8 +59,16 @@ PostSchema.statics = {
    * @param {number} limit - Limit number of users to be returned.
    * @returns {Promise<Post[]>}
    */
-  list({ limitOption = 10, createdAtBefore = null,
-      user = null, createdAfter = null, type = null, tags = [], categories = [] } = {}) {
+  list({
+      limitOption = 10,
+      createdAtBefore = null,
+      user = null,
+      createdAfter = null,
+      type = null,
+      tags = [],
+      categories = [],
+      search = null } = {}) {
+
     const query = { };
     let posts;
     // @TODO use
@@ -69,6 +83,7 @@ PostSchema.statics = {
 
     if (tags.length > 0) query.tags = { $all: tags };
     if (categories.length > 0) query.categories = { $all: categories };
+    if (search) query.$text = { $search: search };
 
     const limit = parseInt(limitOption, 10);
 
@@ -143,6 +158,9 @@ PostSchema.statics = {
       });
   }
 };
+
+// Indexes
+PostSchema.index({ 'title.rendered': 'text', 'content.rendered': 'text' });
 
 /**
  * @typedef Post

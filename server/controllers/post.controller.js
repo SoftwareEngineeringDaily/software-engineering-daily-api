@@ -33,13 +33,15 @@ function get(req, res) {
  */
 function list(req, res, next) {
   const { limit = 50, createdAtBefore = null,
-      createdAfter = null, type = null, tags = null, categories = null } = req.query;
+      createdAfter = null, type = null, tags = null, categories = null, search = null } = req.query;
 
   const query = { limit };
   if (createdAtBefore) query.createdAtBefore = createdAtBefore;
   if (createdAfter) query.createdAfter = createdAfter;
   if (type) query.type = type;
   if (req.user) query.user = req.user;
+  if (search) query.search = search;
+
   if (tags) {
     query.tags = tags.split(',');
     let newTags = []; //eslint-disable-line
