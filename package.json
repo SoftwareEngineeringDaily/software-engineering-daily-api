@@ -7,7 +7,7 @@
   "private": false,
   "engines": {
     "node": ">=4.8.0",
-    "npm": ">=2.15.11",
+    "npm": ">=2.15.11"
   },
   "scripts": {
     "launch": "yarn build && node dist/index.js",
