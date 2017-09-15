@@ -34,14 +34,6 @@ services:
     env_file:
       - .env
 
-    # Overwrite any env var defined in .env file (if required)
-    environment:
-      - MONGO_HOST=mongodb://mongo/express-mongoose-es6-rest-api-development
-      - MONGO_HOST_TEST=mongodb://mongo/express-mongoose-es6-rest-api-development-test
-      - DEBUG=express-mongoose-es6-rest-api:*
-      - RACCOON_REDIS_URL=redis
-      - RACCOON_REDIS_PORT=6379
-
     # Link to containers in another service.
     # Links also express dependency between services in the same way as depends_on,
     # so they determine the order of service startup.
