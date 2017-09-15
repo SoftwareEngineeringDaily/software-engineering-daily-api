@@ -6,3 +6,8 @@
   - npm start or yarn start
   - check package.json for other builds
   - use curl or Postman to make requests
+
+
+## Using Docker
+  - Run `docker-compose up`
+  
