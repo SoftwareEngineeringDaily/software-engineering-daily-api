@@ -11,6 +11,7 @@ import Vote from './vote.model';
 const PostSchema = new mongoose.Schema({
   id: String,
   score: { type: Number, default: 0 },
+  totalFavorites: { type: Number, default: 0 },
   title: {
     rendered: String,
   },
