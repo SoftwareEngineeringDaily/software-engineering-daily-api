@@ -1,9 +1,21 @@
 version: '2'
 
 services:
+  mongo:
+    image: mongo:3.5
+    container_name: sedaily-mongo
+
+#    ports:
+#      - "27017:27017"
+  redis:
+    image: redis:4
+    container_name: sedaily-redis
+#    ports:
+#      - "6379:6379"
   express-mongoose-es6-rest-api:
     build:
       context: .
+    container_name: sedaily-rest-api
     volumes:
       # Mounts the project directory on the host to /app inside the container,
       # allowing you to modify the code without having to rebuild the image.
@@ -22,16 +34,12 @@ services:
     env_file:
       - .env
 
-    # Overwrite any env var defined in .env file (if required)
-    environment:
-      - MONGO_HOST=mongodb://mongo/express-mongoose-es6-rest-api-development
-      - DEBUG=express-mongoose-es6-rest-api:*
-
     # Link to containers in another service.
     # Links also express dependency between services in the same way as depends_on,
     # so they determine the order of service startup.
     links:
       - mongo
+      - redis
   mongo:
     image: "mongo:3.4.2"
     ports:
