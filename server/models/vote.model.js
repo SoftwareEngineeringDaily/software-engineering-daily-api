@@ -5,6 +5,10 @@ import APIError from '../helpers/APIError';
 
 /**
  * Vote Schema
+ * @property {String} userId - The id of the user.
+ * @property {ObjectId} postId - The id of the post.
+ * @property {Boolean} active - Whether or not the vote is in an upvoted or downvoted state.
+ * @property {String} direction - The direction of the vote: upvote or downvote.
  */
 const VoteSchema = new mongoose.Schema({
   userId: String,
@@ -31,26 +35,26 @@ VoteSchema.method({
  */
 VoteSchema.statics = {
   /**
-   * Get user
-   * @param {ObjectId} id - The objectId of user.
+   * Get vote
+   * @param {ObjectId} id - The objectId of vote.
    * @returns {Promise<Vote, APIError>}
    */
   get(id, userId) {
     return this.findOne({ id, userId })
       .exec()
-      .then((user) => {
-        if (user) {
-          return user;
+      .then((vote) => {
+        if (vote) {
+          return vote;
         }
-        const err = new APIError('No such user exists!', httpStatus.NOT_FOUND);
+        const err = new APIError('No such vote exists!', httpStatus.NOT_FOUND);
         return Promise.reject(err);
       });
   },
 
   /**
-   * List users in descending order of 'createdAt' timestamp.
-   * @param {number} skip - Number of users to be skipped.
-   * @param {number} limit - Limit number of users to be returned.
+   * List votes in descending order of 'createdAt' timestamp.
+   * @param {number} skip - Number of votes to be skipped.
+   * @param {number} limit - Limit number of votes to be returned.
    * @returns {Promise<Vote[]>}
    */
   list({ skip = 0, limit = 50 } = {}, userId) {
