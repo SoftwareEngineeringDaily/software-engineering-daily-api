@@ -50,7 +50,7 @@ describe('## Post APIs', () => {
 
   describe('# GET /api/posts/', () => {
     before((done) => { //eslint-disable-line
-      Post.remove({}, (err, removed) => {
+      Post.remove({}, () => {
         done();
       });
     });
