@@ -57,13 +57,76 @@ xdescribe('## Favorite APIs', () => {
 
   afterEach((done) => {
     Favorite.remove().exec()
-    .then(() => {
-      done();
+      .then(() => {
+        done();
+      });
+  });
+
+  describe('# POST /api/users', () => {
+    it('errors when not logged in', (done) => {
+      request(app)
+        .post(`/api/posts/${postId}/favorite`)
+        .expect(httpStatus.UNAUTHORIZED)
+        .then((res) => {
+          expect(res.body).to.exist; //eslint-disable-line
+          done();
+        });
+    });
+
+    it('favorites a post', (done) => {
+      request(app)
+        .post(`/api/posts/${postId}/favorite`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          const favorite = res.body;
+          expect(favorite.postId).to.eql(`${postId}`);
+          expect(favorite.active).to.be.true; //eslint-disable-line
+          expect(favorite.userId).to.exist; //eslint-disable-line
+          done();
+        })
+        .catch(done);
+    });
+
+    it('toggles the favorite for a post', (done) => {
+       request(app)
+        .post(`/api/posts/${postId}/favorite`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          return request(app)
+            .post(`/api/posts/${postId}/favorite`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK)
+        })
+        .then((res) => {
+          const favorite = res.body;
+          expect(favorite.postId).to.eql(`${postId}`);
+          expect(favorite.active).to.be.false; //eslint-disable-line
+          expect(favorite.userId).to.exist; //eslint-disable-line
+          done()
+        })
+        .catch(done);
+    });
+
+    it('unfavorites a post', (done) => {
+      request(app)
+        .post(`/api/posts/${postId}/unfavorite`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          const favorite = res.body;
+          expect(favorite.postId).to.eql(`${postId}`);
+          expect(favorite.active).to.be.false; //eslint-disable-line
+          expect(favorite.userId).to.exist; //eslint-disable-line
+          done();
+        })
+        .catch(done);
     });
   });
 
   describe('# GET /api/favorites/:favoriteId', () => {
-    it('should get user details', (done) => {
+    it('should get favorite details', (done) => {
       const favorite = new Favorite();
       favorite.save()
         .then((favorite) => { //eslint-disable-line
@@ -72,19 +135,46 @@ xdescribe('## Favorite APIs', () => {
             .expect(httpStatus.OK);
         })
         .then((res) => {  //eslint-disable-line
-          // expect(res.body.username).to.equal(user.username);
-          // expect(res.body.mobileNumber).to.equal(user.mobileNumber);
           done();
         })
         .catch(done);
     });
 
-    it('should report error with message - Not found, when user does not exists', (done) => {
+    it('should report error with message - Not found, when favorite does not exists', (done) => {
       request(app)
-        .get('/api/votes/56c787ccc67fc16ccc1a5e92')
+        .get('/api/favorites/56c787ccc67fc16ccc1a5e92')
         .expect(httpStatus.NOT_FOUND)
         .then((res) => {
           expect(res.body.message).to.equal('Not Found');
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# GET /api/favorites/', () => {
+    it('should get all favorites', (done) => {
+      const favorite = new Favorite();
+      favorite.save()
+        .then((favorite) => { //eslint-disable-line
+          return request(app)
+            .get('/api/favorites')
+            .expect(httpStatus.OK);
+        })
+        .then((res) => {
+          expect(res.body).to.be.an('array');
+          done();
+        })
+        .catch(done);
+    });
+
+    it('should get all favorites (with limit and skip)', (done) => {
+      request(app)
+        .get('/api/favorites')
+        .query({ limit: 10, skip: 1 })
+        .expect(httpStatus.OK)
+        .then((res) => {
+          expect(res.body).to.be.an('array');
           done();
         })
         .catch(done);
