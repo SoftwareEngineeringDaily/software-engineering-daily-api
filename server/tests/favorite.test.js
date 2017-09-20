@@ -20,7 +20,7 @@ after((done) => {
   done();
 });
 
-xdescribe('## Favorite APIs', () => {
+describe('## Favorite APIs', () => {
   const validUserCredentials = {
     username: 'react',
     password: 'express'
@@ -132,6 +132,7 @@ xdescribe('## Favorite APIs', () => {
         .then((favorite) => { //eslint-disable-line
           return request(app)
             .get(`/api/favorites/${favorite._id}`)
+            .set('Authorization', `Bearer ${userToken}`)
             .expect(httpStatus.OK);
         })
         .then((res) => {  //eslint-disable-line
@@ -159,6 +160,7 @@ xdescribe('## Favorite APIs', () => {
         .then((favorite) => { //eslint-disable-line
           return request(app)
             .get('/api/favorites')
+            .set('Authorization', `Bearer ${userToken}`)
             .expect(httpStatus.OK);
         })
         .then((res) => {
