@@ -8,7 +8,6 @@ import Favorite from '../models/favorite.model';
 function load(req, res, next, id) {
   Favorite.get(id, req.user._id)
     .then((favoriteFound) => {
-      console.log('**************', favoriteFound)
       req.favorite = favoriteFound; // eslint-disable-line no-param-reassign
       return next();
     })
