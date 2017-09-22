@@ -20,7 +20,7 @@ after((done) => {
   done();
 });
 
-xdescribe('## Vote APIs', () => {
+describe('## Vote APIs', () => {
   const validUserCredentials = {
     username: 'react',
     password: 'express'
@@ -78,11 +78,11 @@ xdescribe('## Vote APIs', () => {
         .then((res) => {
           expect(res.body).to.have.property('token');
           user2 = res.body.token;
-          const postnew = new Post();
-          return postnew.save();
+          const newPost = new Post();
+          return newPost.save();
         })
-        .then((post) => {
-          post2 = post._id;
+        .then((postCreated) => {
+          post2 = postCreated._id;
           done();
         })
         .catch(done);
@@ -118,7 +118,7 @@ xdescribe('## Vote APIs', () => {
     });
   });
 
-  describe('# POST /api/users', () => {
+  describe('# POST /api/votes', () => {
     it('errors when not logged in', (done) => {
       request(app)
         .post(`/api/posts/${postId}/upvote`)
@@ -145,11 +145,17 @@ xdescribe('## Vote APIs', () => {
         .catch(done);
     });
 
-    it('toggles the upvote for a post', (done) => {
+    it('toggles the upvote for a vote', (done) => {
       request(app)
         .post(`/api/posts/${postId}/upvote`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.OK)
+        .then((res) => {
+          return request(app)
+            .post(`/api/posts/${postId}/upvote`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK);
+        })
         .then((res) => {
           const vote = res.body;
           expect(vote.postId).to.eql(`${postId}`);
@@ -177,11 +183,17 @@ xdescribe('## Vote APIs', () => {
         .catch(done);
     });
 
-    it('toggles the downvote for a post', (done) => {
+    it('toggles the downvote for a vote', (done) => {
       request(app)
         .post(`/api/posts/${postId}/downvote`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.OK)
+        .then((res) => {
+          return request(app)
+            .post(`/api/posts/${postId}/downvote`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK);
+        })
         .then((res) => {
           const vote = res.body;
           expect(vote.postId).to.eql(`${postId}`);
@@ -195,17 +207,19 @@ xdescribe('## Vote APIs', () => {
   });
 
   describe('# GET /api/votes/:voteId', () => {
-    it('should get user details', (done) => {
-      const vote = new Vote();
-      vote.save()
-        .then((vote) => { //eslint-disable-line
+    it('should get vote details', (done) => {
+      request(app)
+        .post(`/api/posts/${postId}/upvote`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          const vote = res.body;
           return request(app)
             .get(`/api/votes/${vote._id}`)
+            .set('Authorization', `Bearer ${userToken}`)
             .expect(httpStatus.OK);
         })
         .then((res) => {  //eslint-disable-line
-          // expect(res.body.username).to.equal(user.username);
-          // expect(res.body.mobileNumber).to.equal(user.mobileNumber);
           done();
         })
         .catch(done);
@@ -214,22 +228,23 @@ xdescribe('## Vote APIs', () => {
     it('should report error with message - Not found, when user does not exists', (done) => {
       request(app)
         .get('/api/votes/56c787ccc67fc16ccc1a5e92')
-        .expect(httpStatus.NOT_FOUND)
+        // .expect(httpStatus.NOT_AUTHORIZED)
         .then((res) => {
-          expect(res.body.message).to.equal('Not Found');
+          expect(res.body.message).to.equal('Unauthorized');
           done();
         })
         .catch(done);
     });
   });
 
-  describe('# GET /api/users/', () => {
-    it('should get all users', (done) => {
+  describe('# GET /api/votes/', () => {
+    it('should get all user votes', (done) => {
       const vote = new Vote();
       vote.save()
         .then((vote) => { //eslint-disable-line
           return request(app)
             .get('/api/votes')
+            .set('Authorization', `Bearer ${userToken}`)
             .expect(httpStatus.OK);
         })
         .then((res) => {
@@ -239,9 +254,10 @@ xdescribe('## Vote APIs', () => {
         .catch(done);
     });
 
-    it('should get all users (with limit and skip)', (done) => {
+    it('should get all votes (with limit and skip)', (done) => {
       request(app)
         .get('/api/votes')
+        .set('Authorization', `Bearer ${userToken}`)
         .query({ limit: 10, skip: 1 })
         .expect(httpStatus.OK)
         .then((res) => {
