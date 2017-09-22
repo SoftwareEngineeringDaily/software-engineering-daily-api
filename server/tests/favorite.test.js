@@ -144,6 +144,7 @@ describe('## Favorite APIs', () => {
     it('should report error with message - Not found, when favorite does not exists', (done) => {
       request(app)
         .get('/api/favorites/56c787ccc67fc16ccc1a5e92')
+        .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.NOT_FOUND)
         .then((res) => {
           expect(res.body.message).to.equal('Not Found');
@@ -173,6 +174,7 @@ describe('## Favorite APIs', () => {
     it('should get all favorites (with limit and skip)', (done) => {
       request(app)
         .get('/api/favorites')
+        .set('Authorization', `Bearer ${userToken}`)
         .query({ limit: 10, skip: 1 })
         .expect(httpStatus.OK)
         .then((res) => {
