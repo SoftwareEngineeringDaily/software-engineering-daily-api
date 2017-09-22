@@ -11,6 +11,6 @@ router.route('/')
 router.route('/:favoriteId')
   .get(expressJwt({ secret: config.jwtSecret }), ctrl.get);
 
-router.param('favoriteId', ctrl.load);
+router.param('favoriteId', expressJwt({ secret: config.jwtSecret }), ctrl.load);
 
 export default router;
