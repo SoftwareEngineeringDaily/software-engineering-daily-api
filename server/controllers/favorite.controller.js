@@ -11,10 +11,7 @@ function load(req, res, next, id) {
       req.favorite = favoriteFound; // eslint-disable-line no-param-reassign
       return next();
     })
-    .catch(e => {
-      console.log("error:", e)
-      next(e)
-    });
+    .catch(e => next(e));
 }
 
 /**
