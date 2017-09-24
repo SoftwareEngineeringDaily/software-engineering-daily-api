@@ -92,7 +92,7 @@ describe('## Favorite APIs', () => {
        request(app)
         .post(`/api/posts/${postId}/favorite`)
         .set('Authorization', `Bearer ${userToken}`)
-        .expect(httpStatus.OK);
+        .expect(httpStatus.OK)
         .then((res) => {
           return request(app)
             .post(`/api/posts/${postId}/favorite`)
@@ -131,7 +131,7 @@ describe('## Favorite APIs', () => {
       request(app)
         .post(`/api/posts/${postId}/favorite`)
         .set('Authorization', `Bearer ${userToken}`)
-        .expect(httpStatus.OK);
+        .expect(httpStatus.OK)
         .then((res) => {
           favorite = res.body;
           return request(app)
