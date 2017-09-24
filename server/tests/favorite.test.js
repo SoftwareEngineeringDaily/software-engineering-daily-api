@@ -92,12 +92,12 @@ describe('## Favorite APIs', () => {
        request(app)
         .post(`/api/posts/${postId}/favorite`)
         .set('Authorization', `Bearer ${userToken}`)
-        .expect(httpStatus.OK)
+        .expect(httpStatus.OK);
         .then((res) => {
           return request(app)
             .post(`/api/posts/${postId}/favorite`)
             .set('Authorization', `Bearer ${userToken}`)
-            .expect(httpStatus.OK)
+            .expect(httpStatus.OK);
         })
         .then((res) => {
           const favorite = res.body;
@@ -126,10 +126,14 @@ describe('## Favorite APIs', () => {
   });
 
   describe('# GET /api/favorites/:favoriteId', () => {
+    let favorite;
     it('should get favorite details', (done) => {
-      const favorite = new Favorite();
-      favorite.save()
-        .then((favorite) => { //eslint-disable-line
+      request(app)
+        .post(`/api/posts/${postId}/favorite`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK);
+        .then((res) => {
+          favorite = res.body;
           return request(app)
             .get(`/api/favorites/${favorite._id}`)
             .set('Authorization', `Bearer ${userToken}`)
@@ -155,10 +159,14 @@ describe('## Favorite APIs', () => {
   });
 
   describe('# GET /api/favorites/', () => {
+    let favorite;
     it('should get all favorites', (done) => {
-      const favorite = new Favorite();
-      favorite.save()
-        .then((favorite) => { //eslint-disable-line
+      request(app)
+        .post(`/api/posts/${postId}/favorite`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          favorite = res.body;
           return request(app)
             .get('/api/favorites')
             .set('Authorization', `Bearer ${userToken}`)
@@ -166,6 +174,7 @@ describe('## Favorite APIs', () => {
         })
         .then((res) => {
           expect(res.body).to.be.an('array');
+          expect(res.body[0]._id).to.equal(favorite._id);
           done();
         })
         .catch(done);
