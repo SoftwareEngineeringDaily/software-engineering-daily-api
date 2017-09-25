@@ -118,7 +118,7 @@ describe('## Vote APIs', () => {
     });
   });
 
-  describe('# POST /api/users', () => {
+  describe('# POST /api/votes', () => {
     it('errors when not logged in', (done) => {
       request(app)
         .post(`/api/posts/${postId}/upvote`)
@@ -154,7 +154,7 @@ describe('## Vote APIs', () => {
           const vote = res.body;
           expect(vote.postId).to.eql(`${postId}`);
           expect(vote.direction).to.eql('upvote');
-          expect(vote.active).to.be.false; //eslint-disable-line
+          expect(vote.active).to.be.true; //eslint-disable-line
           expect(vote.userId).to.exist; //eslint-disable-line
           done();
         })
@@ -186,27 +186,38 @@ describe('## Vote APIs', () => {
           const vote = res.body;
           expect(vote.postId).to.eql(`${postId}`);
           expect(vote.direction).to.eql('downvote');
-          expect(vote.active).to.be.false; //eslint-disable-line
+          expect(vote.active).to.be.true; //eslint-disable-line
           expect(vote.userId).to.exist; //eslint-disable-line
-          done();
+          return request(app)
+		        .post(`/api/posts/${postId}/downvote`)
+		        .set('Authorization', `Bearer ${userToken}`)
+		        .expect(httpStatus.OK)
+        })
+        .then((res) => {
+        	const toggledVote = res.body;
+        	expect(toggledVote.active).to.be.false; //eslint-disable-line
+					done();
         })
         .catch(done);
     });
   });
 
   describe('# GET /api/votes/:voteId', () => {
+		let savedVote;
     it('should get vote details', (done) => {
-      const vote = new Vote();
-      vote.save()
-        .then((vote) => { //eslint-disable-line
+      request(app)
+        .post(`/api/posts/${postId}/upvote`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then((res) => { //eslint-disable-line
+					savedVote = res.body;
           return request(app)
-            .get(`/api/votes/${vote._id}`)
+            .get(`/api/votes/${savedVote._id}`)
             .set('Authorization', `Bearer ${userToken}`)
             .expect(httpStatus.OK);
         })
         .then((res) => {  //eslint-disable-line
-          // expect(res.body.username).to.equal(user.username);
-          // expect(res.body.mobileNumber).to.equal(user.mobileNumber);
+					expect(res.body._id).to.equal(savedVote._id);
           done();
         })
         .catch(done);
@@ -218,18 +229,22 @@ describe('## Vote APIs', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.NOT_FOUND)
         .then((res) => {
-          expect(res.body.message).to.equal('Not Found');
+					expect(res.body.message).to.equal('Not Found');
           done();
         })
         .catch(done);
     });
   });
 
-  describe('# GET /api/users/', () => {
-    it('should get all users', (done) => {
-      const vote = new Vote();
-      vote.save()
-        .then((vote) => { //eslint-disable-line
+  describe('# GET /api/votes/', () => {
+  	let savedVote;
+    it('should get all votes', (done) => {
+      request(app)
+        .post(`/api/posts/${postId}/upvote`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          savedVote = res.body;
           return request(app)
             .get('/api/votes')
             .set('Authorization', `Bearer ${userToken}`)
@@ -237,19 +252,27 @@ describe('## Vote APIs', () => {
         })
         .then((res) => {
           expect(res.body).to.be.an('array');
+          expect(res.body[0]._id).to.equal(savedVote._id);
           done();
         })
         .catch(done);
     });
 
-    it('should get all users (with limit and skip)', (done) => {
+    it('should get all votes (with limit and skip)', (done) => {
       request(app)
-        .get('/api/votes')
+        .post(`/api/posts/${postId}/downvote`)
         .set('Authorization', `Bearer ${userToken}`)
-        .query({ limit: 10, skip: 1 })
         .expect(httpStatus.OK)
         .then((res) => {
+          return request(app)
+            .get('/api/votes')
+            .set('Authorization', `Bearer ${userToken}`)
+            .query({ limit: 10, skip: 1 })
+            .expect(httpStatus.OK);
+        })
+        .then((res) => {
           expect(res.body).to.be.an('array');
+          expect(res.body.length).to.equal(0);
           done();
         })
         .catch(done);
