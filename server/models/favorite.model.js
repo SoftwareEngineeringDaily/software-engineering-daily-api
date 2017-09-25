@@ -10,7 +10,7 @@ import APIError from '../helpers/APIError';
  * @property {Boolean} active - The active state of the favorite.
  */
 const FavoriteSchema = new mongoose.Schema({
-  userId: String,
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
   active: { type: Boolean, default: true }
 });
@@ -38,7 +38,7 @@ FavoriteSchema.statics = {
    * @returns {Promise<Favorite, APIError>}
    */
   get(id, userId) {
-    return this.findOne({ id, userId })
+    return this.findOne({ _id: id, userId })
       .exec()
       .then((favorite) => {
         if (favorite) {
