@@ -49,6 +49,12 @@ describe('## Post APIs', () => {
   });
 
   describe('# GET /api/posts/', () => {
+    before((done) => { //eslint-disable-line
+      Post.remove({}, () => {
+        done();
+      });
+    });
+
     let firstSet = [];
 
     it('should get all posts', (done) => {

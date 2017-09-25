@@ -6,7 +6,7 @@ import Post from '../models/post.model';
 import Vote from '../models/vote.model';
 
 /**
- * Load user and append to req.
+ * Load post and append to req.
  */
 function load(req, res, next, id) {
   Post.get(id)
@@ -18,7 +18,7 @@ function load(req, res, next, id) {
 }
 
 /**
- * Get user
+ * Get post.
  * @returns {Post}
  */
 function get(req, res) {
@@ -26,7 +26,7 @@ function get(req, res) {
 }
 
 /**
- * Get user list.
+ * Get post list.
  * @property {number} req.query.skip - Number of users to be skipped.
  * @property {number} req.query.limit - Limit number of users to be returned.
  * @returns {Post[]}
@@ -66,7 +66,7 @@ function list(req, res, next) {
 }
 
 /**
- * Vote a post
+ * Upvote a post.
  */
 function upvote(req, res, next) {
   const post = req.post;
@@ -85,7 +85,7 @@ function upvote(req, res, next) {
     if (vote) {
       let incrementValue = 1;
 
-      // We are changing directly form up to down
+      // We are changing directly from down to up
       if (vote.direction !== 'upvote' && vote.active) {
         incrementValue = 2;
       }
@@ -126,6 +126,9 @@ function upvote(req, res, next) {
   });
 }
 
+/**
+ * Downvote a post.
+ */
 function downvote(req, res, next) {
   const post = req.post;
 
@@ -140,7 +143,7 @@ function downvote(req, res, next) {
     if (vote) {
       let incrementValue = 1;
 
-      // We are changing directly form up to down
+      // We are changing directly from up to down
       if (vote.direction !== 'downvote' && vote.active) {
         incrementValue = 2;
       }
