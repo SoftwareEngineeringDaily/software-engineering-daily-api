@@ -20,7 +20,7 @@ after((done) => {
   done();
 });
 
-xdescribe('## Vote APIs', () => {
+describe('## Vote APIs', () => {
   const validUserCredentials = {
     username: 'react',
     password: 'express'
@@ -195,12 +195,13 @@ xdescribe('## Vote APIs', () => {
   });
 
   describe('# GET /api/votes/:voteId', () => {
-    it('should get user details', (done) => {
+    it('should get vote details', (done) => {
       const vote = new Vote();
       vote.save()
         .then((vote) => { //eslint-disable-line
           return request(app)
             .get(`/api/votes/${vote._id}`)
+            .set('Authorization', `Bearer ${userToken}`)
             .expect(httpStatus.OK);
         })
         .then((res) => {  //eslint-disable-line
@@ -211,9 +212,10 @@ xdescribe('## Vote APIs', () => {
         .catch(done);
     });
 
-    it('should report error with message - Not found, when user does not exists', (done) => {
+    it('should report error with message - Not found, when vote does not exists', (done) => {
       request(app)
         .get('/api/votes/56c787ccc67fc16ccc1a5e92')
+        .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.NOT_FOUND)
         .then((res) => {
           expect(res.body.message).to.equal('Not Found');
@@ -230,6 +232,7 @@ xdescribe('## Vote APIs', () => {
         .then((vote) => { //eslint-disable-line
           return request(app)
             .get('/api/votes')
+            .set('Authorization', `Bearer ${userToken}`)
             .expect(httpStatus.OK);
         })
         .then((res) => {
@@ -242,6 +245,7 @@ xdescribe('## Vote APIs', () => {
     it('should get all users (with limit and skip)', (done) => {
       request(app)
         .get('/api/votes')
+        .set('Authorization', `Bearer ${userToken}`)
         .query({ limit: 10, skip: 1 })
         .expect(httpStatus.OK)
         .then((res) => {
