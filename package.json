@@ -77,7 +77,7 @@
     "gulp-util": "3.0.8",
     "helmet": "3.8.1",
     "http-status": "1.0.1",
-    "istanbul": "0.4.5",
+    "istanbul": "1.0.0-alpha.2",
     "joi": "10.6.0",
     "jsonwebtoken": "8.0.0",
     "lodash": "4.17.4",
