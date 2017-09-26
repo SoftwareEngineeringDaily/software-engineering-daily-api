@@ -26,14 +26,18 @@ function get(req, res) {
 
 /**
  * Create new vote
- * @property {string} req.body.votename - The votename of vote.
- * @property {string} req.body.mobileNumber - The mobileNumber of vote.
+ * @property {string} req.body.userId - The user id of vote.
+ * @property {string} req.body.postId - The id of the post the vote is associated with.
+ * @property {string} req.body.active - Whether or not the vote is in an upvoted or downvoted state.
+ * @property {string} req.body.direction - The direction (upvote/downvote) of the vote.
  * @returns {Vote}
  */
 function create(req, res, next) {
   const vote = new Vote({
-    votename: req.body.votename,
-    mobileNumber: req.body.mobileNumber
+    userId: req.body.userId,
+    postId: req.body.postId,
+    active: req.body.active,
+    direction: req.body.direction
   });
 
   vote.save()
@@ -43,15 +47,18 @@ function create(req, res, next) {
 
 /**
  * Update existing vote
- * @property {string} req.body.votename - The votename of vote.
- * @property {string} req.body.mobileNumber - The mobileNumber of vote.
+ * @property {string} req.body.userId - The user id of vote.
+ * @property {string} req.body.postId - The id of the post the vote is associated with.
+ * @property {string} req.body.active - Whether or not the vote is in an upvoted or downvoted state.
+ * @property {string} req.body.direction - The direction (upvote/downvote) of the vote.
  * @returns {Vote}
  */
 function update(req, res, next) {
   const vote = req.vote;
-  vote.votename = req.body.votename;
-  vote.mobileNumber = req.body.mobileNumber;
-
+  vote.userId = req.body.userId;
+  vote.postId = req.body.postId;
+  vote.active = req.body.active;
+  vote.direction = req.body.direction;
   vote.save()
     .then(savedVote => res.json(savedVote))
     .catch(e => next(e));
