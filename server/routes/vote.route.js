@@ -11,6 +11,6 @@ router.route('/')
 router.route('/:voteId')
   .get(expressJwt({ secret: config.jwtSecret }), ctrl.get);
 
-router.param('voteId', ctrl.load);
+router.param('voteId', expressJwt({ secret: config.jwtSecret }), ctrl.load);
 
 export default router;
