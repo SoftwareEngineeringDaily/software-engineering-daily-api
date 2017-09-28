@@ -75,6 +75,28 @@ describe('## Listened APIs', () => {
           done();
         });
     });
+
+    it('returns an array with one value', (done) => {
+      const listened = new Listened({
+        userId,
+        postId
+      });
+      listened.save()
+        .then(() => {
+          return request(app)
+            .get(`/api/posts/${postId}/listened`)
+            .expect(httpStatus.OK);
+        })
+        .then((res) => {
+          const item = res.body;
+          expect(item).to.have.lengthOf(1);
+          expect(String(item[0].postId)).to.equal(String(postId));
+          expect(String(item[0].userId)).to.equal(String(userId));
+          expect(res.body).to.exist; //eslint-disable-line
+          done();
+        })
+        .catch(done);
+    });
   });
   describe('# POST /api/posts/{postId}/listened', () => {
     it('mark post as listened by unauthorized user should error', (done) => {
