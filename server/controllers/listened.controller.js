@@ -1,18 +1,5 @@
 import Bluebird from 'bluebird';
-
 import Listened from '../models/listened.model';
-
-/**
- * Load favorite and append to req.
- */
-function load(req, res, next, id) {
-  Listened.get(id, req.user._id)
-    .then((favoriteFound) => {
-      req.favorite = favoriteFound; // eslint-disable-line no-param-reassign
-      return next();
-    })
-    .catch(e => next(e));
-}
 
 /**
  * Create new favorite
@@ -57,6 +44,9 @@ function listByPost(req, res, next) {
     .catch(e => next(e));
 }
 
+/**
+ * Default export
+ */
 export default {
-  load, create, listByPost
+  create, listByPost
 };

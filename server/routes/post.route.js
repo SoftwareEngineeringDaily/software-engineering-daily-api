@@ -33,7 +33,7 @@ router.route('/:postId/listened')
   .post(expressJwt({ secret: config.jwtSecret }), listenedCtrl.create);
 
 router.route('/:postId/listened')
-  .get(expressJwt({ secret: config.jwtSecret }), listenedCtrl.listByPost);
+  .get(listenedCtrl.listByPost);
 
 router.param('postId', postCtrl.load);
 
