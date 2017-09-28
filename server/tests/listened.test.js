@@ -28,6 +28,7 @@ describe('## Listened APIs', () => {
 
   let userToken;
   let postId;
+  let userId;
 
   // Create a user and post before running the tests
   before((done) => {
@@ -38,6 +39,7 @@ describe('## Listened APIs', () => {
       .then((res) => {
         expect(res.body).to.have.property('token');
         userToken = res.body.token;
+        userId = res.body.user._id;
         const post = new Post();
         return post.save();
       })
@@ -88,6 +90,31 @@ describe('## Listened APIs', () => {
     it('mark post as listened by authorized user should work', (done) => {
       request(app)
         .post(`/api/posts/${postId}/listened`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          const listened = res.body;
+          expect(listened).to.have.lengthOf(1);
+          expect(res.body).to.exist; //eslint-disable-line
+          done();
+        });
+    });
+  });
+
+  describe('# GET /api/users/{userId}/listened', () => {
+    it('returns a list of posts listened by the user should fail when unauthorized', (done) => {
+      request(app)
+        .get(`/api/users/${userId}/listened`)
+        .expect(httpStatus.UNAUTHORIZED)
+        .then((res) => {
+          expect(res.body).to.exist; //eslint-disable-line
+          done();
+        });
+    });
+
+    it('returns a list of posts listened by the user should work when authorized', (done) => {
+      request(app)
+        .get(`/api/users/${userId}/listened`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.OK)
         .then((res) => {
