@@ -54,7 +54,7 @@ ListenedSchema.statics = {
   },
 
   /**
-   * List listened items in descending order of 'createdAt' timestamp.
+   * List listened items by Post in descending order of 'createdAt' timestamp.
    * @param {number} skip - Number of favorites to be skipped.
    * @param {number} limit - Limit number of favorites to be returned.
    * @param {number} postId - The post ID.
@@ -62,6 +62,21 @@ ListenedSchema.statics = {
    */
   listByPost({ skip = 0, limit = 50 } = {}, postId) {
     return this.find({ postId })
+      .sort({ createdAt: -1 })
+      .skip(+skip)
+      .limit(+limit)
+      .exec();
+  },
+
+  /**
+   * List listened items by User in descending order of 'createdAt' timestamp.
+   * @param {number} skip - Number of favorites to be skipped.
+   * @param {number} limit - Limit number of favorites to be returned.
+   * @param {number} userId - The post ID.
+   * @returns {Promise<ListenedSchema[]>}
+   */
+  listByUser({ skip = 0, limit = 50 } = {}, userId) {
+    return this.find({ userId })
       .sort({ createdAt: -1 })
       .skip(+skip)
       .limit(+limit)

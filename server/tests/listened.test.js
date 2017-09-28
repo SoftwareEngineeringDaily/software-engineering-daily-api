@@ -101,10 +101,10 @@ describe('## Listened APIs', () => {
     });
   });
 
-  describe('# GET /api/users/{userId}/listened', () => {
+  describe('# GET /api/listened', () => {
     it('returns a list of posts listened by the user should fail when unauthorized', (done) => {
       request(app)
-        .get(`/api/users/${userId}/listened`)
+        .get('/api/listened')
         .expect(httpStatus.UNAUTHORIZED)
         .then((res) => {
           expect(res.body).to.exist; //eslint-disable-line
@@ -113,16 +113,26 @@ describe('## Listened APIs', () => {
     });
 
     it('returns a list of posts listened by the user should work when authorized', (done) => {
-      request(app)
-        .get(`/api/users/${userId}/listened`)
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(httpStatus.OK)
+      const listened = new Listened({
+        userId,
+        postId
+      });
+      listened.save()
+        .then(() => {
+          return request(app)
+            .get('/api/listened')
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK);
+        })
         .then((res) => {
-          const listened = res.body;
-          expect(listened).to.have.lengthOf(1);
+          const item = res.body;
+          expect(item).to.have.lengthOf(1);
+          expect(String(item[0].postId)).to.equal(String(postId));
+          expect(String(item[0].userId)).to.equal(String(userId));
           expect(res.body).to.exist; //eslint-disable-line
           done();
-        });
+        })
+        .catch(done);
     });
   });
 });

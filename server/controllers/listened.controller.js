@@ -45,8 +45,22 @@ function listByPost(req, res, next) {
 }
 
 /**
+ * Get the list of listened posts by post Id
+ * .
+ * @property {number} req.query.skip - Number of favorites to be skipped.
+ * @property {number} req.query.limit - Limit number of favorites to be returned.
+ * @returns {Listened[]}
+ */
+function listByUser(req, res, next) {
+  const { limit = 50, skip = 0 } = req.query;
+  Listened.listByUser({ limit, skip }, req.user._id)
+    .then(favorites => res.json(favorites))
+    .catch(e => next(e));
+}
+
+/**
  * Default export
  */
 export default {
-  create, listByPost
+  create, listByPost, listByUser
 };

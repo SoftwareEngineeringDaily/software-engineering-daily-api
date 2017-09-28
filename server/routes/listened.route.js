@@ -8,6 +8,6 @@ const router = express.Router(); // eslint-disable-line new-cap
 router.use(expressJwt({ secret: config.jwtSecret }));
 
 router.route('/')
-  .get(ctrl.list);
+  .get(expressJwt({ secret: config.jwtSecret }), ctrl.listByUser);
 
 export default router;
