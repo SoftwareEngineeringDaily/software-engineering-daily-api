@@ -20,7 +20,7 @@ after((done) => {
   done();
 });
 
-describe('## Favorite APIs', () => {
+describe('## Listened APIs', () => {
   const validUserCredentials = {
     username: 'react',
     password: 'express'
@@ -56,7 +56,7 @@ describe('## Favorite APIs', () => {
   });
 
   afterEach((done) => {
-    Favorite.remove().exec()
+    Listened.remove().exec()
       .then(() => {
         done();
       });

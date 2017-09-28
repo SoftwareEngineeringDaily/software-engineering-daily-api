@@ -2,6 +2,8 @@ import express from 'express';
 import expressJwt from 'express-jwt';
 import postCtrl from '../controllers/post.controller';
 import favoriteCtrl from '../controllers/favorite.controller';
+import listenedCtrl from '../controllers/listened.controller';
+
 import config from '../../config/config';
 
 const router = express.Router(); // eslint-disable-line new-cap
@@ -26,6 +28,12 @@ router.route('/:postId/favorite')
 
 router.route('/:postId/unfavorite')
   .post(expressJwt({ secret: config.jwtSecret }), favoriteCtrl.unfavorite);
+
+router.route('/:postId/listened')
+  .post(expressJwt({ secret: config.jwtSecret }), listenedCtrl.create);
+
+router.route('/:postId/listened')
+  .get(expressJwt({ secret: config.jwtSecret }), listenedCtrl.listByPost);
 
 router.param('postId', postCtrl.load);
 
