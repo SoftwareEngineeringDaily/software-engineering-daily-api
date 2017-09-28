@@ -19,4 +19,9 @@ router.route('/register')
 router.route('/random-number')
   .get(expressJwt({ secret: config.jwtSecret }), authCtrl.getRandomNumber);
 
+router.route('/:socialNetwork')
+  .post(authCtrl.socialAuth);
+
+router.param('socialNetwork', authCtrl.loadSocialNetwork);
+
 export default router;

@@ -79,6 +79,23 @@ function register(req, res, next) {
     });
 }
 
+function loadSocialNetwork(req, res, next) {
+  req.socialNetwork = req.params.socialNetwork;
+  switch (req.socialNetwork) {
+    case 'facebook':
+    case 'google':
+      next();
+      break;
+    default:
+      let error = new APIError('No such social auth exists!', httpStatus.NOT_FOUND, true); //eslint-disable-line
+      next(error);
+  }
+}
+
+function socialAuth(req, res, next) {
+  return res.json(req.socialNetwork);
+}
+
 /**
  * This is a protected route. Will return random number only if jwt token is provided in header.
  * @param req
@@ -93,4 +110,4 @@ function getRandomNumber(req, res) {
   });
 }
 
-export default { login, getRandomNumber, register };
+export default { login, getRandomNumber, register, loadSocialNetwork, socialAuth };
