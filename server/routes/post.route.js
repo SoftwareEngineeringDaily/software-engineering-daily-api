@@ -1,6 +1,7 @@
 import express from 'express';
 import expressJwt from 'express-jwt';
 import postCtrl from '../controllers/post.controller';
+import voteCtrl from '../controllers/vote.controller';
 import favoriteCtrl from '../controllers/favorite.controller';
 import config from '../../config/config';
 
@@ -16,10 +17,10 @@ router.route('/:postId')
   .get(postCtrl.get);
 
 router.route('/:postId/upvote')
-  .post(expressJwt({ secret: config.jwtSecret }), postCtrl.upvote);
+  .post(expressJwt({ secret: config.jwtSecret }), voteCtrl.upvote);
 
 router.route('/:postId/downvote')
-  .post(expressJwt({ secret: config.jwtSecret }), postCtrl.downvote);
+  .post(expressJwt({ secret: config.jwtSecret }), voteCtrl.downvote);
 
 router.route('/:postId/favorite')
   .post(expressJwt({ secret: config.jwtSecret }), favoriteCtrl.favorite);
