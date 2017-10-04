@@ -32,9 +32,6 @@ router.route('/:postId/unfavorite')
 router.route('/:postId/listened')
   .post(expressJwt({ secret: config.jwtSecret }), listenedCtrl.create);
 
-router.route('/:postId/listened')
-  .get(listenedCtrl.listByPost);
-
 router.param('postId', postCtrl.load);
 
 export default router;
