@@ -2,7 +2,45 @@ import jwt from 'jsonwebtoken';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import config from '../../config/config';
+import passport from 'passport';
+import FacebookTokenStrategy from 'passport-facebook-token';
 import User from '../models/user.model';
+
+
+passport.serializeUser(function(user, done){
+  console.log('******** serializeUser', user)
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done){
+  console.log('!!!!!!!! deserializeUser')
+  User.findById(id, function(err, user){
+      done(err, user);
+  });
+});
+
+passport.use(new FacebookTokenStrategy({
+    clientID: config.facebook.clientID,
+    clientSecret: config.facebook.clientSecret
+  },
+  function(accessToken, refreshToken, profile, done) {
+    const user = {
+        'email': profile.emails[0].value,
+        'name' : profile.name.givenName + ' ' + profile.name.familyName,
+        'id'   : profile.id,
+        'token': accessToken
+    }
+    User.findById(profile.id, function(err, user){
+      console.log(err, user)
+    });
+    console.log('&&&&&&& FacebookTokenStrategy')
+    // You can perform any necessary actions with your user at this point,
+    // e.g. internal verification against a users table,
+    // creating new user entries, etc.
+
+    return done(null, user); // the user object we just made gets passed to the route's controller as `req.user`
+  }
+));
 
 /**
  * Returns jwt token if valid username and password is provided
@@ -80,6 +118,7 @@ function register(req, res, next) {
 }
 
 function facebookAuth(req, res, next) {
+  console.log('##### facebookAuth', req.user)
   return res.json(req.user);
 }
 
