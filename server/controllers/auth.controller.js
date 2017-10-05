@@ -79,21 +79,8 @@ function register(req, res, next) {
     });
 }
 
-function loadSocialNetwork(req, res, next) {
-  req.socialNetwork = req.params.socialNetwork;
-  switch (req.socialNetwork) {
-    case 'facebook':
-    case 'google':
-      next();
-      break;
-    default:
-      let error = new APIError('No such social auth exists!', httpStatus.NOT_FOUND, true); //eslint-disable-line
-      next(error);
-  }
-}
-
-function socialAuth(req, res, next) {
-  return res.json(req.socialNetwork);
+function facebookAuth(req, res, next) {
+  return res.json(req.user);
 }
 
 /**
@@ -110,4 +97,4 @@ function getRandomNumber(req, res) {
   });
 }
 
-export default { login, getRandomNumber, register, loadSocialNetwork, socialAuth };
+export default { login, getRandomNumber, register, facebookAuth };
