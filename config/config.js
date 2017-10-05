@@ -27,9 +27,7 @@ const envVarsSchema = Joi.object({
   FACEBOOK_ID: Joi.string().required()
     .description('Facbook application id'),
   FACEBOOK_SECRET: Joi.string().required()
-    .description('Facbook application secret'),
-  FACEBOOK_CALLBACKURL: Joi.string().required()
-    .description('Facbook application callback url')
+    .description('Facbook application secret')
 }).unknown()
   .required();
 
@@ -50,8 +48,7 @@ const config = {
   },
   facebook: {
     clientID: envVars.FACEBOOK_ID,
-    clientSecret: envVars.FACEBOOK_SECRET,
-    callbackURL: envVars.FACEBOOK_CALLBACKURL
+    clientSecret: envVars.FACEBOOK_SECRET
   }
 };
 
