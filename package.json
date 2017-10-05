@@ -86,6 +86,8 @@
     "moment": "2.18.1",
     "mongoose": "4.11.10",
     "morgan": "1.8.2",
+    "passport": "^0.4.0",
+    "passport-facebook-token": "^3.3.0",
     "raccoon": "0.2.8",
     "redis": "2.8.0",
     "run-sequence": "2.1.0",
