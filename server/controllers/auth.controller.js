@@ -8,14 +8,12 @@ import User from '../models/user.model';
 
 
 passport.serializeUser(function(user, done){
-  console.log('******** serializeUser', user)
-  done(null, user.id);
+  done(null, user.facebook.id);
 });
 
 passport.deserializeUser(function(id, done){
-  console.log('!!!!!!!! deserializeUser')
-  User.findById(id, function(err, user){
-      done(err, user);
+  User.findOne({'facebook.id': id}, function(err, user){
+    done(err, user);
   });
 });
 
@@ -24,21 +22,31 @@ passport.use(new FacebookTokenStrategy({
     clientSecret: config.facebook.clientSecret
   },
   function(accessToken, refreshToken, profile, done) {
-    const user = {
-        'email': profile.emails[0].value,
-        'name' : profile.name.givenName + ' ' + profile.name.familyName,
-        'id'   : profile.id,
-        'token': accessToken
-    }
-    User.findById(profile.id, function(err, user){
-      console.log(err, user)
+    let username = profile.emails[0].value || profile.id;
+    User
+    .findOne({ username: username }).exec()
+    .then((user) => {
+      if (!user) {
+        const newUser = new User();
+        newUser.username = username;
+        newUser.facebook = {
+          'email': profile.emails[0].value,
+          'name': profile.name.givenName + ' ' + profile.name.familyName,
+          'id': profile.id,
+          'token': accessToken
+        };
+        return newUser.save()
+          .then(userSaved => {
+            return done(null, userSaved);
+          })
+      } else {
+        return done(null, user);
+      }
+    })
+    .catch((err) => {
+      err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+      return done(err);
     });
-    console.log('&&&&&&& FacebookTokenStrategy')
-    // You can perform any necessary actions with your user at this point,
-    // e.g. internal verification against a users table,
-    // creating new user entries, etc.
-
-    return done(null, user); // the user object we just made gets passed to the route's controller as `req.user`
   }
 ));
 
@@ -83,6 +91,16 @@ function register(req, res, next) {
   const username = req.body.username;
   const password = req.body.password;
 
+  if (!username) {
+    let err = new APIError('Username is required to register.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+    return next(err);
+  }
+
+  if (!password) {
+    let err = new APIError('Password is required to register.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+    return next(err);
+  }
+
   User
     .findOne({ username }).exec()
     .then((user) => {
@@ -117,9 +135,14 @@ function register(req, res, next) {
     });
 }
 
+/**
+ *
+ */
 function facebookAuth(req, res, next) {
-  console.log('##### facebookAuth', req.user)
-  return res.json(req.user);
+  const token = jwt.sign(req.user.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
+  return res.status(200).json({
+    token,
+  });
 }
 
 /**
