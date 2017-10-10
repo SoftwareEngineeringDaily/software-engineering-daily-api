@@ -20,7 +20,7 @@ router.route('/register')
 router.route('/random-number')
   .get(expressJwt({ secret: config.jwtSecret }), authCtrl.getRandomNumber);
 
-router.route('/facebook/callback')
+router.route('/facebook')
   .get(passport.authenticate('facebook-token'), authCtrl.facebookAuth);
 
 export default router;
