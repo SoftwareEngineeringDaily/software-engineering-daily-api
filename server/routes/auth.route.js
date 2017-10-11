@@ -20,7 +20,10 @@ router.route('/register')
 router.route('/random-number')
   .get(expressJwt({ secret: config.jwtSecret }), authCtrl.getRandomNumber);
 
-router.route('/facebook')
-  .get(passport.authenticate('facebook-token'), authCtrl.facebookAuth);
+router.route('/facebook/token')
+  .post(passport.authenticate('facebook-token'), authCtrl.socialAuth);
+
+router.route('/google/token')
+  .post(passport.authenticate('google-token'), authCtrl.socialAuth);
 
 export default router;

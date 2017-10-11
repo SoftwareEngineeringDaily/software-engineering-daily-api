@@ -27,7 +27,11 @@ const envVarsSchema = Joi.object({
   FACEBOOK_ID: Joi.string().required()
     .description('Facbook application id'),
   FACEBOOK_SECRET: Joi.string().required()
-    .description('Facbook application secret')
+    .description('Facebook application secret'),
+  GOOGLE_ID: Joi.string().required()
+    .description('Google application id'),
+  GOOGLE_SECRET: Joi.string().required()
+    .description('Google application secret')
 }).unknown()
   .required();
 
@@ -49,6 +53,10 @@ const config = {
   facebook: {
     clientID: envVars.FACEBOOK_ID,
     clientSecret: envVars.FACEBOOK_SECRET
+  },
+  google: {
+    clientID: envVars.GOOGLE_ID,
+    clientSecret: envVars.GOOGLE_SECRET
   }
 };
 
