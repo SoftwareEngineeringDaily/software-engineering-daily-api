@@ -12,8 +12,9 @@ import Comment from '../models/comment.model';
  */
 
 function create(req, res, next) {
-  const {content, postId } = req.body;
-  const {user} = req;
+  const { postId } = req.params;
+  const { content } = req.body;
+  const { user } = req;
 
   const comment = new Comment();
   comment.content = content
@@ -36,8 +37,7 @@ function create(req, res, next) {
  * @returns {[Comment]}
  */
 function list(req, res, next) {
-  const { postId } = req.body;
-  console.log('Comments for postId', postId);
+  const { postId } = req.params;
   Comment.getCommentsForItem(postId)
     .then((comments) => {
       res.json({comments});

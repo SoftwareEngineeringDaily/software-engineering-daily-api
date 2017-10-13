@@ -67,8 +67,7 @@ CommentSchema.statics = {
       });
   },
   getCommentsForItem(postId) {
-    return this.find({})
-    //return this.find({post: postId })
+    return this.find({post: postId })
       .exec()
     }
 };
