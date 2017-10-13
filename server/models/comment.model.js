@@ -57,6 +57,8 @@ CommentSchema.statics = {
    */
   get(id) {
     return this.findById(id)
+      .populate('author', '-password')
+      .populate('post')
       .exec()
       .then((comment) => {
         if (comment) {
@@ -68,6 +70,7 @@ CommentSchema.statics = {
   },
   getCommentsForItem(postId) {
     return this.find({post: postId })
+      .populate('author', '-password')
       .exec()
     }
 };
