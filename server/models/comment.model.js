@@ -23,6 +23,10 @@ const CommentSchema = new mongoose.Schema({
     type: Date,
     deafult: Date.now
   },
+  post: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Post'
+  },
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
@@ -48,20 +52,25 @@ CommentSchema.method({
 CommentSchema.statics = {
   /**
    * Get user
-   * @param {ObjectId} id - The objectId of user.
-   * @returns {Promise<Post, APIError>}
+   * @param {ObjectId} id - The objectId of the comment.
+   * @returns {Promise<Comment, APIError>}
    */
   get(id) {
     return this.findById(id)
       .exec()
-      .then((user) => {
-        if (user) {
-          return user;
+      .then((comment) => {
+        if (comment) {
+          return commment;
         }
-        const err = new APIError('No such user exists!', httpStatus.NOT_FOUND);
+        const err = new APIError('No such comment exists!', httpStatus.NOT_FOUND);
         return Promise.reject(err);
       });
-  }
+  },
+  getCommentsForItem(postId) {
+    return this.find({})
+    //return this.find({post: postId })
+      .exec()
+    }
 };
 
 // Indexes
