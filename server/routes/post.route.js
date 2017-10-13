@@ -20,7 +20,12 @@ router.route('/:postId')
   .get(postCtrl.get);
 
 router.route('/:postId/comments')
-  .get(expressJwt({ secret: config.jwtSecret }), commentCtrl.list);
+  .get(expressJwt({ secret: config.jwtSecret, credentialsRequired: false }), commentCtrl.list);
+
+
+router.route('/:postId/comment')
+  .post(expressJwt({ secret: config.jwtSecret }), commentCtrl.create);
+
 
 router.route('/:postId/upvote')
   .post(expressJwt({ secret: config.jwtSecret }), voteCtrl.upvote);
