@@ -2,6 +2,7 @@ import express from 'express';
 import expressJwt from 'express-jwt';
 import postCtrl from '../controllers/post.controller';
 import voteCtrl from '../controllers/vote.controller';
+import commentCtrl from '../controllers/comment.controller';
 import favoriteCtrl from '../controllers/favorite.controller';
 import listenedCtrl from '../controllers/listened.controller';
 
@@ -17,6 +18,9 @@ router.route('/recommendations')
 
 router.route('/:postId')
   .get(postCtrl.get);
+
+router.route('/:postId/comments')
+  .get(expressJwt({ secret: config.jwtSecret }), commentCtrl.list);
 
 router.route('/:postId/upvote')
   .post(expressJwt({ secret: config.jwtSecret }), voteCtrl.upvote);

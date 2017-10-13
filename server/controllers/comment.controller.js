@@ -10,12 +10,13 @@ import Comment from '../models/comment.model';
  * @returns {Post[]}
  */
 function list(req, res, next) {
-
-}
-
-// @TODO: maybe this should be in a recommendation controller
-function recommendations(req, res, next) {
-
+  const { postId } = req.body;
+  console.log('Comments for postId', postId);
+  Comment.getCommentsForItem(postId)
+    .then((comments) => {
+      res.json({comments});
+    })
+    .catch(e => next(e));
 }
 
 export default {list};

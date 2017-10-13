@@ -15,7 +15,7 @@ import Vote from './vote.model';
  */
 const CommentSchema = new mongoose.Schema({
   id: String,
-  text: {
+  body: {
     type: String,
     required: true
   },
@@ -74,9 +74,9 @@ CommentSchema.statics = {
 };
 
 // Indexes
-//CommentSchema.index({ 'title.rendered': 'text', 'content.rendered': 'text' });
+CommentSchema.index({ 'body': 'text' });
 
 /**
  * @typedef Post
  */
-export default mongoose.model('Post', PostSchema);
+export default mongoose.model('Comment', CommentSchema);
