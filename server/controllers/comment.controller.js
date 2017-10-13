@@ -19,7 +19,7 @@ function create(req, res, next) {
   const comment = new Comment();
   comment.content = content
   comment.post = postId
-  comment.author = user.id
+  comment.author = user._id
   comment.save()
   .then((commentSaved)  => {
     return res.status(201).json({
