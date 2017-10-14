@@ -18,6 +18,7 @@ const PostSchema = new mongoose.Schema({
   content: {
     rendered: String,
   },
+  date: { type: Date, default: Date.now }
 });
 
 /**
@@ -61,15 +62,15 @@ PostSchema.statics = {
    * @returns {Promise<Post[]>}
    */
   list({
-      limitOption = 10,
-      createdAtBefore = null,
-      user = null,
-      createdAfter = null,
-      type = null,
-      tags = [],
-      categories = [],
-      search = null } = {}) {
-
+    limit = 10,
+    createdAtBefore = null,
+    user = null,
+    createdAfter = null,
+    type = null,
+    tags = [],
+    categories = [],
+    search = null
+  } = {}) {
     const query = { };
     let posts;
     // @TODO use
@@ -86,7 +87,7 @@ PostSchema.statics = {
     if (categories.length > 0) query.categories = { $all: categories };
     if (search) query.$text = { $search: search };
 
-    const limit = parseInt(limitOption, 10);
+    const limitOption = parseInt(limit, 10);
 
     let sort = { date: dateDirection };
 
@@ -106,7 +107,7 @@ PostSchema.statics = {
 
     return this.find(query, 'content title date mp3 link score featuredImage upvoted downvoted tags categories')
       .sort(sort)
-      .limit(limit)
+      .limit(limitOption)
       .then((postsFound) => {
         posts = postsFound;
         // Flip direct back

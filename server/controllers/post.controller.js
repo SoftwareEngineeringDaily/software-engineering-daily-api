@@ -32,10 +32,18 @@ function get(req, res) {
  * @returns {Post[]}
  */
 function list(req, res, next) {
-  const { limit = 50, createdAtBefore = null,
-      createdAfter = null, type = null, tags = null, categories = null, search = null } = req.query;
+  const {
+    limit = null,
+    createdAtBefore = null,
+    createdAfter = null,
+    type = null,
+    tags = null,
+    categories = null,
+    search = null
+  } = req.query;
 
-  const query = { limit };
+  const query = { };
+  if (limit) query.limit = limit;
   if (createdAtBefore) query.createdAtBefore = createdAtBefore;
   if (createdAfter) query.createdAfter = createdAfter;
   if (type) query.type = type;
