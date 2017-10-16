@@ -22,9 +22,7 @@ function create(req, res, next) {
   comment.author = user._id
   comment.save()
   .then((commentSaved)  => {
-    return res.status(201).json({
-      commentSaved
-    })  ;
+    return res.status(201).json({result: commentSaved});
   })
   .catch( (err) => next(err));
 }
@@ -40,7 +38,7 @@ function list(req, res, next) {
   const { postId } = req.params;
   Comment.getCommentsForItem(postId)
     .then((comments) => {
-      res.json({comments});
+      res.json({result: comments});
     })
     .catch(e => next(e));
 }
