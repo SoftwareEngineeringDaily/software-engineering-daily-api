@@ -66,15 +66,15 @@ describe('## Comment APIs', () => {
 
   describe('# POST /api/posts/$postId/comment', () => {
 
-      // it('errors when not logged in', (done) => {
-      //   request(app)
-      //   .post(`/api/posts/${postId}/comment`)
-      //   .expect(httpStatus.UNAUTHORIZED)
-      //   .then((res) => {
-      //     expect(res.body).to.exist; //eslint-disable-line
-      //     done();
-      //   });
-      // });
+      it('errors when not logged in', (done) => {
+        request(app)
+        .post(`/api/posts/${postId}/comment`)
+        .expect(httpStatus.UNAUTHORIZED)
+        .then((res) => {
+          expect(res.body).to.exist; //eslint-disable-line
+          done();
+        });
+      });
 
       it('comment on a post', (done) => {
         const content = 'Hello content!';
