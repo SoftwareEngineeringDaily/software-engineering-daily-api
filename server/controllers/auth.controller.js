@@ -138,7 +138,7 @@ function register(req, res, next) {
 /**
  *
  */
-function facebookAuth(req, res, next) {
+function socialAuth(req, res, next) {
   const token = jwt.sign(req.user.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
   return res.status(200).json({
     token,
@@ -159,4 +159,4 @@ function getRandomNumber(req, res) {
   });
 }
 
-export default { login, getRandomNumber, register, facebookAuth };
+export default { login, getRandomNumber, register, socialAuth };

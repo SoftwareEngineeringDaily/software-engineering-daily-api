@@ -23,7 +23,4 @@ router.route('/random-number')
 router.route('/facebook/token')
   .post(passport.authenticate('facebook-token'), authCtrl.socialAuth);
 
-router.route('/google/token')
-  .post(passport.authenticate('google-token'), authCtrl.socialAuth);
-
 export default router;
