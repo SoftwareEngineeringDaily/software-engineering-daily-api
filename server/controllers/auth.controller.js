@@ -8,11 +8,11 @@ import User from '../models/user.model';
 
 
 passport.serializeUser(function(user, done){
-  done(null, user.facebook.id);
+  done(null, user._id);
 });
 
 passport.deserializeUser(function(id, done){
-  User.findOne({'facebook.id': id}, function(err, user){
+  User.findOne(id, function(err, user){
     done(err, user);
   });
 });
