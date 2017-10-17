@@ -1,6 +1,6 @@
 import express from 'express';
 import expressJwt from 'express-jwt';
-import ctrl from '../controllers/vote.controller';
+import ctrl from '../controllers/listened.controller';
 import config from '../../config/config';
 
 const router = express.Router(); // eslint-disable-line new-cap
@@ -8,11 +8,6 @@ const router = express.Router(); // eslint-disable-line new-cap
 router.use(expressJwt({ secret: config.jwtSecret }));
 
 router.route('/')
-  .get(ctrl.list);
-
-router.route('/:voteId')
-  .get(ctrl.get);
-
-router.param('voteId', ctrl.load);
+  .get(expressJwt({ secret: config.jwtSecret }), ctrl.listByUser);
 
 export default router;

@@ -11,7 +11,7 @@ import APIError from '../helpers/APIError';
  * @property {String} direction - The direction of the vote: upvote or downvote.
  */
 const VoteSchema = new mongoose.Schema({
-  userId: String,
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
   active: { type: Boolean, default: true },
   direction: String,
@@ -40,7 +40,7 @@ VoteSchema.statics = {
    * @returns {Promise<Vote, APIError>}
    */
   get(id, userId) {
-    return this.findOne({ id, userId })
+    return this.findOne({ _id: id, userId })
       .exec()
       .then((vote) => {
         if (vote) {
