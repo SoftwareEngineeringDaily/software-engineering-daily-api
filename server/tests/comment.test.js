@@ -95,6 +95,18 @@ describe('## Comment APIs', () => {
         .catch(done);
       });
 
+      it('should get comments', (done) => {
+        request(app)
+        .get(`/api/posts/${postId}/comments`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          expect(res.body).to.exist;
+          expect(res.body.result).to.be.an('array');
+          done();
+        })
+        .catch(done);
+      });
+
 
     });
 
