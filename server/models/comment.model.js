@@ -70,6 +70,7 @@ CommentSchema.statics = {
   },
   getCommentsForItem(postId) {
     return this.find({post: postId })
+      .sort({dateCreated: -1})
       .populate('author', '-password')
       .exec()
     }
