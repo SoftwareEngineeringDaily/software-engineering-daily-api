@@ -56,16 +56,7 @@ describe('## Comment APIs', () => {
     });
   });
 
-  /*
-  afterEach((done) => {
-    Comment.remove().exec()
-    .then(() => {
-      done();
-    });
-  });*/
-
   describe('# POST /api/posts/$postId/comment', () => {
-
       it('errors when not logged in', (done) => {
         request(app)
         .post(`/api/posts/${postId}/comment`)
@@ -106,8 +97,5 @@ describe('## Comment APIs', () => {
         })
         .catch(done);
       });
-
-
     });
-
 });
