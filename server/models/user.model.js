@@ -29,20 +29,6 @@ const UserSchema = new mongoose.Schema({
       type: String
     }
   },
-  google: {
-    id: {
-      type: String
-    },
-    token: {
-      type: String
-    },
-    email: {
-      type: String
-    },
-    name: {
-      type: String
-    }
-  },
   // mobileNumber: {
   //   type: String,
   //   required: true,
