@@ -1,4 +1,6 @@
 ## Set up
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/SoftwareEngineeringDaily/software-engineering-daily-api.svg)](https://greenkeeper.io/)
   - Install and run a local redis client (docker coming soon)
   - Install and run a local mongo client (docker coming soon)
   - cp .env.example .env
