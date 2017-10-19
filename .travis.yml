@@ -1,8 +1,6 @@
 language: node_js
 node_js:
-  - "4.8"
-  - "6.10"
-  - "7.6"
+  - "6.11"
 services:
   - mongodb
 cache:
@@ -10,6 +8,15 @@ cache:
   - node_modules
 git:
   depth: 3
+env:
+  - JWT_SECRET=insert-random-secret-string-here
+  - MONGO_HOST=mongodb://localhost/sedaily
+  - MONGO_HOST_TEST=mongodb://localhost/sedaily-test
+  - MONGO_PORT=27017
+  - RACCOON_REDIS_URL=localhost
+  - RACCOON_REDIS_PORT=6379
+  - FACEBOOK_ID=insert-facebook-app-id-here
+  - FACEBOOK_SECRET=insert-facebook-app-secret-here
 script:
   # - yarn test:check-coverage
   - npm run test
