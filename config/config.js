@@ -23,7 +23,11 @@ const envVarsSchema = Joi.object({
   MONGO_HOST_TEST: Joi.string()
     .description('Mongo DB test host url'),
   MONGO_PORT: Joi.number()
-    .default(27017)
+    .default(27017),
+  FACEBOOK_ID: Joi.string().required()
+    .description('Facbook application id'),
+  FACEBOOK_SECRET: Joi.string().required()
+    .description('Facebook application secret')
 }).unknown()
   .required();
 
@@ -41,6 +45,10 @@ const config = {
     host: envVars.MONGO_HOST,
     test: envVars.MONGO_HOST_TEST,
     port: envVars.MONGO_PORT
+  },
+  facebook: {
+    clientID: envVars.FACEBOOK_ID,
+    clientSecret: envVars.FACEBOOK_SECRET
   }
 };
 

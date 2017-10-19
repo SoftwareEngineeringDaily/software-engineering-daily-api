@@ -154,4 +154,15 @@ describe('## Auth APIs', () => {
         .catch(done);
     });
   });
+
+  xdescribe('# GET /api/auth/:socialNetwork', () => {
+    it('should return bad request error', (done) => {
+      //call /api/auth/twitter
+    });
+
+    it('should get valid JWT token', (done) => {
+      //call /api/auth/facebook
+      //call /api/auth/google
+    });
+  });
 });

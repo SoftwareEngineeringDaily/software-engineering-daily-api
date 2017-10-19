@@ -13,8 +13,21 @@ const UserSchema = new mongoose.Schema({
     required: true
   },
   password: {
-    type: String,
-    required: true,
+    type: String
+  },
+  facebook: {
+    id: {
+      type: String
+    },
+    token: {
+      type: String
+    },
+    email: {
+      type: String
+    },
+    name: {
+      type: String
+    }
   },
   // mobileNumber: {
   //   type: String,
