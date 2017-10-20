@@ -2,7 +2,53 @@ import jwt from 'jsonwebtoken';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import config from '../../config/config';
+import passport from 'passport';
+import FacebookTokenStrategy from 'passport-facebook-token';
 import User from '../models/user.model';
+
+
+passport.serializeUser(function(user, done){
+  done(null, user._id);
+});
+
+passport.deserializeUser(function(id, done){
+  User.findOne(id, function(err, user){
+    done(err, user);
+  });
+});
+
+passport.use(new FacebookTokenStrategy({
+    clientID: config.facebook.clientID,
+    clientSecret: config.facebook.clientSecret
+  },
+  function(accessToken, refreshToken, profile, done) {
+    let username = profile.emails[0].value || profile.id;
+    User
+    .findOne({ username: username }).exec()
+    .then((user) => {
+      if (!user) {
+        const newUser = new User();
+        newUser.username = username;
+        newUser.facebook = {
+          'email': profile.emails[0].value,
+          'name': profile.name.givenName + ' ' + profile.name.familyName,
+          'id': profile.id,
+          'token': accessToken
+        };
+        return newUser.save()
+          .then(userSaved => {
+            return done(null, userSaved);
+          })
+      } else {
+        return done(null, user);
+      }
+    })
+    .catch((err) => {
+      err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+      return done(err);
+    });
+  }
+));
 
 /**
  * Returns jwt token if valid username and password is provided
@@ -45,6 +91,16 @@ function register(req, res, next) {
   const username = req.body.username;
   const password = req.body.password;
 
+  if (!username) {
+    let err = new APIError('Username is required to register.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+    return next(err);
+  }
+
+  if (!password) {
+    let err = new APIError('Password is required to register.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+    return next(err);
+  }
+
   User
     .findOne({ username }).exec()
     .then((user) => {
@@ -80,6 +136,16 @@ function register(req, res, next) {
 }
 
 /**
+ *
+ */
+function socialAuth(req, res, next) {
+  const token = jwt.sign(req.user.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
+  return res.status(200).json({
+    token,
+  });
+}
+
+/**
  * This is a protected route. Will return random number only if jwt token is provided in header.
  * @param req
  * @param res
@@ -93,4 +159,4 @@ function getRandomNumber(req, res) {
   });
 }
 
-export default { login, getRandomNumber, register };
+export default { login, getRandomNumber, register, socialAuth };

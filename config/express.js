@@ -10,6 +10,7 @@ import expressWinston from 'express-winston';
 import expressValidation from 'express-validation';
 import helmet from 'helmet';
 import winstonInstance from './winston';
+import passport from 'passport';
 import routes from '../server/routes/index.route';
 import config from './config';
 import APIError from '../server/helpers/APIError';
@@ -33,6 +34,8 @@ app.use(helmet());
 
 // enable CORS - Cross Origin Resource Sharing
 app.use(cors());
+
+app.use(passport.initialize());
 
 // enable detailed API logging in dev env
 if (config.env === 'development') {
