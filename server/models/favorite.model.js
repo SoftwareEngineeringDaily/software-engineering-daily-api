@@ -4,11 +4,25 @@ import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 
 /**
- * Favorite Schema
- * @property {String} userId - The id of the user.
- * @property {ObjectId} postId - The id of the post.
- * @property {Boolean} active - The active state of the favorite.
+ * @swagger
+ * definitions:
+ *   Favorite:
+ *     type: object
+ *     properties:
+ *       _id:
+ *         $ref: '#/definitions/ObjectId'
+ *       __v:
+ *         $ref: '#/definitions/MongoVersion'
+ *       userId:
+ *         $ref: '#/definitions/ObjectId'
+ *       postId:
+ *         $ref: '#/definitions/ObjectId'
+ *       active:
+ *         type: boolean
+ *         description: Active state of favorite
+ *
  */
+
 const FavoriteSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
@@ -33,6 +47,7 @@ FavoriteSchema.method({
  */
 FavoriteSchema.statics = {
   /**
+   * TODO - remove? not in use
    * Get favorite.
    * @param {ObjectId} id - The objectId of favorite.
    * @returns {Promise<Favorite, APIError>}
@@ -64,7 +79,4 @@ FavoriteSchema.statics = {
   }
 };
 
-/**
- * @typedef Favorite
- */
 export default mongoose.model('Favorite', FavoriteSchema);

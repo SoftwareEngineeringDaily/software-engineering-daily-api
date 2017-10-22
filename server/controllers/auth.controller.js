@@ -7,6 +7,13 @@ import FacebookTokenStrategy from 'passport-facebook-token';
 import User from '../models/user.model';
 import _ from 'lodash';
 
+/**
+ * @swagger
+ * tags:
+ * - name: auth
+ *   description: User Registration, Login & Authentication
+ */
+
 passport.serializeUser(function(user, done){
   done(null, user._id);
 });
@@ -16,6 +23,8 @@ passport.deserializeUser(function(id, done){
     done(err, user);
   });
 });
+
+// TODO: add swagger doc
 
 passport.use(new FacebookTokenStrategy({
     clientID: config.facebook.clientID,
@@ -51,12 +60,23 @@ passport.use(new FacebookTokenStrategy({
 ));
 
 /**
- * Returns jwt token if valid username and password is provided
- * @param req
- * @param res
- * @param next
- * @returns {*}
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Existing user login
+ *     description: Login for existing user
+ *     tags: [auth]
+ *     parameters:
+ *       - $ref: '#/parameters/userParam'
+ *     responses:
+ *       '200':
+ *         $ref: '#/responses/SuccessfulAuthentication'
+ *       '400':
+ *         $ref: '#/responses/BadRequest'
+ *       '404':
+ *         $ref: '#/responses/NotFound'
  */
+
 function login(req, res, next) {
   const username = req.body.username;
   const password = req.body.password;
@@ -81,12 +101,37 @@ function login(req, res, next) {
 }
 
 /**
- * Returns jwt token if valid username and password is provided
- * @param req
- * @param res
- * @param next
- * @returns {*}
+ * @swagger
+ *   /auth/register:
+ *     post:
+ *       summary: Register a new user
+ *       description: Register a new user
+ *       tags: [auth]
+ *       parameters:
+ *         - in: body
+ *           name: user
+ *           description: User to register
+ *           schema:
+ *             $ref: '#/parameters/userParam'
+ *           required: true
+ *       responses:
+ *         '201':
+ *           description: successful user creation
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user:
+ *                 $ref: '#/definitions/User'
+ *               token:
+ *                 $ref: '#/definitions/Token'
+ *         '400':
+ *           $ref: '#/responses/BadRequest'
+ *         '401':
+ *           description: unauthorized - user already exists. TODO-change to 403-forbidden
+ *           schema:
+ *             $ref: '#/definitions/Error'
  */
+
 function register(req, res, next) {
   const username = req.body.username;
   const password = req.body.password;
@@ -148,6 +193,7 @@ function socialAuth(req, res, next) {
 }
 
 /**
+ * TODO: add swagger doc
  * This is a protected route. Will return random number only if jwt token is provided in header.
  * @param req
  * @param res

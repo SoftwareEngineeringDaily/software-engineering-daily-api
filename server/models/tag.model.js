@@ -4,6 +4,7 @@ import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 
 /**
+ * TODO: Add swagger doc
  * Tag Schema
  */
 const TagSchema = new mongoose.Schema({
