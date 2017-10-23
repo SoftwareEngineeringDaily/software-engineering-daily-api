@@ -10,9 +10,25 @@ import APIError from '../helpers/APIError';
 const UserSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: true
   },
   password: {
+    type: String
+  },
+  name: {
+    type: String
+    // , required: true // Should be requied but need to update all clients
+  },
+  bio: {
+    type: String
+  },
+  website: {
+    type: String
+  },
+  verified: {
+    type: Boolean,
+    default: false
+  },
+  email: {
     type: String
   },
   facebook: {
