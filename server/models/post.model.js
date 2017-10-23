@@ -39,26 +39,30 @@ PostSchema.method({
  */
 PostSchema.statics = {
   /**
-   * Get user
-   * @param {ObjectId} id - The objectId of user.
+   * Get post
+   * @param {ObjectId} id - The objectId of post.
    * @returns {Promise<Post, APIError>}
    */
   get(id) {
     return this.findById(id)
       .exec()
-      .then((user) => {
-        if (user) {
-          return user;
+      .then((post) => {
+        if (post) {
+          return post;
         }
-        const err = new APIError('No such user exists!', httpStatus.NOT_FOUND);
+        const err = new APIError('No such post exists!', httpStatus.NOT_FOUND);
         return Promise.reject(err);
       });
   },
 
   /**
-   * List users in descending order of 'createdAt' timestamp.
-   * @param {number} skip - Number of users to be skipped.
-   * @param {number} limit - Limit number of users to be returned.
+   * List posts in descending order of 'createdAt' timestamp.
+   * @param {number} limit - Limit number of posts to be returned.
+   * @param {date} createdAtBefore - Date post was created before.
+   * @param {date} createdAfter - Date post was created after.
+   * @param {list} tags - List of Tags Ids
+   * @param {list} categories - List of Categories
+   * @param {string} search - Post Title to search
    * @returns {Promise<Post[]>}
    */
   list({
