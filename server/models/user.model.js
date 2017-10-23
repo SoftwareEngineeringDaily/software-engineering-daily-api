@@ -18,6 +18,9 @@ const UserSchema = new mongoose.Schema({
     type: String
     // , required: true // Should be requied but need to update all clients
   },
+  avatarUrl: {
+    type: String
+  },
   bio: {
     type: String
   },
