@@ -23,22 +23,6 @@ xdescribe('## User APIs', () => {
     mobileNumber: '1234567890'
   };
 
-  describe('# POST /api/users', () => {
-    it('should create a new user', (done) => {
-      request(app)
-        .post('/api/users')
-        .send(user)
-        .expect(httpStatus.OK)
-        .then((res) => {
-          expect(res.body.username).to.equal(user.username);
-          expect(res.body.mobileNumber).to.equal(user.mobileNumber);
-          user = res.body;
-          done();
-        })
-        .catch(done);
-    });
-  });
-
   describe('# GET /api/users/:userId', () => {
     it('should get user details', (done) => {
       request(app)
@@ -80,42 +64,4 @@ xdescribe('## User APIs', () => {
     });
   });
 
-  describe('# GET /api/users/', () => {
-    it('should get all users', (done) => {
-      request(app)
-        .get('/api/users')
-        .expect(httpStatus.OK)
-        .then((res) => {
-          expect(res.body).to.be.an('array');
-          done();
-        })
-        .catch(done);
-    });
-
-    it('should get all users (with limit and skip)', (done) => {
-      request(app)
-        .get('/api/users')
-        .query({ limit: 10, skip: 1 })
-        .expect(httpStatus.OK)
-        .then((res) => {
-          expect(res.body).to.be.an('array');
-          done();
-        })
-        .catch(done);
-    });
-  });
-
-  describe('# DELETE /api/users/', () => {
-    it('should delete user', (done) => {
-      request(app)
-        .delete(`/api/users/${user._id}`)
-        .expect(httpStatus.OK)
-        .then((res) => {
-          expect(res.body.username).to.equal('KK');
-          expect(res.body.mobileNumber).to.equal(user.mobileNumber);
-          done();
-        })
-        .catch(done);
-    });
-  });
 });
