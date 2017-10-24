@@ -6,6 +6,7 @@ import app from '../../index';
 
 chai.config.includeStack = true;
 
+
 /**
  * root level hooks
  */
@@ -17,11 +18,29 @@ after((done) => {
   done();
 });
 
-xdescribe('## User APIs', () => {
-  let user = {
-    username: 'KK123',
-    mobileNumber: '1234567890'
-  };
+let user;
+let userToken;
+
+const validUserCredentials = {
+  username: 'react',
+  password: 'express'
+};
+
+before((done) => {
+  request(app)
+  .post('/api/auth/register')
+  .send(validUserCredentials)
+  .expect(httpStatus.CREATED)
+  .then((res) => {
+    expect(res.body).to.have.property('token');
+    userToken = res.body.token;
+    user = res.body.user;
+    done();
+  })
+  .catch(done);
+});
+
+describe('## User APIs', () => {
 
   describe('# GET /api/users/:userId', () => {
     it('should get user details', (done) => {
@@ -30,7 +49,6 @@ xdescribe('## User APIs', () => {
         .expect(httpStatus.OK)
         .then((res) => {
           expect(res.body.username).to.equal(user.username);
-          expect(res.body.mobileNumber).to.equal(user.mobileNumber);
           done();
         })
         .catch(done);
@@ -48,6 +66,9 @@ xdescribe('## User APIs', () => {
     });
   });
 
+  // TODO: add a test to make sure we can't update
+  // username to that of an existing user!
+
   describe('# PUT /api/users/:userId', () => {
     it('should update user details', (done) => {
       user.username = 'KK';
@@ -57,7 +78,6 @@ xdescribe('## User APIs', () => {
         .expect(httpStatus.OK)
         .then((res) => {
           expect(res.body.username).to.equal('KK');
-          expect(res.body.mobileNumber).to.equal(user.mobileNumber);
           done();
         })
         .catch(done);

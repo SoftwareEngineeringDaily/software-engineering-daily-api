@@ -20,6 +20,8 @@ function get(req, res) {
   return res.json(req.user);
 }
 
+// TODO: fix this, as this should throw an error if updating to an existing
+// user.
 /**
  * Update existing user
  * @property {string} req.body.username - The username of user.
