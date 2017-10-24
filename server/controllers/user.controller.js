@@ -4,12 +4,10 @@ import User from '../models/user.model';
  * Load user and append to req.
  */
 function load(req, res, next, id) {
-  console.log('id', id)
   User.get(id)
     .then((user) => {
       delete user.password;
       user.password = null;
-      console.log('user load', user);
       req.user = user; // eslint-disable-line no-param-reassign
       return next();
     })
@@ -21,7 +19,6 @@ function load(req, res, next, id) {
  * @returns {User}
  */
 function get(req, res) {
-  console.log('user get', req.user);
   return res.json(req.user);
 }
 

@@ -30,7 +30,6 @@ describe('## User APIs', () => {
   let user;
   let userToken;
 
-  let getUserUrl;
 
   before((done) => {
     request(app)
@@ -41,9 +40,6 @@ describe('## User APIs', () => {
       expect(res.body).to.have.property('token');
       userToken = res.body.token;
       user = res.body.user;
-      getUserUrl = `/api/users/${user._id}`;
-      console.log('user', user);
-      console.log('user id', user._id);
       done();
     })
     .catch(done);
@@ -52,9 +48,9 @@ describe('## User APIs', () => {
   describe('# GET /api/users/:userId', () => {
     it('should get user details', (done) => {
       request(app)
-        .get(getUserUrl)
+        .get(`/api/users/${user._id}`)
+        .expect(httpStatus.OK)
         .then((res) => {
-          console.log('getUserUrl', getUserUrl);
           expect(res.body.username).to.equal(user.username);
           done();
         })
