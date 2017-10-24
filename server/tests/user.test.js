@@ -3,6 +3,7 @@ import request from 'supertest-as-promised';
 import httpStatus from 'http-status';
 import chai, { expect } from 'chai';
 import app from '../../index';
+import User from '../models/user.model';
 
 chai.config.includeStack = true;
 
@@ -18,36 +19,42 @@ after((done) => {
   done();
 });
 
-let user;
-let userToken;
-
 const validUserCredentials = {
   username: 'react',
   password: 'express'
 };
 
-before((done) => {
-  request(app)
-  .post('/api/auth/register')
-  .send(validUserCredentials)
-  .expect(httpStatus.CREATED)
-  .then((res) => {
-    expect(res.body).to.have.property('token');
-    userToken = res.body.token;
-    user = res.body.user;
-    done();
-  })
-  .catch(done);
-});
 
 describe('## User APIs', () => {
+
+  let user;
+  let userToken;
+
+  let getUserUrl;
+
+  before((done) => {
+    request(app)
+    .post('/api/auth/register')
+    .send(validUserCredentials)
+    .expect(httpStatus.CREATED)
+    .then((res) => {
+      expect(res.body).to.have.property('token');
+      userToken = res.body.token;
+      user = res.body.user;
+      getUserUrl = `/api/users/${user._id}`;
+      console.log('user', user);
+      console.log('user id', user._id);
+      done();
+    })
+    .catch(done);
+  });
 
   describe('# GET /api/users/:userId', () => {
     it('should get user details', (done) => {
       request(app)
-        .get(`/api/users/${user._id}`)
-        .expect(httpStatus.OK)
+        .get(getUserUrl)
         .then((res) => {
+          console.log('getUserUrl', getUserUrl);
           expect(res.body.username).to.equal(user.username);
           done();
         })
