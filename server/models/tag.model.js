@@ -34,7 +34,7 @@ TagSchema.statics = {
         if (tag) {
           return tag;
         }
-        const err = new APIError('No such user exists!', httpStatus.NOT_FOUND);
+        const err = new APIError('No such tag exists!', httpStatus.NOT_FOUND);
         return Promise.reject(err);
       });
   },

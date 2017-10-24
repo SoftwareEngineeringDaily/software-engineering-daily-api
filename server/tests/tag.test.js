@@ -3,6 +3,8 @@ import request from 'supertest-as-promised';
 import httpStatus from 'http-status';
 import chai, {expect} from 'chai';
 import app from '../../index';
+import Tag from '../models/tag.model';
+
 
 chai.config.includeStack = true;
 
@@ -18,13 +20,16 @@ after((done) => {
 });
 
 xdescribe('## Tag APIs', () => {
-
-  describe('# GET /api/users/:userId', () => {
-    it('should get user details', (done) => {
-      request(app)
-        .get('/api/tags/')
-        .expect(httpStatus.OK)
-        .then((res) => {
+  describe('# GET /api/tags/:tagId', () => {
+    it('should get a tag details', (done) => {
+      const tag = new Tag();
+      tag.save()
+        .then((tagFound) => { //eslint-disable-line
+          return request(app)
+            .get(`/api/tags/${tagFound.id}`)
+            .expect(httpStatus.OK);
+        })
+        .then((res) => {  //eslint-disable-line
           done();
         })
         .catch(done);
@@ -42,4 +47,34 @@ xdescribe('## Tag APIs', () => {
     });
   });
 
+  describe('# GET /api/tags/', () => {
+    before((done) => { //eslint-disable-line
+      Tag.remove({}, () => {
+        done();
+      });
+    });
+
+    let firstSet = [];
+    const limitNum = 5;
+    it('should get all tags', (done) => {
+      const tagsArrayPromise = saveMongoArrayPromise(
+        Tag,
+        new Array(limitNum).fill({}).concat(new Array(limitNum).fill({date: moment().subtract(1, 'minutes')}))
+      );
+      tagsArrayPromise
+        .then((tagFound) => { //eslint-disable-line
+          return request(app)
+            .get('/api/tags')
+            .query({limit: limitNum})
+            .expect(httpStatus.OK);
+        })
+        .then((res) => {
+          expect(res.body).to.be.an('array');
+          expect(res.body).to.have.lengthOf(limitNum);
+          firstSet = res.body;
+          done();
+        })
+        .catch(done);
+    });
+  });
 });
