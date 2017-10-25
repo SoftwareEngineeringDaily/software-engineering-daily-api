@@ -66,8 +66,8 @@ function update(req, res, next) {
     }
     // Using _.pick to only get a few properties:
     // otherwise user can set themselves to verified, etc :)
-    const pickedProps = _.pick(req.body, ['username','website','bio', 'name','email']);
-    Object.assign(user, pickedProps);
+    const newValues = _.pick(req.body, User.updatableFields);
+    Object.assign(user, newValues);
     delete user.password;
     user.save();
     delete user.password; // Why doesn't this work?

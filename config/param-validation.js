@@ -20,9 +20,13 @@ export default {
     body: {
       username: Joi.string().required(),
       password: Joi.string().required(),
+      // Should be required once mobile apps get updated:
+      // TODO: consider adding versioning to API so we can roll
+      // out new features to different clients.
       name: Joi.string(),
       bio: Joi.string(),
       website: Joi.string(),
+      // Should be required once mobile apps get updated:
       email: Joi.string().email()
     }
   }

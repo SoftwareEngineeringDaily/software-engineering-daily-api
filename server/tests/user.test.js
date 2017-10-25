@@ -40,6 +40,7 @@ describe('## User APIs', () => {
       userToken = res.body.token;
       // TODO: auth should return more info?
       user = Object.assign(res.body.user, validUserCredentials);
+      // user = res.body.user
       done();
     })
     .catch(done);

@@ -73,10 +73,6 @@ const UserSchema = new mongoose.Schema({
  * Methods
  */
 UserSchema.method({
-  generateHash: function generateHash(password) {
-    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
-  },
-
   validPassword: function validPassword(password) {
     return bcrypt.compareSync(password, this.password);
   },
@@ -103,6 +99,10 @@ UserSchema.statics = {
       });
   },
 
+  generateHash: function generateHash(password) {
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+  },
+
   /**
    * List users in descending order of 'createdAt' timestamp.
    * @param {number} skip - Number of users to be skipped.
@@ -115,7 +115,8 @@ UserSchema.statics = {
       .skip(+skip)
       .limit(+limit)
       .exec();
-  }
+  },
+  updatableFields: ['username','website','bio', 'name','email']
 };
 
 /**
