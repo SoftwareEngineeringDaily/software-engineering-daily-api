@@ -75,6 +75,7 @@ describe('## User APIs', () => {
       user.username = 'KK';
       request(app)
         .put(`/api/users/${user._id}`)
+        .set('Authorization', `Bearer ${userToken}`)
         .send(user)
         .expect(httpStatus.OK)
         .then((res) => {

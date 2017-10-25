@@ -39,7 +39,6 @@ function update(req, res, next) {
   const user = req.userLoaded;
   const username = req.body.username;
   if(!req.user || user._id != req.user._id) {
-    console.log('user to mod', user, 'id1', user._id, 'id', req.user._id);
     let err = new APIError('Not enough  permissions to modify that user.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
     return next(err);
   }
