@@ -7,11 +7,6 @@ import _ from 'lodash';
  * Load user and append to req.
  */
 function load(req, res, next, id) {
-  if (!id) {
-    console.log('id null');
-    return next();
-  }
-
   User.get(id)
     .then((user) => {
       delete user.password;
