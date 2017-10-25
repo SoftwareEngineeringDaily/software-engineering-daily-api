@@ -1,3 +1,5 @@
+import APIError from '../helpers/APIError';
+import httpStatus from 'http-status';
 import User from '../models/user.model';
 
 /**
@@ -31,11 +33,25 @@ function get(req, res) {
  * @returns {User}
  */
 function update(req, res, next) {
+  // TODO: this is a bit weird since we are overriding the req.user
+  // we should be checkint to make sure that jwt token value is not overwritten!
+  // So we can make sure the user updating is the same as the owner :)
+  //
   const user = req.user;
-  user.username = req.body.username;
-  user.save()
-    .then(savedUser => res.json(savedUser))
-    .catch(e => next(e));
-}
+  const username = req.body.username;
+  User.findOne({ username })
+  .exec()
+  .then((_user) => {
+    if (_user && _user.id != user.id) {
+      let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+      return next(err);
+    }
+    // TODO: update other properties:
+    user.username = req.body.username;
+    user.save()
+    res.json(user);
+  })
+  .catch(e => next(e));
+  }
 
 export default {load, get, update};

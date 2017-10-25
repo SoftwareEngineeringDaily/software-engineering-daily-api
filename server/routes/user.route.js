@@ -11,6 +11,8 @@ router.route('/:userId')
   .get(userCtrl.get)
 
   /** PUT /api/users/:userId - Update user */
+
+  // TODO: make sure to check for AUTH!!!!!!!!!
   .put(validate(paramValidation.updateUser), userCtrl.update)
 
 

@@ -24,12 +24,10 @@ const validUserCredentials = {
   password: 'express'
 };
 
-
 describe('## User APIs', () => {
 
   let user;
   let userToken;
-
 
   before((done) => {
     request(app)
