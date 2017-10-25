@@ -33,9 +33,8 @@ function get(req, res) {
 function update(req, res, next) {
   const user = req.userLoaded;
   const username = req.body.username;
-  // We gotta check a few thigns:
-  // First we make sure we are the actual user we are modifying
-  // should refactor to 'hasPermissions'.
+  // We gotta check a few things:
+  // First we make sure we are the actual user we are modifying.
   if(!req.user || user._id != req.user._id) {
     let err = new APIError('Not enough  permissions to modify that user.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
     return next(err);
@@ -49,7 +48,7 @@ function update(req, res, next) {
       return next(err);
     }
     // Using _.pick to only get a few properties:
-    // othewwise user can set themselves to verified, etc :)
+    // otherwise user can set themselves to verified, etc :)
     const pickedProps = _.pick(req.body, ['username','website','bio', 'name','email']);
     Object.assign(user, pickedProps);
     delete user.password;

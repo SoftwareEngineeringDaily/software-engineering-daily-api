@@ -5,7 +5,7 @@ export default {
   updateUser: {
     body: {
       username: Joi.string().required(),
-      
+      // TODO: add other basic validations.
       // , mobileNumber: Joi.string().regex(/^[1-9][0-9]{9}$/).required()
     },
     params: {

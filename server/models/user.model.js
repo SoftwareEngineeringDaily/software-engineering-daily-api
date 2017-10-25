@@ -14,6 +14,7 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String
+    // TODO: Should be required.
   },
   name: {
     type: String
