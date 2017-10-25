@@ -3,6 +3,7 @@ import request from 'supertest-as-promised';
 import httpStatus from 'http-status';
 import chai, { expect } from 'chai';
 import app from '../../index';
+import User from '../models/user.model';
 
 chai.config.includeStack = true;
 
@@ -17,26 +18,30 @@ after((done) => {
   done();
 });
 
-xdescribe('## User APIs', () => {
-  let user = {
-    username: 'KK123',
-    mobileNumber: '1234567890'
-  };
+const validUserCredentials = {
+  username: 'react',
+  password: 'express',
+  email: 'react@softwareengineeringdaily.com',
+  name: 'John Doe'
+};
 
-  describe('# POST /api/users', () => {
-    it('should create a new user', (done) => {
-      request(app)
-        .post('/api/users')
-        .send(user)
-        .expect(httpStatus.OK)
-        .then((res) => {
-          expect(res.body.username).to.equal(user.username);
-          expect(res.body.mobileNumber).to.equal(user.mobileNumber);
-          user = res.body;
-          done();
-        })
-        .catch(done);
-    });
+describe('## User APIs', () => {
+
+  let user;
+  let userToken;
+
+  before((done) => {
+    request(app)
+    .post('/api/auth/register')
+    .send(validUserCredentials)
+    .expect(httpStatus.CREATED)
+    .then((res) => {
+      expect(res.body).to.have.property('token');
+      userToken = res.body.token;
+      user = res.body.user
+      done();
+    })
+    .catch(done);
   });
 
   describe('# GET /api/users/:userId', () => {
@@ -46,7 +51,6 @@ xdescribe('## User APIs', () => {
         .expect(httpStatus.OK)
         .then((res) => {
           expect(res.body.username).to.equal(user.username);
-          expect(res.body.mobileNumber).to.equal(user.mobileNumber);
           done();
         })
         .catch(done);
@@ -64,58 +68,26 @@ xdescribe('## User APIs', () => {
     });
   });
 
+  // TODO: add a test to make sure we can't update
+  // username to that of an existing user!
+
+  // TODO: add test so we make sure we can only modify our
+  // own data. Already tested with postman.
+
   describe('# PUT /api/users/:userId', () => {
     it('should update user details', (done) => {
       user.username = 'KK';
       request(app)
         .put(`/api/users/${user._id}`)
+        .set('Authorization', `Bearer ${userToken}`)
         .send(user)
         .expect(httpStatus.OK)
         .then((res) => {
           expect(res.body.username).to.equal('KK');
-          expect(res.body.mobileNumber).to.equal(user.mobileNumber);
           done();
         })
         .catch(done);
     });
   });
 
-  describe('# GET /api/users/', () => {
-    it('should get all users', (done) => {
-      request(app)
-        .get('/api/users')
-        .expect(httpStatus.OK)
-        .then((res) => {
-          expect(res.body).to.be.an('array');
-          done();
-        })
-        .catch(done);
-    });
-
-    it('should get all users (with limit and skip)', (done) => {
-      request(app)
-        .get('/api/users')
-        .query({ limit: 10, skip: 1 })
-        .expect(httpStatus.OK)
-        .then((res) => {
-          expect(res.body).to.be.an('array');
-          done();
-        })
-        .catch(done);
-    });
-  });
-
-  describe('# DELETE /api/users/', () => {
-    it('should delete user', (done) => {
-      request(app)
-        .delete(`/api/users/${user._id}`)
-        .expect(httpStatus.OK)
-        .then((res) => {
-          expect(res.body.username).to.equal('KK');
-          expect(res.body.mobileNumber).to.equal(user.mobileNumber);
-          done();
-        })
-        .catch(done);
-    });
-  });
 });
