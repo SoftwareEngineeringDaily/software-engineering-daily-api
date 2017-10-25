@@ -19,7 +19,11 @@ export default {
   login: {
     body: {
       username: Joi.string().required(),
-      password: Joi.string().required()
+      password: Joi.string().required(),
+      name: Joi.string(),
+      bio: Joi.string(),
+      website: Joi.string(),
+      email: Joi.string().email()
     }
   }
 };
