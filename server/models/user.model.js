@@ -10,7 +10,7 @@ import APIError from '../helpers/APIError';
 const UserSchema = new mongoose.Schema({
   username: {
     type: String,
-    // , required: true // Should be requied since it is also validated 
+    // , required: true // Should be requied since it is also validated
   },
   password: {
     type: String

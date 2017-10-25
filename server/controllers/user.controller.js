@@ -1,6 +1,7 @@
 import APIError from '../helpers/APIError';
 import httpStatus from 'http-status';
 import User from '../models/user.model';
+import _ from 'lodash';
 
 /**
  * Load user and append to req.
@@ -8,7 +9,7 @@ import User from '../models/user.model';
 function load(req, res, next, id) {
   User.get(id)
     .then((user) => {
-      user.password = null;
+      delete user.password;
       req.userLoaded = user; // eslint-disable-line no-param-reassign
       return next();
     })
@@ -47,9 +48,14 @@ function update(req, res, next) {
       let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
       return next(err);
     }
-    // TODO: update other properties:
-    user.username = req.body.username;
-    user.save()
+    // Using _.pick to only get a few properties:
+    // othewwise user can set themselves to verified, etc :)
+    const pickedProps = _.pick(req.body, ['username','website','bio', 'name','email']);
+    Object.assign(user, pickedProps);
+    delete user.password;
+    user.save();
+    delete user.password; // Why doesn't this work?
+    user.password = null;
     res.json(user);
   })
   .catch(e => next(e));
