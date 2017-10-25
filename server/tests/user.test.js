@@ -7,7 +7,6 @@ import User from '../models/user.model';
 
 chai.config.includeStack = true;
 
-
 /**
  * root level hooks
  */

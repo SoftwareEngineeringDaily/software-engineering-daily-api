@@ -8,6 +8,13 @@ import config from '../../config/config';
 const router = express.Router(); // eslint-disable-line new-cap
 
 
+router.route('/me')
+  /** GET /api/users/:userId - Get user */
+  .get(
+    expressJwt({ secret: config.jwtSecret})
+    , userCtrl.me)
+
+
 router.route('/:userId')
   /** GET /api/users/:userId - Get user */
   .get(

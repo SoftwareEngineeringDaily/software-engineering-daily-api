@@ -7,6 +7,11 @@ import _ from 'lodash';
  * Load user and append to req.
  */
 function load(req, res, next, id) {
+  if (!id) {
+    console.log('id null');
+    return next();
+  }
+
   User.get(id)
     .then((user) => {
       delete user.password;
@@ -15,6 +20,23 @@ function load(req, res, next, id) {
     })
     .catch(e => next(e));
 }
+/**
+ * Get currently logged in user
+ * @returns {User}
+ */
+function me(req, res, next) {
+  User.get(req.user._id)
+    .then((user) => {
+      delete user.password;
+      return res.json(user);
+    })
+    .catch(e => {
+      return next(err);
+    });
+}
+
+// TODO: maybe a quick version of me that only loads a shallow verison of
+// user id
 
 /**
  * Get user
@@ -60,4 +82,4 @@ function update(req, res, next) {
   .catch(e => next(e));
   }
 
-export default {load, get, update};
+export default {load, get, me, update};
