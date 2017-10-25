@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import moment from 'moment';
 import request from 'supertest-as-promised';
 import httpStatus from 'http-status';
 import chai, {expect} from 'chai';
@@ -7,6 +8,12 @@ import Tag from '../models/tag.model';
 
 
 chai.config.includeStack = true;
+
+function saveMongoArrayPromise(model, dataArray) {
+  // this moved later into util file for use by multiple models and tests
+  return Promise.all(dataArray.map(data => model(data).save()));
+}
+
 
 /**
  * root level hooks
@@ -19,10 +26,12 @@ after((done) => {
   done();
 });
 
-xdescribe('## Tag APIs', () => {
+describe('## Tag APIs', () => {
   describe('# GET /api/tags/:tagId', () => {
     it('should get a tag details', (done) => {
-      const tag = new Tag();
+      const tag = new Tag({
+        'id': 2
+      });
       tag.save()
         .then((tagFound) => { //eslint-disable-line
           return request(app)
@@ -37,7 +46,7 @@ xdescribe('## Tag APIs', () => {
 
     it('should report error with message - Not found, when tag does not exists', (done) => {
       request(app)
-        .get('/api/tags/56c787ccc67fc16ccc1a5e92')
+        .get('/api/tags/123123123')
         .expect(httpStatus.NOT_FOUND)
         .then((res) => {
           expect(res.body.message).to.equal('Not Found');
