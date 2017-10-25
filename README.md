@@ -1,6 +1,6 @@
 ## Set up (local)
-  - Install and run a local redis client (docker coming soon)
-  - Install and run a local mongo client (docker coming soon)
+  - Install and run a local redis client
+  - Install and run a local mongo client 
   - cp .env.local_example .env
   - npm install or yarn install
   - npm start or yarn start
