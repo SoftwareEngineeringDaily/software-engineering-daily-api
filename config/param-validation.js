@@ -8,7 +8,7 @@ export default {
       name: Joi.string().required(),
       bio: Joi.string(),
       website: Joi.string(),
-      email: Joi.string().email().required()
+      email: Joi.string().email()
     },
     params: {
       userId: Joi.string().hex().required()
@@ -26,7 +26,6 @@ export default {
       name: Joi.string(),
       bio: Joi.string(),
       website: Joi.string(),
-      // Should be required once mobile apps get updated:
       email: Joi.string().email()
     }
   }
