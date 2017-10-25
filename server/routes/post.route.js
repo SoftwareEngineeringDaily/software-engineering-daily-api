@@ -5,7 +5,6 @@ import voteCtrl from '../controllers/vote.controller';
 import commentCtrl from '../controllers/comment.controller';
 import favoriteCtrl from '../controllers/favorite.controller';
 import listenedCtrl from '../controllers/listened.controller';
-
 import config from '../../config/config';
 
 const router = express.Router(); // eslint-disable-line new-cap

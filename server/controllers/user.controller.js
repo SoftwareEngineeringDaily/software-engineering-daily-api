@@ -8,9 +8,8 @@ import User from '../models/user.model';
 function load(req, res, next, id) {
   User.get(id)
     .then((user) => {
-      delete user.password;
       user.password = null;
-      req.user = user; // eslint-disable-line no-param-reassign
+      req.userLoaded = user; // eslint-disable-line no-param-reassign
       return next();
     })
     .catch(e => next(e));
@@ -21,7 +20,7 @@ function load(req, res, next, id) {
  * @returns {User}
  */
 function get(req, res) {
-  return res.json(req.user);
+  return res.json(req.userLoaded);
 }
 
 // TODO: fix this, as this should throw an error if updating to an existing
@@ -37,8 +36,13 @@ function update(req, res, next) {
   // we should be checkint to make sure that jwt token value is not overwritten!
   // So we can make sure the user updating is the same as the owner :)
   //
-  const user = req.user;
+  const user = req.userLoaded;
   const username = req.body.username;
+  if(!req.user || user._id != req.user._id) {
+    console.log('user to mod', user, 'id1', user._id, 'id', req.user._id);
+    let err = new APIError('Not enough  permissions to modify that user.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+    return next(err);
+  }
   User.findOne({ username })
   .exec()
   .then((_user) => {
