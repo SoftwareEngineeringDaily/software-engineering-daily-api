@@ -70,6 +70,9 @@ describe('## User APIs', () => {
   // TODO: add a test to make sure we can't update
   // username to that of an existing user!
 
+  // TODO: add test so we make sure we can only modify our
+  // own data. Already tested with postman.
+
   describe('# PUT /api/users/:userId', () => {
     it('should update user details', (done) => {
       user.username = 'KK';

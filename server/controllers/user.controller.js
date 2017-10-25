@@ -23,8 +23,6 @@ function get(req, res) {
   return res.json(req.userLoaded);
 }
 
-// TODO: fix this, as this should throw an error if updating to an existing
-// user.
 /**
  * Update existing user
  * @property {string} req.body.username - The username of user.
@@ -32,16 +30,16 @@ function get(req, res) {
  * @returns {User}
  */
 function update(req, res, next) {
-  // TODO: this is a bit weird since we are overriding the req.user
-  // we should be checkint to make sure that jwt token value is not overwritten!
-  // So we can make sure the user updating is the same as the owner :)
-  //
   const user = req.userLoaded;
   const username = req.body.username;
+  // We gotta check a few thigns:
+  // First we make sure we are the actual user we are modifying
+  // should refactor to 'hasPermissions'.
   if(!req.user || user._id != req.user._id) {
     let err = new APIError('Not enough  permissions to modify that user.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
     return next(err);
   }
+  // Next we are making sure the username doens't already exist:
   User.findOne({ username })
   .exec()
   .then((_user) => {
