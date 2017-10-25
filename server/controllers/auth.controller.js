@@ -5,7 +5,7 @@ import config from '../../config/config';
 import passport from 'passport';
 import FacebookTokenStrategy from 'passport-facebook-token';
 import User from '../models/user.model';
-
+import _ from 'lodash';
 
 passport.serializeUser(function(user, done){
   done(null, user._id);
@@ -110,11 +110,10 @@ function register(req, res, next) {
       }
 
       const newUser = new User();
-      newUser.username = username;
       newUser.password = User.generateHash(password);
       // We assing a set of "approved fields"
-      // const newValues = _.pick(req.body, User.updatableFields);
-      // Object.assign(newUser, newValues);
+      const newValues = _.pick(req.body, User.updatableFields);
+      Object.assign(newUser, newValues);
 
       return newUser.save();
     })

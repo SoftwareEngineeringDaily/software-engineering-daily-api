@@ -38,9 +38,7 @@ describe('## User APIs', () => {
     .then((res) => {
       expect(res.body).to.have.property('token');
       userToken = res.body.token;
-      // TODO: auth should return more info?
-      user = Object.assign(res.body.user, validUserCredentials);
-      // user = res.body.user
+      user = res.body.user
       done();
     })
     .catch(done);
