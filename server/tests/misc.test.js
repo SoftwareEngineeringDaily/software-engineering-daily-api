@@ -43,19 +43,5 @@ describe('## Misc', () => {
         })
         .catch(done);
     });
-
-    xit('should handle express validation error - username is required', (done) => {
-      request(app)
-        .post('/api/users')
-        .send({
-          mobileNumber: '1234567890'
-        })
-        .expect(httpStatus.BAD_REQUEST)
-        .then((res) => {
-          expect(res.body.message).to.equal('"username" is required');
-          done();
-        })
-        .catch(done);
-    });
   });
 });

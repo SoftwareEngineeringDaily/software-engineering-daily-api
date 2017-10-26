@@ -1,19 +1,17 @@
 
 import Promise from 'bluebird';
-import mongoose  from 'mongoose';
+import mongoose, {Schema} from 'mongoose';
 import moment from 'moment';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Vote from './vote.model';
 
-// TODO
-// import mongoose {Schema}  from 'mongoose';
 
 //
 /**
  * Comment Schema
  */
-const CommentSchema = new mongoose.Schema({
+const CommentSchema = new Schema({
   id: String,
   content: {
     type: String,
@@ -24,11 +22,11 @@ const CommentSchema = new mongoose.Schema({
     default: Date.now
   },
   post: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'Post'
   },
   author: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'User'
   }
 });

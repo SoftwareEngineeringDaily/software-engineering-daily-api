@@ -13,7 +13,7 @@ router.route('/login')
   .post(validate(paramValidation.login), authCtrl.login);
 
 router.route('/register')
-  .post(validate(paramValidation.login), authCtrl.register);
+  .post(validate(paramValidation.register), authCtrl.register);
 
 /** GET /api/auth/random-number - Protected route,
  * needs token returned by the above as header. Authorization: Bearer {token} */
