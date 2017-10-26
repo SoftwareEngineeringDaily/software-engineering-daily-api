@@ -6,9 +6,9 @@ export default {
     body: {
       username: Joi.string().required(),
       name: Joi.string().required(),
-      bio: Joi.string(),
-      website: Joi.string(),
-      email: Joi.string().email()
+      bio: Joi.string().allow(''),
+      website: Joi.string().allow(''),
+      email: Joi.string().email().allow('')
     },
     params: {
       userId: Joi.string().hex().required()
@@ -29,9 +29,9 @@ export default {
       password: Joi.string().required(),
       // Should be required once mobile apps get updated:
       name: Joi.string(),
-      bio: Joi.string(),
-      website: Joi.string(),
-      email: Joi.string().email()
+      bio: Joi.string().allow(''),
+      website: Joi.string().allow(''),
+      email: Joi.string().email().allow('')
     }
   }
 };
