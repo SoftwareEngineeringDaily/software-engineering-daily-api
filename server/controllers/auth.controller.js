@@ -111,7 +111,7 @@ function register(req, res, next) {
 
       const newUser = new User();
       newUser.password = User.generateHash(password);
-      // We assing a set of "approved fields"
+      // We assign a set of "approved fields"
       const newValues = _.pick(req.body, User.updatableFields);
       Object.assign(newUser, newValues);
 
