@@ -22,7 +22,7 @@ function load(req, res, next, id) {
 function me(req, res, next) {
   User.get(req.user._id)
     .then((user) => {
-      delete user.password;
+      user.password = null;
       return res.json(user);
     })
     .catch(e => {
