@@ -21,6 +21,38 @@ const CommentSchema = new Schema({
     type: Date,
     default: Date.now
   },
+  parentComment: {
+    type: Schema.Types.ObjectId,
+    ref: 'Comment'
+  },
+  deleted: {
+    type: Boolean,
+    default: false
+  },
+  lastEdited: {
+    type: Date
+  },
+  upVotes: {
+    type: Number,
+    default: 0
+  },
+  downVotes: {
+    type: Number,
+    default: 0
+  },
+  voted: {
+    // what user voted
+  },
+  replies: {
+    type: Number,
+    default: 0
+  },
+
+  // cummulative Votes
+  // shadow banning--> not that usefull?
+  //
+  // last edited by
+  // locked?
   post: {
     type: Schema.Types.ObjectId,
     ref: 'Post'
