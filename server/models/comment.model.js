@@ -1,6 +1,6 @@
 
 import Promise from 'bluebird';
-import mongoose, {Schema} from 'mongoose';
+import mongoose, {Schema} from 'mongoose-fill';
 import moment from 'moment';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
@@ -32,6 +32,37 @@ const CommentSchema = new Schema({
   lastEdited: {
     type: Date
   },
+  post: {
+    type: Schema.Types.ObjectId,
+    ref: 'Post'
+  },
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }
+}, {
+  toObject: {
+    virtuals: true
+  },
+  toJSON: {
+    virtuals: true
+  }
+});
+
+CommentSchema.fill('replies', function(callback){
+  console.log('--- replies fille -- ');
+  console.log('--- ------------------------ replies fille -- ');
+  console.log('--- ------------------------ replies fille -- ');
+  console.log('--- ------------------------ replies fille -- ');
+    this.db.model('Comment')
+        .find({parentComment: this.id})
+        .select('content author')
+        .order('-dateCreated')
+        .exec(callback)
+});
+
+
+/*
   upVotes: {
     type: Number,
     default: 0
@@ -53,15 +84,9 @@ const CommentSchema = new Schema({
   //
   // last edited by
   // locked?
-  post: {
-    type: Schema.Types.ObjectId,
-    ref: 'Post'
-  },
-  author: {
-    type: Schema.Types.ObjectId,
-    ref: 'User'
-  }
-});
+*/
+
+
 
 /**
  * Add your
