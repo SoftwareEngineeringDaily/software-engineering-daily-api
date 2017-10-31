@@ -35,34 +35,35 @@ function create(req, res, next) {
  * @property {number} req.query.limit - Limit number of users to be returned.
  * @returns {[Comment]}
  */
-function list(req, res, next) {
-  const { postId } = req.params;
+ function list(req, res, next) {
+   const { postId } = req.params;
 
-  Comment.getTopLevelCommentsForItem(postId)
-    .then((comments) => {
-      let commentPromises = [];
-      let ALL_COMMENTS = [];
-      let newComments = [];
-      _.each(comments, ()=> {
-        newComments.push({});
-      });
-      _.each(comments, (comment, index)=> {
-        commentPromises.push(comment.fillNestedComments(index, (index, replies) => {
-          let originalComment = comments[index];
-          newComments[index] = _.extend({replies}, originalComment.toJSON());
-          if (replies.length > 0) {
-            console.log('length > 0 ', newComments[index]);
-          }
-        }));
-      });
-      Promise.all(commentPromises).then(() => {
-        console.log('send results...');
-        // Fetch all comments here isntead
-        // TODO: use statics isntead .... since not really modifying own object
-        res.json({result: newComments});
-      });
-    })
-    .catch(e => next(e));
-}
+   let newComments = [];
+   Comment.getTopLevelCommentsForItem(postId)
+   .then((comments) => {
+     let commentPromises = [];
+     _.each(comments, ()=> {
+       newComments.push({});
+     });
+     _.each(comments, (comment, index)=> {
+       commentPromises.push(Comment.fillNestedComments(comment._id, index, (index, replies) => {
+         let originalComment = comments[index];
+         newComments[index] = _.extend({replies}, originalComment.toJSON());
+         if (replies.length > 0) {
+           console.log('length > 0 ', newComments[index]);
+         }
+       }));
+     });
+     return Promise.all(commentPromises)
+   })
+   .then(() => {
+     console.log('send results...');
+     // Fetch all comments likes here isntead
+     // TODO: use statics isntead .... since not really modifying own object
+     // _.each(newComments, function)
+     res.json({result: newComments});
+   })
+   .catch(e => next(e));
+ }
 
-export default {list, create};
+  export default {list, create};

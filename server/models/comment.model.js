@@ -77,21 +77,6 @@ const CommentSchema = new Schema({
  * - virtuals
  */
 
-/**
- * Methods
- */
-CommentSchema.methods.fillNestedComments = function(index,cb) {
-  return this.model('Comment').find({parentComment: this._id})
-    .then((comments) => {
-      cb(index, comments);
-      const finish = new Promise((resolve, reject) => {
-        // TODO: fetch all getting of likes
-        // for nested commments?
-        resolve();
-      })
-      return finish;
-    });
-};
 
 /**
  * Statics
@@ -115,12 +100,33 @@ CommentSchema.statics = {
         return Promise.reject(err);
       });
   },
+
   getTopLevelCommentsForItem(postId) {
     return this.find({post: postId, parentComment: null })
       .sort({dateCreated: -1})
       .populate('author', '-password')
       .exec()
-    }
+  },
+
+ /**
+  * Fetches children comments (one level deep) for the provided parentComment id
+  * @param  {String}   parentComment the id of the parentComment
+  * @param  {Number}   index This should not be passed in here
+  * @param  {Function} cb    [description]
+  * @return {Promise}
+  */
+  fillNestedComments(parentComment, index,cb) {
+    return this.find({parentComment})
+    .lean() // so not Mongoose objects
+    .then((comments) => {
+      // TODO: REMOVE INDEX from this function... create closure instead
+      cb(index, comments);
+      const finish = new Promise((resolve, reject) => {
+        resolve();
+      })
+      return finish;
+    });
+  }
 };
 
 // Indexes
