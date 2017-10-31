@@ -115,7 +115,7 @@ CommentSchema.statics = {
         return Promise.reject(err);
       });
   },
-  getCommentsForItem(postId) {
+  getTopLevelCommentsForItem(postId) {
     return this.find({post: postId, parentComment: null })
       .sort({dateCreated: -1})
       .populate('author', '-password')

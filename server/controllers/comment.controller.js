@@ -37,8 +37,8 @@ function create(req, res, next) {
  */
 function list(req, res, next) {
   const { postId } = req.params;
-  
-  Comment.getCommentsForItem(postId)
+
+  Comment.getTopLevelCommentsForItem(postId)
     .then((comments) => {
       let commentPromises = [];
       let ALL_COMMENTS = [];
