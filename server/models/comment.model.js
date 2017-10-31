@@ -1,6 +1,6 @@
 
 import Promise from 'bluebird';
-import mongoose, {Schema} from 'mongoose-fill';
+import mongoose, {Schema} from 'mongoose';
 import moment from 'moment';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
@@ -40,26 +40,8 @@ const CommentSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User'
   }
-}, {
-  toObject: {
-    virtuals: true
-  },
-  toJSON: {
-    virtuals: true
-  }
 });
 
-CommentSchema.fill('replies', function(callback){
-  console.log('--- replies fille -- ');
-  console.log('--- ------------------------ replies fille -- ');
-  console.log('--- ------------------------ replies fille -- ');
-  console.log('--- ------------------------ replies fille -- ');
-    this.db.model('Comment')
-        .find({parentComment: this.id})
-        .select('content author')
-        .order('-dateCreated')
-        .exec(callback)
-});
 
 
 /*
@@ -98,8 +80,18 @@ CommentSchema.fill('replies', function(callback){
 /**
  * Methods
  */
-CommentSchema.method({
-});
+CommentSchema.methods.fillNestedComments = function(cb) {
+  return this.model('Comment').find({parentComment: this._id})
+    .then((comments) => {
+      console.log('comments--replies', comments);
+      this.replies = comments;
+
+      const finish = new Promise((resolve, reject) => {
+        resolve();
+      })
+      return finish;
+    });
+};
 
 /**
  * Statics

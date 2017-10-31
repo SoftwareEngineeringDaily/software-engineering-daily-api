@@ -85,7 +85,6 @@
     "mocha": "3.5.0",
     "moment": "2.18.1",
     "mongoose": "4.11.10",
-    "mongoose-fill": "^1.7.0",
     "morgan": "1.8.2",
     "passport": "0.4.0",
     "passport-facebook-token": "3.3.0",

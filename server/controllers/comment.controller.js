@@ -1,5 +1,6 @@
 import Bluebird from 'bluebird';
 import mongoose from 'mongoose';
+import _ from 'lodash';
 
 import Comment from '../models/comment.model';
 
@@ -38,7 +39,13 @@ function list(req, res, next) {
   const { postId } = req.params;
   Comment.getCommentsForItem(postId)
     .then((comments) => {
-      res.json({result: comments});
+      let commentPromises = [];
+      _.each(comments, (comment)=> {
+        commentPromises.push(comment.fillNestedComments());
+      });
+      Promise.all(commentPromises).then(() => {
+        res.json({result: comments});
+      });
     })
     .catch(e => next(e));
 }
