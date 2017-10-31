@@ -113,7 +113,7 @@ CommentSchema.statics = {
   fillNestedComments(parentComment) {
     return this.getNestedComments(parentComment._id)
     .then( (replies) => {
-      let comment = parentComment;
+      let comment = parentComment.toJSON();
       comment.replies = replies;
       console.log('comment', comment);
       return comment
