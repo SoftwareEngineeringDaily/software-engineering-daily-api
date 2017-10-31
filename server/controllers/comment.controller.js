@@ -37,24 +37,28 @@ function create(req, res, next) {
  */
 function list(req, res, next) {
   const { postId } = req.params;
+  
   Comment.getCommentsForItem(postId)
     .then((comments) => {
       let commentPromises = [];
+      let ALL_COMMENTS = [];
       let newComments = [];
       _.each(comments, ()=> {
         newComments.push({});
       });
       _.each(comments, (comment, index)=> {
         commentPromises.push(comment.fillNestedComments(index, (index, replies) => {
-          let modifiedComment = comments[index];
+          let originalComment = comments[index];
+          newComments[index] = _.extend({replies}, originalComment.toJSON());
           if (replies.length > 0) {
-            newComments[index] = _.extend({replies}, {});
             console.log('length > 0 ', newComments[index]);
           }
         }));
       });
       Promise.all(commentPromises).then(() => {
         console.log('send results...');
+        // Fetch all comments here isntead
+        // TODO: use statics isntead .... since not really modifying own object
         res.json({result: newComments});
       });
     })

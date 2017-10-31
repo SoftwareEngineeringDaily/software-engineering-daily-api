@@ -85,6 +85,8 @@ CommentSchema.methods.fillNestedComments = function(index,cb) {
     .then((comments) => {
       cb(index, comments);
       const finish = new Promise((resolve, reject) => {
+        // TODO: fetch all getting of likes
+        // for nested commments?
         resolve();
       })
       return finish;
@@ -114,7 +116,7 @@ CommentSchema.statics = {
       });
   },
   getCommentsForItem(postId) {
-    return this.find({post: postId })
+    return this.find({post: postId, parentComment: null })
       .sort({dateCreated: -1})
       .populate('author', '-password')
       .exec()
