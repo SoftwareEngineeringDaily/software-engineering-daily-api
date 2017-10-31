@@ -80,12 +80,10 @@ const CommentSchema = new Schema({
 /**
  * Methods
  */
-CommentSchema.methods.fillNestedComments = function(cb) {
+CommentSchema.methods.fillNestedComments = function(index,cb) {
   return this.model('Comment').find({parentComment: this._id})
     .then((comments) => {
-      console.log('comments--replies', comments);
-      this.replies = comments;
-
+      cb(index, comments);
       const finish = new Promise((resolve, reject) => {
         resolve();
       })

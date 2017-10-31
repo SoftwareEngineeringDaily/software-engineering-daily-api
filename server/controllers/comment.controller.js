@@ -40,11 +40,22 @@ function list(req, res, next) {
   Comment.getCommentsForItem(postId)
     .then((comments) => {
       let commentPromises = [];
-      _.each(comments, (comment)=> {
-        commentPromises.push(comment.fillNestedComments());
+      let newComments = [];
+      _.each(comments, ()=> {
+        newComments.push({});
+      });
+      _.each(comments, (comment, index)=> {
+        commentPromises.push(comment.fillNestedComments(index, (index, replies) => {
+          let modifiedComment = comments[index];
+          if (replies.length > 0) {
+            newComments[index] = _.extend({replies}, {});
+            console.log('length > 0 ', newComments[index]);
+          }
+        }));
       });
       Promise.all(commentPromises).then(() => {
-        res.json({result: comments});
+        console.log('send results...');
+        res.json({result: newComments});
       });
     })
     .catch(e => next(e));
