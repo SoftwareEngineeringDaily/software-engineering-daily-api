@@ -105,27 +105,18 @@ CommentSchema.statics = {
     return this.find({post: postId, parentComment: null })
       .sort({dateCreated: -1})
       .populate('author', '-password')
+      .lean()
       .exec()
   },
 
  /**
   * Fetches children comments (one level deep) for the provided parentComment id
   * @param  {String}   parentComment the id of the parentComment
-  * @param  {Number}   index This should not be passed in here
-  * @param  {Function} cb    [description]
   * @return {Promise}
   */
-  fillNestedComments(parentComment, index,cb) {
+  fillNestedComments(parentComment) {
     return this.find({parentComment})
     .lean() // so not Mongoose objects
-    .then((comments) => {
-      // TODO: REMOVE INDEX from this function... create closure instead
-      cb(index, comments);
-      const finish = new Promise((resolve, reject) => {
-        resolve();
-      })
-      return finish;
-    });
   }
 };
 

@@ -38,29 +38,30 @@ function create(req, res, next) {
  function list(req, res, next) {
    const { postId } = req.params;
 
-   let newComments = [];
    Comment.getTopLevelCommentsForItem(postId)
    .then((comments) => {
      let commentPromises = [];
-     _.each(comments, ()=> {
-       newComments.push({});
-     });
-     _.each(comments, (comment, index)=> {
-       commentPromises.push(Comment.fillNestedComments(comment._id, index, (index, replies) => {
-         let originalComment = comments[index];
-         newComments[index] = _.extend({replies}, originalComment.toJSON());
-         if (replies.length > 0) {
-           console.log('length > 0 ', newComments[index]);
-         }
-       }));
+
+
+     // Here we are fetching our nested comments
+     // by pushing everything to a promise
+     _.each(comments, (comment)=> {
+       commentPromises.push(Comment.fillNestedComments(comment));
      });
      return Promise.all(commentPromises)
    })
-   .then(() => {
-     console.log('send results...');
+   .then((newComments) => {
      // Fetch all comments likes here isntead
      // TODO: use statics isntead .... since not really modifying own object
+     let getLikesPromises = [];
      // _.each(newComments, function)
+      // Get likes for top level
+
+      // Get likes for children
+     });
+     return Promise.all(getLikesPromises);
+   })
+   .then( () => {
      res.json({result: newComments});
    })
    .catch(e => next(e));
