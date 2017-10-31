@@ -40,12 +40,11 @@ function create(req, res, next) {
 
    Comment.getTopLevelCommentsForItem(postId)
    .then((comments) => {
-     let commentPromises = [];
      // Here we are fetching our nested comments, and need everything to finish
-     _.each(comments, (comment)=> {
-       commentPromises.push(Comment.fillNestedComments(comment));
-     });
-     return Promise.all(commentPromises);
+     let nestedCommentPromises = _.map(comments, (comment) => {
+       return Comment.fillNestedComments(comment);
+     })
+     return Promise.all(nestedCommentPromises);
    })
    .then( (parentComments) => {
      res.json({result: parentComments});
