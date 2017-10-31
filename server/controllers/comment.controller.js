@@ -41,8 +41,6 @@ function create(req, res, next) {
    Comment.getTopLevelCommentsForItem(postId)
    .then((comments) => {
      let commentPromises = [];
-
-
      // Here we are fetching our nested comments
      // by pushing everything to a promise
      _.each(comments, (comment)=> {
@@ -50,19 +48,8 @@ function create(req, res, next) {
      });
      return Promise.all(commentPromises)
    })
-   .then((newComments) => {
-     // Fetch all comments likes here isntead
-     // TODO: use statics isntead .... since not really modifying own object
-     let getLikesPromises = [];
-     // _.each(newComments, function)
-      // Get likes for top level
-
-      // Get likes for children
-     });
-     return Promise.all(getLikesPromises);
-   })
-   .then( () => {
-     res.json({result: newComments});
+   .then( (parentComments) => {
+     res.json({result: parentComments});
    })
    .catch(e => next(e));
  }

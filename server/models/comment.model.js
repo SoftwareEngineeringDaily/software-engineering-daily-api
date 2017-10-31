@@ -105,8 +105,19 @@ CommentSchema.statics = {
     return this.find({post: postId, parentComment: null })
       .sort({dateCreated: -1})
       .populate('author', '-password')
-      .lean()
       .exec()
+  },
+
+  // Gets children comment for parentComment and adds them as a
+  // field called replies
+  fillNestedComments(parentComment) {
+    return this.getNestedComments(parentComment._id)
+    .then( (replies) => {
+      let comment = parentComment;
+      comment.replies = replies;
+      console.log('comment', comment);
+      return comment
+    });
   },
 
  /**
@@ -114,8 +125,8 @@ CommentSchema.statics = {
   * @param  {String}   parentComment the id of the parentComment
   * @return {Promise}
   */
-  fillNestedComments(parentComment) {
-    return this.find({parentComment})
+  getNestedComments(parentCommentId) {
+    return this.find({parentComment: parentCommentId})
     .lean() // so not Mongoose objects
   }
 };
