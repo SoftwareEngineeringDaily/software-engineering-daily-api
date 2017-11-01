@@ -1,4 +1,4 @@
-import Bluebird from 'bluebird';
+import Promise from 'bluebird';
 import mongoose from 'mongoose';
 import _ from 'lodash';
 
@@ -43,8 +43,14 @@ function create(req, res, next) {
      // Here we are fetching our nested comments, and need everything to finish
      let nestedCommentPromises = _.map(comments, (comment) => {
        return Comment.fillNestedComments(comment);
-     })
+     });
      return Promise.all(nestedCommentPromises);
+   })
+   .then((parentComments) => {
+     // If authed then fill in if user has liked:
+     if (req.user) {
+     }
+     return parentComments;
    })
    .then( (parentComments) => {
      res.json({result: parentComments});
