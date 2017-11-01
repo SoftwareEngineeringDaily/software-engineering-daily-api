@@ -3,6 +3,7 @@ import postRoutes from './post.route';
 import voteRoutes from './vote.route';
 import favoriteRoutes from './favorite.route';
 import authRoutes from './auth.route';
+import userRoutes from './user.route';
 import listenedRoutes from './listened.route';
 import tagsRoutes from './tag.route';
 
@@ -19,9 +20,8 @@ router.use('/votes', voteRoutes);
 router.use('/favorites', favoriteRoutes);
 router.use('/listened', listenedRoutes);
 router.use('/tags', tagsRoutes);
+router.use('/users', userRoutes);
 
-// mount user routes at /users
-// router.use('/users', userRoutes);
 
 // mount auth routes at /auth
 router.use('/auth', authRoutes);

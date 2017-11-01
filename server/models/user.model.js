@@ -10,9 +10,30 @@ import APIError from '../helpers/APIError';
 const UserSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: true
+    // , required: true // Should be requied since it is also validated
   },
   password: {
+    type: String
+    // TODO: Should be required.
+  },
+  name: {
+    type: String
+    // , required: true // Should be requied but need to update all clients
+  },
+  avatarUrl: {
+    type: String
+  },
+  bio: {
+    type: String
+  },
+  website: {
+    type: String
+  },
+  verified: {
+    type: Boolean,
+    default: false
+  },
+  email: {
     type: String
   },
   facebook: {
@@ -52,10 +73,6 @@ const UserSchema = new mongoose.Schema({
  * Methods
  */
 UserSchema.method({
-  generateHash: function generateHash(password) {
-    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
-  },
-
   validPassword: function validPassword(password) {
     return bcrypt.compareSync(password, this.password);
   },
@@ -82,6 +99,10 @@ UserSchema.statics = {
       });
   },
 
+  generateHash: function generateHash(password) {
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+  },
+
   /**
    * List users in descending order of 'createdAt' timestamp.
    * @param {number} skip - Number of users to be skipped.
@@ -94,7 +115,8 @@ UserSchema.statics = {
       .skip(+skip)
       .limit(+limit)
       .exec();
-  }
+  },
+  updatableFields: ['username','website','bio', 'name','email']
 };
 
 /**
