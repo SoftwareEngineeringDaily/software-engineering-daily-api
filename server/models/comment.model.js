@@ -1,10 +1,7 @@
-
 import Promise from 'bluebird';
 import mongoose, {Schema} from 'mongoose';
-import moment from 'moment';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
-import Vote from './vote.model';
 
 
 //
@@ -105,7 +102,6 @@ CommentSchema.statics = {
     return this.find({post: postId, parentComment: null })
       .sort({dateCreated: -1})
       .populate('author', '-password')
-      .exec()
   },
 
   // Gets children comment for parentComment and adds them as a
