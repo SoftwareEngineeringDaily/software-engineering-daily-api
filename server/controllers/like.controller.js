@@ -17,7 +17,7 @@ function create(req, res, next) {
   .catch( (err) => next(err));
 };
 
-// Simple middleawre that moves
+// Simple middleware that moves
 // commentId to the body so the `create` can parse it.
 function commentIdToBody(req, res, next) {
   const { commentId } = req.params;

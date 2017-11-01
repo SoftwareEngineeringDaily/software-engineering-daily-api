@@ -104,14 +104,13 @@ CommentSchema.statics = {
       .populate('author', '-password')
   },
 
-  // Gets children comment for parentComment and adds them as a
+  // Gets children comments for parentComment and adds them as a
   // field called replies
   fillNestedComments(parentComment) {
     return this.getNestedComments(parentComment._id)
     .then( (replies) => {
       let comment = parentComment.toJSON();
       comment.replies = replies;
-      console.log('comment', comment);
       return comment
     });
   },

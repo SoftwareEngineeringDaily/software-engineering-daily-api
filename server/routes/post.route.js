@@ -23,7 +23,9 @@ router.route('/:postId/comments')
   .get(expressJwt({ secret: config.jwtSecret, credentialsRequired: false }), commentCtrl.list);
 
 router.route('/:postId/comment')
-  .post(expressJwt({ secret: config.jwtSecret }), commentCtrl.create);
+  .post(
+    expressJwt({ secret: config.jwtSecret })
+    , commentCtrl.create);
 
 router.route('/:postId/comments/:commentId/like')
   .post(
