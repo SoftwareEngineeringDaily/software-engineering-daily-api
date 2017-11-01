@@ -3,6 +3,7 @@ import expressJwt from 'express-jwt';
 import postCtrl from '../controllers/post.controller';
 import voteCtrl from '../controllers/vote.controller';
 import commentCtrl from '../controllers/comment.controller';
+import likeCtrl from '../controllers/like.controller';
 import favoriteCtrl from '../controllers/favorite.controller';
 import listenedCtrl from '../controllers/listened.controller';
 import config from '../../config/config';
@@ -23,6 +24,12 @@ router.route('/:postId/comments')
 
 router.route('/:postId/comment')
   .post(expressJwt({ secret: config.jwtSecret }), commentCtrl.create);
+
+router.route('/:postId/comments/:commentId/like')
+  .post(
+    expressJwt({ secret: config.jwtSecret })
+  , likeCtrl.commentIdToBody
+  , likeCtrl.create);
 
 router.route('/:postId/upvote')
   .post(expressJwt({ secret: config.jwtSecret }), voteCtrl.upvote);
