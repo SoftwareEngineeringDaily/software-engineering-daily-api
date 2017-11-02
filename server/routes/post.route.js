@@ -30,7 +30,8 @@ router.route('/:postId/upvote')
   .post(expressJwt({ secret: config.jwtSecret }), voteCtrl.upvote);
 
 router.route('/:postId/downvote')
-  .post(expressJwt({ secret: config.jwtSecret }), voteCtrl.downvote);
+  .post(expressJwt({ secret: config.jwtSecret })
+  , voteCtrl.downvote);
 
 router.route('/:postId/favorite')
   .post(expressJwt({ secret: config.jwtSecret }), favoriteCtrl.favorite);

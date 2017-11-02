@@ -29,6 +29,12 @@ const CommentSchema = new Schema({
   lastEdited: {
     type: Date
   },
+  /*
+  root: {
+    type: Schema.Types.ObjectId
+    // , ref: 'Post' | 'AMA'
+  },
+  */
   post: {
     type: Schema.Types.ObjectId,
     ref: 'Post'
