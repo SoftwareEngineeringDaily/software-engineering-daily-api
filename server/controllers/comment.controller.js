@@ -14,12 +14,16 @@ import Comment from '../models/comment.model';
 
 function create(req, res, next) {
   const { postId } = req.params;
+  const { parentCommentId } = req.params;
   const { content } = req.body;
   const { user } = req;
 
   const comment = new Comment();
   comment.content = content
   comment.post = postId
+  if (parentCommentId) {
+    comment.parentComment = parentCommentId
+  }
   comment.author = user._id
   comment.save()
   .then((commentSaved)  => {

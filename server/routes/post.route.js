@@ -21,6 +21,7 @@ router.route('/:postId')
 router.route('/:postId/comments')
   .get(expressJwt({ secret: config.jwtSecret, credentialsRequired: false }), commentCtrl.list);
 
+// Create a comment:
 router.route('/:postId/comment')
   .post(
     expressJwt({ secret: config.jwtSecret })
