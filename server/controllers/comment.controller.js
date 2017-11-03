@@ -1,5 +1,6 @@
-import Bluebird from 'bluebird';
+import Promise from 'bluebird';
 import mongoose from 'mongoose';
+import map from 'lodash/map';
 
 import Comment from '../models/comment.model';
 
@@ -13,12 +14,17 @@ import Comment from '../models/comment.model';
 
 function create(req, res, next) {
   const { postId } = req.params;
+  const { parentCommentId } = req.body;
   const { content } = req.body;
   const { user } = req;
 
   const comment = new Comment();
   comment.content = content
   comment.post = postId
+  // If this is a child comment we need to assign it's parent
+  if (parentCommentId) {
+    comment.parentComment = parentCommentId
+  }
   comment.author = user._id
   comment.save()
   .then((commentSaved)  => {
@@ -34,13 +40,27 @@ function create(req, res, next) {
  * @property {number} req.query.limit - Limit number of users to be returned.
  * @returns {[Comment]}
  */
-function list(req, res, next) {
-  const { postId } = req.params;
-  Comment.getCommentsForItem(postId)
-    .then((comments) => {
-      res.json({result: comments});
-    })
-    .catch(e => next(e));
-}
+ function list(req, res, next) {
+   const { postId } = req.params;
 
-export default {list, create};
+   Comment.getTopLevelCommentsForItem(postId)
+   .then((comments) => {
+     // Here we are fetching our nested comments, and need everything to finish
+     let nestedCommentPromises = map(comments, (comment) => {
+       return Comment.fillNestedComments(comment);
+     });
+     return Promise.all(nestedCommentPromises);
+   })
+   .then((parentComments) => {
+     // If authed then fill in if user has liked:
+     if (req.user) {
+     }
+     return parentComments;
+   })
+   .then( (parentComments) => {
+     res.json({result: parentComments});
+   })
+   .catch(e => next(e));
+ }
+
+  export default {list, create};

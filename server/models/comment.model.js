@@ -1,10 +1,7 @@
-
 import Promise from 'bluebird';
 import mongoose, {Schema} from 'mongoose';
-import moment from 'moment';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
-import Vote from './vote.model';
 
 
 //
@@ -21,6 +18,23 @@ const CommentSchema = new Schema({
     type: Date,
     default: Date.now
   },
+  parentComment: {
+    type: Schema.Types.ObjectId,
+    ref: 'Comment'
+  },
+  deleted: {
+    type: Boolean,
+    default: false
+  },
+  lastEdited: {
+    type: Date
+  },
+  /*
+  root: {
+    type: Schema.Types.ObjectId
+    // , ref: 'Post' | 'AMA'
+  },
+  */
   post: {
     type: Schema.Types.ObjectId,
     ref: 'Post'
@@ -31,6 +45,34 @@ const CommentSchema = new Schema({
   }
 });
 
+
+
+/*
+  upVotes: {
+    type: Number,
+    default: 0
+  },
+  downVotes: {
+    type: Number,
+    default: 0
+  },
+  voted: {
+    // what user voted
+  },
+  replies: {
+    type: Number,
+    default: 0
+  },
+
+  // cummulative Votes
+  // shadow banning--> not that usefull?
+  //
+  // last edited by
+  // locked?
+*/
+
+
+
 /**
  * Add your
  * - pre-save hooks
@@ -38,11 +80,6 @@ const CommentSchema = new Schema({
  * - virtuals
  */
 
-/**
- * Methods
- */
-CommentSchema.method({
-});
 
 /**
  * Statics
@@ -66,12 +103,34 @@ CommentSchema.statics = {
         return Promise.reject(err);
       });
   },
-  getCommentsForItem(postId) {
-    return this.find({post: postId })
+
+  getTopLevelCommentsForItem(postId) {
+    return this.find({post: postId, parentComment: null })
       .sort({dateCreated: -1})
       .populate('author', '-password')
-      .exec()
-    }
+  },
+
+  // Gets children comments for parentComment and adds them as a
+  // field called replies
+  fillNestedComments(parentComment) {
+    return this.getNestedComments(parentComment._id)
+    .then( (replies) => {
+      let comment = parentComment.toJSON();
+      comment.replies = replies;
+      return comment
+    });
+  },
+
+ /**
+  * Fetches children comments (one level deep) for the provided parentComment id
+  * @param  {String}   parentComment the id of the parentComment
+  * @return {Promise}
+  */
+  getNestedComments(parentCommentId) {
+    return this.find({parentComment: parentCommentId})
+    .populate('author', '-password')
+    .lean() // so not Mongoose objects
+  }
 };
 
 // Indexes

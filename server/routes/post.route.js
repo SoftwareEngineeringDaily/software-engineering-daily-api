@@ -21,14 +21,18 @@ router.route('/:postId')
 router.route('/:postId/comments')
   .get(expressJwt({ secret: config.jwtSecret, credentialsRequired: false }), commentCtrl.list);
 
+// Create a comment:
 router.route('/:postId/comment')
-  .post(expressJwt({ secret: config.jwtSecret }), commentCtrl.create);
+  .post(
+    expressJwt({ secret: config.jwtSecret })
+    , commentCtrl.create);
 
 router.route('/:postId/upvote')
   .post(expressJwt({ secret: config.jwtSecret }), voteCtrl.upvote);
 
 router.route('/:postId/downvote')
-  .post(expressJwt({ secret: config.jwtSecret }), voteCtrl.downvote);
+  .post(expressJwt({ secret: config.jwtSecret })
+  , voteCtrl.downvote);
 
 router.route('/:postId/favorite')
   .post(expressJwt({ secret: config.jwtSecret }), favoriteCtrl.favorite);
