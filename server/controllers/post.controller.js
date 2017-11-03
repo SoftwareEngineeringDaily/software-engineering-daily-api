@@ -93,7 +93,15 @@ function recommendations(req, res, next) {
 }
 
 function upvote(req, res, next) {
+  const userIdString = req.user._id.toString();
+  const postIdString = post._id.toString();
+  if (req.liked) {
+    raccoon.liked(userIdString, postIdString);
+  } else if (req.unliked) {
+    raccoon.unliked(userIdString, postIdString);
+  }
 }
+
 function downvote(req, res, next) {
   if(req.undisliked) {
     raccoon.undisliked(req.user._id.toString(), post._id.toString());

@@ -81,18 +81,11 @@ function findVote(req, res, next) {
  * Upvote a post.
  */
 function upvote(req, res, next) {
-  const post = req.post;
+  const entity = req.entity;
 
-  if (!post.score) post.score = 0;
-
-  Vote.findOne({
-    postId: post._id,
-    userId: req.user._id,
-  })
-  .then((voteFound) => {
-    const vote = voteFound;
-    const userIdString = req.user._id.toString();
-    const postIdString = post._id.toString();
+  if (!entity.score) entity.score = 0;
+  let promise;
+  const vote = req.vote;
 
     if (vote) {
       let incrementValue = 1;
@@ -110,28 +103,29 @@ function upvote(req, res, next) {
       }
 
       if (vote.active) {
-        post.score += incrementValue;
-        raccoon.liked(userIdString, postIdString);
+        entity.score += incrementValue;
+        req.liked = true;
       } else {
-        post.score -= incrementValue;
-        raccoon.unliked(userIdString, postIdString);
+        entity.score -= incrementValue;
+        req.unliked = true;
       }
 
-      return Bluebird.all([vote.save(), post.save()]);
-    }
+      promise = Bluebird.all([vote.save(), entity.save()]);
+    } else {
 
     const newvote = new Vote();
-    newvote.postId = post._id;
+    newvote.entityId = entity._id;
     newvote.userId = req.user._id;
     newvote.direction = 'upvote'; // @TODO: Make constant
-    post.score += 1;
-    raccoon.liked(userIdString, postIdString);
+    entity.score += 1;
+    req.liked = true;
 
-    return Bluebird.all([newvote.save(), post.save()]);
-  })
+    promise = Bluebird.all([newvote.save(), entity.save()]);
+  }
+  promise
   .then((vote) => {
     req.vote = vote[0]; // eslint-disable-line no-param-reassign
-    return res.json(vote[0]);
+    next();
   })
   .catch((e) => {
     next(e);
@@ -180,7 +174,7 @@ function downvote(req, res, next) {
     newvote.direction = 'downvote'; // @TODO: Make constant
     entity.score -= 1;
 
-    req.disliked = true
+    req.disliked = true;
 
     promise = Bluebird.all([newvote.save(), entity.save()]);
   }
@@ -196,4 +190,4 @@ function finish(req, res, next) {
     return res.json(req.vote);
 }
 
-export default { load, get, list, upvote, downvote };
+export default { load, get, findVote, movePostToEntity, list, upvote, downvote };
