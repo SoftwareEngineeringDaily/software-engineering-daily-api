@@ -13,6 +13,7 @@ import APIError from '../helpers/APIError';
 const VoteSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
+  entityId: { type: mongoose.Schema.Types.ObjectId },
   active: { type: Boolean, default: true },
   direction: String,
 });

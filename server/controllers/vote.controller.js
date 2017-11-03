@@ -25,46 +25,6 @@ function get(req, res) {
 }
 
 /**
- * Create new vote
- * @property {string} req.body.userId - The user id of vote.
- * @property {string} req.body.postId - The id of the post the vote is associated with.
- * @property {string} req.body.active - Whether or not the vote is in an upvoted or downvoted state.
- * @property {string} req.body.direction - The direction (upvote/downvote) of the vote.
- * @returns {Vote}
- */
-function create(req, res, next) {
-  const vote = new Vote({
-    userId: req.body.userId,
-    postId: req.body.postId,
-    active: req.body.active,
-    direction: req.body.direction
-  });
-
-  vote.save()
-    .then(savedVote => res.json(savedVote))
-    .catch(e => next(e));
-}
-
-/**
- * Update existing vote
- * @property {string} req.body.userId - The user id of vote.
- * @property {string} req.body.postId - The id of the post the vote is associated with.
- * @property {string} req.body.active - Whether or not the vote is in an upvoted or downvoted state.
- * @property {string} req.body.direction - The direction (upvote/downvote) of the vote.
- * @returns {Vote}
- */
-function update(req, res, next) {
-  const vote = req.vote;
-  vote.userId = req.body.userId;
-  vote.postId = req.body.postId;
-  vote.active = req.body.active;
-  vote.direction = req.body.direction;
-  vote.save()
-    .then(savedVote => res.json(savedVote))
-    .catch(e => next(e));
-}
-
-/**
  * Get vote list.
  * @property {number} req.query.skip - Number of votes to be skipped.
  * @property {number} req.query.limit - Limit number of votes to be returned.
@@ -77,15 +37,38 @@ function list(req, res, next) {
     .catch(e => next(e));
 }
 
-/**
- * Delete vote.
- * @returns {Vote}
- */
-function remove(req, res, next) {
-  const vote = req.vote;
-  vote.remove()
-    .then(deletedVote => res.json(deletedVote))
-    .catch(e => next(e));
+function movePostToEntity(req, res, next) {
+  if (req.post) {
+    req.entity = req.post;
+  }
+  next();
+}
+
+function findVote(req, res, next) {
+  // TODO: REMOVE once we migrate over to entityId only
+  const successCB = (vote) => {
+    if( vote) { req.vote = vote; }
+  };
+
+  const errorCB = (error) => {
+    next(error);
+  };
+
+  if (req.post) {
+    Vote.findOne({
+      postId: req.post._id,
+      userId: req.user._id,
+    })
+    .then(successCB)
+    .catch(error);
+  } else {
+    Vote.findOne({
+      entity: req.entity._id,
+      userId: req.user._id,
+    })
+    .then(successCB)
+    .catch(error);
+  }
 }
 
 /**
@@ -207,4 +190,4 @@ function downvote(req, res, next) {
   .catch(e => next(e));
 }
 
-export default { load, get, create, update, list, remove, upvote, downvote };
+export default { load, get, list, upvote, downvote };
