@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import mongoose from 'mongoose';
-import _ from 'lodash';
+import map from 'lodash/map';
 
 import Comment from '../models/comment.model';
 
@@ -46,7 +46,7 @@ function create(req, res, next) {
    Comment.getTopLevelCommentsForItem(postId)
    .then((comments) => {
      // Here we are fetching our nested comments, and need everything to finish
-     let nestedCommentPromises = _.map(comments, (comment) => {
+     let nestedCommentPromises = map(comments, (comment) => {
        return Comment.fillNestedComments(comment);
      });
      return Promise.all(nestedCommentPromises);
