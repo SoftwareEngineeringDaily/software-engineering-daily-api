@@ -92,5 +92,15 @@ function recommendations(req, res, next) {
   });
 }
 
+function upvote(req, res, next) {
+}
+function downvote(req, res, next) {
+  if(req.undisliked) {
+    raccoon.undisliked(req.user._id.toString(), post._id.toString());
+  } else if(req.disliked) {
+    raccoon.disliked(req.user._id.toString(), post._id.toString());
+  }
+  next();
+}
 
-export default { load, get, list, recommendations };
+export default { load, get, list, recommendations, downvote, upvote };

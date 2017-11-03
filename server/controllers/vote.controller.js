@@ -37,6 +37,7 @@ function list(req, res, next) {
     .catch(e => next(e));
 }
 
+// To have the mobile clients start puptting info insode of entityId
 function movePostToEntity(req, res, next) {
   if (req.post) {
     req.entity = req.post;
@@ -47,7 +48,14 @@ function movePostToEntity(req, res, next) {
 function findVote(req, res, next) {
   // TODO: REMOVE once we migrate over to entityId only
   const successCB = (vote) => {
-    if( vote) { req.vote = vote; }
+    if( vote) {
+      req.vote = vote;
+    } else {
+      if (req.post) {
+        // This means that post could already be moved to entity
+      }
+    }
+    next();
   };
 
   const errorCB = (error) => {
@@ -63,7 +71,7 @@ function findVote(req, res, next) {
     .catch(error);
   } else {
     Vote.findOne({
-      entity: req.entity._id,
+      entityId: req.entity._id,
       userId: req.user._id,
     })
     .then(successCB)
@@ -137,57 +145,57 @@ function upvote(req, res, next) {
  * Downvote a post.
  */
 function downvote(req, res, next) {
-  const post = req.post;
+  const entity = req.entity;
 
-  if (!post.score) post.score = 0;
+  if (!entity.score) entity.score = 0;
+  let promise;
+  const vote = req.vote;
+  if (vote) {
+    let incrementValue = 1;
 
-  Vote.findOne({
-    postId: post._id,
-    userId: req.user._id,
-  })
-  .then((voteFound) => {
-    const vote = voteFound;
-    if (vote) {
-      let incrementValue = 1;
-
-      // We are changing directly from up to down
-      if (vote.direction !== 'downvote' && vote.active) {
-        incrementValue = 2;
-      }
-
-      vote.active = !vote.active;
-
-      if (vote.direction !== 'downvote') {
-        vote.direction = 'downvote';
-        vote.active = true;
-      }
-
-      if (vote.active) {
-        post.score -= incrementValue;
-        raccoon.disliked(req.user._id.toString(), post._id.toString());
-      } else {
-        post.score += incrementValue;
-        raccoon.undisliked(req.user._id.toString(), post._id.toString());
-      }
-
-      return Bluebird.all([vote.save(), post.save()]);
+    // We are changing directly from up to down
+    if (vote.direction !== 'downvote' && vote.active) {
+      incrementValue = 2;
     }
 
+    vote.active = !vote.active;
+
+    if (vote.direction !== 'downvote') {
+      vote.direction = 'downvote';
+      vote.active = true;
+    }
+
+    if (vote.active) {
+      entity.score -= incrementValue;
+      raccoon.disliked(req.user._id.toString(), entity._id.toString());
+    } else {
+      entity.score += incrementValue;
+      req.undisliked = true;
+    }
+
+    promise = Bluebird.all([vote.save(), entity.save()]);
+  } else {
+
     const newvote = new Vote();
-    newvote.postId = post._id;
+    newvote.entityId = entity._id;
     newvote.userId = req.user._id;
     newvote.direction = 'downvote'; // @TODO: Make constant
-    post.score -= 1;
+    entity.score -= 1;
 
-    raccoon.disliked(req.user._id.toString(), post._id.toString());
+    req.disliked = true
 
-    return Bluebird.all([newvote.save(), post.save()]);
-  })
+    promise = Bluebird.all([newvote.save(), entity.save()]);
+  }
+  promise
   .then((vote) => {
     req.vote = vote[0]; // eslint-disable-line no-param-reassign
-    return res.json(vote[0]);
+    next();
   })
   .catch(e => next(e));
+}
+
+function finish(req, res, next) {
+    return res.json(req.vote);
 }
 
 export default { load, get, list, upvote, downvote };

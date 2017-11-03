@@ -14,6 +14,7 @@ const CommentSchema = new Schema({
     type: String,
     required: true
   },
+  score: { type: Number, default: 0 },
   dateCreated: {
     type: Date,
     default: Date.now
