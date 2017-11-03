@@ -14,13 +14,14 @@ import Comment from '../models/comment.model';
 
 function create(req, res, next) {
   const { postId } = req.params;
-  const { parentCommentId } = req.params;
+  const { parentCommentId } = req.body;
   const { content } = req.body;
   const { user } = req;
 
   const comment = new Comment();
   comment.content = content
   comment.post = postId
+  // If this is a child comment we need to assign it's parent
   if (parentCommentId) {
     comment.parentComment = parentCommentId
   }
