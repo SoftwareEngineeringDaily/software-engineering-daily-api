@@ -50,10 +50,6 @@ function findVote(req, res, next) {
   const successCB = (vote) => {
     if( vote) {
       req.vote = vote;
-    } else {
-      if (req.post) {
-        // This means that post could already be moved to entity
-      }
     }
     next();
   };
@@ -62,11 +58,13 @@ function findVote(req, res, next) {
     next(error);
   };
 
+  // We need to account for the fact that posts could either be
+  // liked under entityId or postId
   if (req.post) {
-    Vote.findOne({
-      postId: req.post._id,
-      userId: req.user._id,
-    })
+    Vote.findOne({$or: [
+      {postId: req.post._id, userId: req.user._id},
+      {entityId: req.entity._id, userId: req.user._id}
+    ]})
     .then(successCB)
     .catch(error);
   } else {
