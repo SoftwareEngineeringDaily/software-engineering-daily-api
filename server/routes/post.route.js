@@ -28,11 +28,22 @@ router.route('/:postId/comment')
     , commentCtrl.create);
 
 router.route('/:postId/upvote')
-  .post(expressJwt({ secret: config.jwtSecret }), voteCtrl.upvote);
+  .post(expressJwt({ secret: config.jwtSecret })
+  , voteCtrl.movePostToEntity
+  , voteCtrl.findVote
+  , voteCtrl.upvote
+  , postCtrl.upvote
+  , voteCtrl.finish
+);
 
 router.route('/:postId/downvote')
   .post(expressJwt({ secret: config.jwtSecret })
-  , voteCtrl.downvote);
+  , voteCtrl.movePostToEntity
+  , voteCtrl.findVote
+  , voteCtrl.downvote
+  , postCtrl.downvote
+  , voteCtrl.finish
+);
 
 router.route('/:postId/favorite')
   .post(expressJwt({ secret: config.jwtSecret }), favoriteCtrl.favorite);

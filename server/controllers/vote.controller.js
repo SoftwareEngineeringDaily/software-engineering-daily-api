@@ -190,4 +190,4 @@ function finish(req, res, next) {
     return res.json(req.vote);
 }
 
-export default { load, get, findVote, movePostToEntity, list, upvote, downvote };
+export default { load, get, findVote, movePostToEntity, finish, list, upvote, downvote };
