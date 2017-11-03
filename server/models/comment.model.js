@@ -128,6 +128,7 @@ CommentSchema.statics = {
   */
   getNestedComments(parentCommentId) {
     return this.find({parentComment: parentCommentId})
+    .populate('author', '-password')
     .lean() // so not Mongoose objects
   }
 };
