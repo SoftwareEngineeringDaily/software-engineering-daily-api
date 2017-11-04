@@ -21,7 +21,8 @@
     "test:watch": "npm run test -- --watch",
     "test:coverage": "cross-env NODE_ENV=test ./node_modules/.bin/istanbul cover _mocha -- --ui bdd --reporter spec --colors --compilers js:babel-core/register server/tests --recursive",
     "test:check-coverage": "npm run test:coverage && istanbul check-coverage",
-    "report-coverage": "coveralls < ./coverage/lcov.info"
+    "report-coverage": "coveralls < ./coverage/lcov.info",
+    "flow": "flow"
   },
   "repository": {
     "type": "git",
@@ -43,7 +44,9 @@
   "dependencies": {
     "babel-cli": "6.26.0",
     "babel-core": "6.26.0",
+    "babel-eslint": "^8.0.1",
     "babel-plugin-add-module-exports": "0.2.1",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
     "babel-preset-es2015": "6.24.1",
     "babel-preset-stage-2": "6.24.1",
     "bcrypt-nodejs": "0.0.3",
@@ -62,6 +65,7 @@
     "dotenv": "4.0.0",
     "eslint": "4.6.1",
     "eslint-config-airbnb-base": "12.0.0",
+    "eslint-plugin-flowtype": "^2.36.0",
     "eslint-plugin-import": "2.7.0",
     "eslint-watch": "3.1.2",
     "express": "4.15.4",
@@ -108,7 +112,8 @@
       "stage-2"
     ],
     "plugins": [
-      "add-module-exports"
+      "add-module-exports",
+      "transform-flow-strip-types"
     ]
   }
 }
