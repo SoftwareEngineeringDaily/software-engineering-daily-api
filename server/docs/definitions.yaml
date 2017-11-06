@@ -1,0 +1,44 @@
+definitions:
+  User:
+    type: object
+    description: User returned upon succesful registration
+    properties:
+      __v:
+        $ref: '#/definitions/MongoVersion'
+      password:
+        type: string
+        example: 2nkas$dd.1fau
+        description: hash of password
+      username:
+        type: string
+        example: johnjacob
+        description: user's name
+      _id:
+        $ref: '#/definitions/ObjectId'
+      createdAt:
+        type: string
+        format: date-time
+        example: 2017-11-01T01:24:06.701Z
+        description: Date and time user was created
+  Error:
+    type: object
+    properties:
+      message:
+        type: string
+        description: Reason for error
+        example: Error message
+      stack:
+        type: string
+        description: Stack trace resulting in error
+  Token:
+    type: string
+    description: JSON web token to store credentials
+    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OWY4Njc3YzFkNmZmZDNkMGJkODMzNGIiLCJwYXNzd29yZCI6IiQyYSQwOCRoMEgyR2FWbWh1V0tNd1hSWlRYekxPcDMuWG85OGJmYVZYWXp2cURuU2p1SGlrZE9YRmd3LiIsInVzZXJuYW1lIjoiam9obkBqYWNvYi5jb20iLCJfX3YiOjAsImNyZWF0ZWRBdCI6IjIwMTctMTAtMzFUMTI6MDc6MjQuNTAyWiIsImlhdCI6MTUwOTQ1Mjk0MywiZXhwIjoxNjUzNDUyOTQzfQ.2yECxNnmM6u9wcUkYq1OPX6HzfcLeaOgoQ35PJ2fQZs
+  ObjectId:
+    type: string
+    description: MongoDB id of the returned or related object
+    example: 507f1f77bcf86cd799439010
+  MongoVersion:
+    type: integer
+    description: MongoDB version of the object
+    example: 0

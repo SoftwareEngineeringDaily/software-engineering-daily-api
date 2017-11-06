@@ -1,0 +1,20 @@
+responses:
+  NotFound:
+    description: The specified resource was not found
+    schema:
+      $ref: '#/definitions/Error'
+  Unauthorized:
+    description: Unauthorized
+    schema:
+      $ref: '#/definitions/Error'
+  BadRequest:
+    description: Bad request - missing required elements
+    schema:
+      $ref: '#/definitions/Error'
+  SuccessfulAuthentication:
+    description: Successful authentication
+    schema:
+      type: object
+      properties:
+        token:
+          $ref: '#/definitions/Token'

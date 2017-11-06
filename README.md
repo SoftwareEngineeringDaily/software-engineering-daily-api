@@ -14,7 +14,7 @@ The backend services and API for the Software Engineering Daily [Android](https:
   - `npm start` or `yarn start`
   - check package.json for other builds
   - use curl or Postman to make requests
-
+  - view swagger api docs at HOST/api/docs
 
 ## Using Docker
   - `cp .env.docker_example .env`

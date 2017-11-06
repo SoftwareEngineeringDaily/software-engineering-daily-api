@@ -4,10 +4,25 @@ import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 
 /**
- * Listened Schema
- * @property {String} userId - The id of the user.
- * @property {ObjectId} postId - The id of the post.
+ * @swagger
+ * definitions:
+ *   Listened:
+ *     type: object
+ *     properties:
+ *       _id:
+ *         $ref: '#/definitions/ObjectId'
+ *       __v:
+ *         $ref: '#/definitions/MongoVersion'
+ *       userId:
+ *         $ref: '#/definitions/ObjectId'
+ *       postId:
+ *         $ref: '#/definitions/ObjectId'
+ *       active:
+ *         type: boolean
+ *         description: Active state of favorite
+ *
  */
+
 const ListenedSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -84,7 +99,4 @@ ListenedSchema.statics = {
   }
 };
 
-/**
- * @typedef ListenedSchema
- */
 export default mongoose.model('Listened', ListenedSchema);
