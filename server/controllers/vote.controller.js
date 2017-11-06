@@ -39,6 +39,7 @@ function list(req, res, next) {
 
 // To have the mobile clients start puptting info insode of entityId
 function movePostToEntity(req, res, next) {
+  console.log('Moving post.---------');
   if (req.post) {
     req.entity = req.post;
   }
@@ -47,7 +48,9 @@ function movePostToEntity(req, res, next) {
 
 function findVote(req, res, next) {
   // TODO: REMOVE once we migrate over to entityId only
+
   const successCB = (vote) => {
+    console.log('vote success cb---------');
     if( vote) {
       req.vote = vote;
     }
@@ -55,6 +58,8 @@ function findVote(req, res, next) {
   };
 
   const errorCB = (error) => {
+
+    console.log('ErrorCB.---------');
     next(error);
   };
 
@@ -66,14 +71,14 @@ function findVote(req, res, next) {
       {entityId: req.entity._id, userId: req.user._id}
     ]})
     .then(successCB)
-    .catch(error);
+    .catch( (error) => { next(error) } );
   } else {
     Vote.findOne({
       entityId: req.entity._id,
       userId: req.user._id,
     })
     .then(successCB)
-    .catch(error);
+    .catch( (error) => { next(error) } );
   }
 }
 
@@ -83,12 +88,16 @@ function findVote(req, res, next) {
 function upvote(req, res, next) {
   const entity = req.entity;
 
+  console.log('upvote ---------');
   if (!entity.score) entity.score = 0;
   let promise;
   const vote = req.vote;
 
     if (vote) {
+      console.log('entity', entity);
+
       let incrementValue = 1;
+
 
       // We are changing directly from down to up
       if (vote.direction !== 'upvote' && vote.active) {
@@ -109,10 +118,10 @@ function upvote(req, res, next) {
         entity.score -= incrementValue;
         req.unliked = true;
       }
-
       promise = Bluebird.all([vote.save(), entity.save()]);
     } else {
 
+      console.log('upvote - no existing vote ---------');
     const newvote = new Vote();
     newvote.entityId = entity._id;
     newvote.userId = req.user._id;
@@ -124,10 +133,13 @@ function upvote(req, res, next) {
   }
   promise
   .then((vote) => {
+    console.log('upvote - existing done?!!!---------');
     req.vote = vote[0]; // eslint-disable-line no-param-reassign
+    console.log('upvote - existing done??2!!!---------');
     next();
   })
   .catch((e) => {
+    console.log('error upvote - existing done?!!!---------');
     next(e);
   });
 }
