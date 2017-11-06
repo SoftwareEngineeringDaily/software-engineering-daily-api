@@ -159,7 +159,7 @@ function downvote(req, res, next) {
 
     if (vote.active) {
       entity.score -= incrementValue;
-      raccoon.disliked(req.user._id.toString(), entity._id.toString());
+      req.disliked = true;
     } else {
       entity.score += incrementValue;
       req.undisliked = true;
