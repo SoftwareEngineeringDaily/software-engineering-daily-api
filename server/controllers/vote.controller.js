@@ -37,7 +37,8 @@ function list(req, res, next) {
     .catch(e => next(e));
 }
 
-// To have the mobile clients start puptting info insode of entityId
+// To have the mobile clients start putting vote info insode of entityId
+// instead of postId. This will make vote.model more general.
 function movePostToEntity(req, res, next) {
   if (req.post) {
     req.entity = req.post;
