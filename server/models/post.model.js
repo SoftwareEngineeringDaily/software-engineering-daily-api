@@ -136,7 +136,6 @@ PostSchema.statics = {
       })
       .then((votes) => {
         if (!user) return posts;
-        console.log('votes', votes);
         const voteMap = {};
         for (let index in votes) { // eslint-disable-line
           const vote = votes[index];
