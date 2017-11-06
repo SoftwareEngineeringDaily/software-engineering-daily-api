@@ -49,7 +49,6 @@ function findVote(req, res, next) {
   // TODO: REMOVE once we migrate over to entityId only
 
   const successCB = (vote) => {
-    console.log('vote success cb---------');
     if( vote) {
       req.vote = vote;
     }
@@ -57,8 +56,6 @@ function findVote(req, res, next) {
   };
 
   const errorCB = (error) => {
-
-    console.log('ErrorCB.---------');
     next(error);
   };
 
