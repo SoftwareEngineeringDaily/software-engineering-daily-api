@@ -5,6 +5,18 @@ import map from 'lodash/map';
 import Comment from '../models/comment.model';
 
 /**
+ * Load post and append to req.
+ */
+function load(req, res, next, id) {
+  Comment.get(id)
+    .then((comment) => {
+      req.comment = comment; // eslint-disable-line no-param-reassign
+      return next();
+    })
+    .catch(e => next(e));
+}
+
+/**
  * Returns jwt token if valid username and password is provided
  * @param req
  * @param res
@@ -63,4 +75,4 @@ function create(req, res, next) {
    .catch(e => next(e));
  }
 
-  export default {list, create};
+  export default {load, list, create};

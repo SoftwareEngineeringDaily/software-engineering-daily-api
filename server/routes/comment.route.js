@@ -4,7 +4,6 @@ import transferField from '../middleware/transferField';
 import commentCtrl from '../controllers/comment.controller';
 import voteCtrl from '../controllers/vote.controller';
 import config from '../../config/config';
-import commentCtrl from '../controllers/comment.controller';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
