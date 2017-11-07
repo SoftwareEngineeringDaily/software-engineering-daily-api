@@ -94,19 +94,20 @@ function recommendations(req, res, next) {
 
 function upvote(req, res, next) {
   const userIdString = req.user._id.toString();
-  const postIdString = post._id.toString();
+  const postIdString = req.post._id.toString();
   if (req.liked) {
     raccoon.liked(userIdString, postIdString);
   } else if (req.unliked) {
     raccoon.unliked(userIdString, postIdString);
   }
+  next();
 }
 
 function downvote(req, res, next) {
   if(req.undisliked) {
-    raccoon.undisliked(req.user._id.toString(), post._id.toString());
+    raccoon.undisliked(req.user._id.toString(), req.post._id.toString());
   } else if(req.disliked) {
-    raccoon.disliked(req.user._id.toString(), post._id.toString());
+    raccoon.disliked(req.user._id.toString(), req.post._id.toString());
   }
   next();
 }

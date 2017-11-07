@@ -32,6 +32,7 @@ router.route('/:postId/upvote')
   , voteCtrl.movePostToEntity
   , voteCtrl.findVote
   , voteCtrl.upvote
+  , postCtrl.upvote
   , voteCtrl.finish
 );
 
@@ -40,6 +41,7 @@ router.route('/:postId/downvote')
   , voteCtrl.movePostToEntity
   , voteCtrl.findVote
   , voteCtrl.downvote
+  , postCtrl.downvote
   , voteCtrl.finish
 );
 

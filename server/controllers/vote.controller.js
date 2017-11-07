@@ -89,8 +89,8 @@ function upvote(req, res, next) {
   let promise;
   const vote = req.vote;
 
+  // TODO: rewrite this to have it be model / entity.liked(vote)
     if (vote) {
-
       let incrementValue = 1;
       // We are changing directly from down to up
       if (vote.direction !== 'upvote' && vote.active) {
