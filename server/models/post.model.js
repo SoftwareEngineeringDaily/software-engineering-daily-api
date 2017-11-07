@@ -127,10 +127,10 @@ PostSchema.statics = {
         return Vote.find({$or: [
           {
             userId: user._id,
-            postId:  postIds,
+            postId:  {$in: postIds},
           },            {
             userId: user._id,
-            entityId: postIds,
+            entityId: {$in: postIds},
           },
         ]}).exec();
       })
