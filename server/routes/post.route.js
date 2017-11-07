@@ -39,7 +39,7 @@ router.route('/:postId/upvote')
 
 router.route('/:postId/downvote')
   .post(expressJwt({ secret: config.jwtSecret })
-  , voteCtrl.movePostToEntity
+  , transferField({source: 'post', target: 'entity'})
   , voteCtrl.findVote
   , voteCtrl.downvote
   , postCtrl.downvote
