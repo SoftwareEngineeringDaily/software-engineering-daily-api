@@ -2,7 +2,7 @@ import Promise from 'bluebird';
 import mongoose, {Schema} from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
-
+import Vote from './vote.model';
 
 //
 /**
@@ -103,6 +103,22 @@ CommentSchema.statics = {
         const err = new APIError('No such comment exists!', httpStatus.NOT_FOUND);
         return Promise.reject(err);
       });
+  },
+
+  populateVoteInfo(parentComments) {
+    const commentIds = this.getAllIds(parentComments);
+
+  },
+  // Gets all comment ids, for both children and parents:
+  getAllIds(parentComments) {
+    var commentIds = parentComments.map((comment) => { return comment._id });
+    // now the children:
+    _.each(parentComments, (parent) => {
+      commentIds.concat(
+        parent.replies.map((comment) => { return comment._id })
+      );
+    });
+    return commentIds;
   },
 
   getTopLevelCommentsForItem(postId) {
