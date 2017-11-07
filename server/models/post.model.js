@@ -142,7 +142,7 @@ PostSchema.statics = {
       // let contentSearch = {}
       // contentSearch['content.rendered'] = { $regex: new RegExp(`${search}`, 'i') };
 
-      query.$or = [titleSerach];console.log(titleSerach)
+      query.$or = [titleSerach];
     }
 
     const limitOption = parseInt(limit, 10);
