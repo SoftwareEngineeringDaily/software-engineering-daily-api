@@ -19,13 +19,14 @@ router.route('/:commentId/upvote')
 );
 
 
+/*
 router.route('/:commentId/downvote')
   .post(expressJwt({ secret: config.jwtSecret })
   , transferField({source: 'comment', target: 'entity'})
   , voteCtrl.findVote
   , voteCtrl.downvote
-  , voteCtrl.finish 
-);
+  , voteCtrl.finish
+); */
 
 
 // TODO: load comment
