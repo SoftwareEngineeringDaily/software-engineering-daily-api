@@ -4,24 +4,53 @@ import map from 'lodash/map';
 
 import Comment from '../models/comment.model';
 
-/**
- * Load post and append to req.
- */
+/*
+* Load comment and append to req.
+*/
 function load(req, res, next, id) {
-  Comment.get(id)
-    .then((comment) => {
-      req.comment = comment; // eslint-disable-line no-param-reassign
-      return next();
-    })
-    .catch(e => next(e));
+ Comment.get(id)
+   .then((comment) => {
+     req.comment = comment; // eslint-disable-line no-param-reassign
+     return next();
+   })
+   .catch(e => next(e));
 }
 
 /**
- * Returns jwt token if valid username and password is provided
- * @param req
- * @param res
- * @param next
- * @returns {*}
+ * @swagger
+ * tags:
+ * - name: comment
+ *   description: Commenting of Episodes
+ */
+
+/**
+ * @swagger
+ * /posts/{postId}/comment:
+ *   post:
+ *     summary: Create comment for episode
+ *     description: Create comment for episode
+ *     tags: [comment]
+ *     security:
+ *       - Token: []
+ *     parameters:
+ *       - $ref: '#/parameters/postId'
+ *       - in: body
+ *         name: content
+ *         type: string
+ *         required: true
+ *         description: Comment content
+ *     responses:
+ *       '201':
+ *         description: successful created
+ *         schema:
+ *           type: object
+ *           properties:
+ *             result:
+ *               $ref: '#/definitions/Comment'
+ *       '401':
+ *         $ref: '#/responses/Unauthorized'
+ *       '404':
+ *         $ref: '#/responses/NotFound'
  */
 
 function create(req, res, next) {
@@ -40,17 +69,34 @@ function create(req, res, next) {
   comment.author = user._id
   comment.save()
   .then((commentSaved)  => {
+    // TODO: result key is not consistent with other responses, consider changing this
     return res.status(201).json({result: commentSaved});
   })
   .catch( (err) => next(err));
 }
 
 /**
- * Get post list.
- * @property {string} req.body.postId - Id of post to fetch
- * @property {number} req.query.skip - Number of users to be skipped.
- * @property {number} req.query.limit - Limit number of users to be returned.
- * @returns {[Comment]}
+ * @swagger
+ * /posts/{postId}/comments:
+ *   get:
+ *     summary: Get comments for episode
+ *     description: Get comments for episode
+ *     tags: [comment]
+ *     security: []
+ *     parameters:
+ *       - $ref: '#/parameters/postId'
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           type: object
+ *           properties:
+ *             result:
+ *               type: array
+ *               items:
+ *                 $ref: '#/definitions/Comment'
+ *       '404':
+ *         $ref: '#/responses/NotFound'
  */
  function list(req, res, next) {
    const { postId } = req.params;

@@ -5,8 +5,23 @@ import mongoose from 'mongoose';
 import Vote from '../models/vote.model';
 
 /**
- * Load vote and append to req.
+ * @swagger
+ * tags:
+ * - name: vote
+ *   description: Voting of Items (episode, comment) Up & Down
  */
+
+/**
+ * @swagger
+ * parameters:
+ *   voteId:
+ *     name: voteId
+ *     in: path
+ *     description: Mongo ObjectId of vote
+ *     required: true
+ *     type: string
+ */
+
 function load(req, res, next, id) {
   Vote.get(id, req.user._id)
     .then((vote) => {
@@ -17,19 +32,87 @@ function load(req, res, next, id) {
 }
 
 /**
- * Get vote
- * @returns {Vote}
+ * @swagger
+ *   /votes/{voteId}:
+ *     get:
+ *       summary: Get specific vote
+ *       description: Get specific vote cast by user
+ *       tags: [vote]
+ *       security:
+ *         - Token: []
+ *       parameters:
+ *         - $ref: '#/parameters/voteId'
+ *       responses:
+ *         '401':
+ *           $ref: '#/responses/Unauthorized'
+ *         '404':
+ *           $ref: '#/responses/NotFound'
  */
+
 function get(req, res) {
   return res.json(req.vote);
 }
 
 /**
- * Get vote list.
- * @property {number} req.query.skip - Number of votes to be skipped.
- * @property {number} req.query.limit - Limit number of votes to be returned.
- * @returns {Vote[]}
+ * TODO: use/remove - do we need because of upvote/downvote functions?
  */
+
+function create(req, res, next) {
+  const vote = new Vote({
+    userId: req.body.userId,
+    postId: req.body.postId,
+    active: req.body.active,
+    direction: req.body.direction
+  });
+
+  vote.save()
+    .then(savedVote => res.json(savedVote))
+    .catch(e => next(e));
+}
+
+/**
+ * TODO: use/remove - do we need because of upvote/downvote functions?
+ * Update existing vote
+ * @property {string} req.body.userId - The user id of vote.
+ * @property {string} req.body.postId - The id of the post the vote is associated with.
+ * @property {string} req.body.active - Whether or not the vote is in an upvoted or downvoted state.
+ * @property {string} req.body.direction - The direction (upvote/downvote) of the vote.
+ * @returns {Vote}
+ */
+function update(req, res, next) {
+  const vote = req.vote;
+  vote.userId = req.body.userId;
+  vote.postId = req.body.postId;
+  vote.active = req.body.active;
+  vote.direction = req.body.direction;
+  vote.save()
+    .then(savedVote => res.json(savedVote))
+    .catch(e => next(e));
+}
+
+/**
+ * @swagger
+ *   /votes:
+ *     get:
+ *       summary: Get upvotes and downvotes
+ *       description: Get upvotes and downvotes made by the current user
+ *       tags: [vote]
+ *       security:
+ *         - Token: []
+ *       parameters:
+ *         - $ref: '#/parameters/limit'
+ *         - $ref: '#/parameters/skip'
+ *       responses:
+ *         '200':
+ *           description: successful operation
+ *           schema:
+ *             type: array
+ *             items:
+ *               $ref: '#/definitions/Vote'
+ *         '401':
+ *           $ref: '#/responses/Unauthorized'
+ */
+
 function list(req, res, next) {
   const { limit = 50, skip = 0 } = req.query;
   Vote.list({ limit, skip }, req.user._id)
@@ -72,8 +155,29 @@ function findVote(req, res, next) {
 }
 
 /**
- * Upvote a post.
+ * @swagger
+ * /posts/{postId}/upvote:
+ *   post:
+ *     summary: Upvote episode by ID
+ *     description: Upvote episode by ID
+ *     tags: [vote]
+ *     security:
+ *       # indicates security authorization required
+ *       # empty array because no "scopes" for non-OAuth
+ *       - Token: []
+ *     parameters:
+ *       - $ref: '#/parameters/postId'
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           $ref: '#/definitions/Vote'
+ *       '401':
+ *         $ref: '#/responses/Unauthorized'
+ *       '404':
+ *         $ref: '#/responses/NotFound'
  */
+
 function upvote(req, res, next) {
   const entity = req.entity;
 
@@ -133,8 +237,27 @@ function upvote(req, res, next) {
 
 
 /**
- * Downvote a post.
+ * @swagger
+ * /posts/{postId}/downvote:
+ *   post:
+ *     summary: Downvote episode by ID
+ *     description: Downvote episode by ID
+ *     tags: [vote]
+ *     security:
+ *       - Token: []
+ *     parameters:
+ *       - $ref: '#/parameters/postId'
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           $ref: '#/definitions/Vote'
+ *       '401':
+ *         $ref: '#/responses/Unauthorized'
+ *       '404':
+ *         $ref: '#/responses/NotFound'
  */
+
 function downvote(req, res, next) {
   const entity = req.entity;
 

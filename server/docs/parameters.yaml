@@ -1,0 +1,32 @@
+parameters:
+  limit:
+    name: limit
+    in: query
+    description: max items to return
+    required: false
+    type: integer
+  skip:
+    name: skip
+    in: query
+    description: number of items to skip
+    required: false
+    type: integer
+    default: 0
+  userParam:
+    name: loginUser
+    in: body
+    description: User to register/login with
+    type: object
+    properties:
+      username:
+        type: string
+        description: User name
+        example: johnjacob
+      password:
+        type: string
+        format: password
+        description: Clear-text password
+        example: secret
+    required:
+      - username
+      - password

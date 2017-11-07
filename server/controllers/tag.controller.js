@@ -1,6 +1,7 @@
 import Tag from '../models/tag.model';
 
 /**
+ * TODO: Add swagger doc`
  * Load tag and append to req.
  */
 function load(req, res, next, id) {

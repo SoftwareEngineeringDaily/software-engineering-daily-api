@@ -2,11 +2,37 @@ import Promise from 'bluebird';
 import mongoose, {Schema} from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
+<<<<<<< HEAD
 import Vote from './vote.model';
 import each from 'lodash/each';
 //
+=======
+
+
+>>>>>>> develop
 /**
- * Comment Schema
+ * @swagger
+ * definitions:
+ *   Comment:
+ *     type: object
+ *     properties:
+ *       _id:
+ *         $ref: '#/definitions/ObjectId'
+ *       __v:
+ *         $ref: '#/definitions/MongoVersion'
+ *       content:
+ *         type: string
+ *         description: Comment body
+ *         example: I like this episode
+ *       dateCreated:
+ *         type: string
+ *         format: date-time
+ *         description: Date comment created
+ *         example: 2017-10-30T01:05:39.674Z
+ *       author:
+ *         $ref: '#/definitions/ObjectId'
+ *       post:
+ *         $ref: '#/definitions/ObjectId'
  */
 const CommentSchema = new Schema({
   id: String,
@@ -87,6 +113,7 @@ const CommentSchema = new Schema({
  */
 CommentSchema.statics = {
   /**
+   * TODO - remove? not in use
    * Get user
    * @param {ObjectId} id - The objectId of the comment.
    * @returns {Promise<Comment, APIError>}
@@ -198,7 +225,4 @@ CommentSchema.statics = {
 // Indexes
 CommentSchema.index({ 'content': 'text' });
 
-/**
- * @typedef Post
- */
 export default mongoose.model('Comment', CommentSchema);

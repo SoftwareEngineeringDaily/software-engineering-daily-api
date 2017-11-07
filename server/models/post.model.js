@@ -6,8 +6,52 @@ import APIError from '../helpers/APIError';
 import Vote from './vote.model';
 
 /**
- * Post Schema
+ * @swagger
+ * definitions:
+ *   Post:
+ *     type: object
+ *     properties:
+ *       _id:
+ *         $ref: '#/definitions/ObjectId'
+ *       __v:
+ *         $ref: '#/definitions/MongoVersion'
+ *       title:
+ *         type: object
+ *         properties:
+ *           rendered:
+ *             type: string
+ *             description: HTML for title
+ *             example: Bitcoin Segwit with Jordan Clifford
+ *       content:
+ *         type: object
+ *         properties:
+ *           rendered:
+ *             type: string
+ *             description: HTML for content
+ *             example: <!--powerpress_player--><div class...
+ *       date:
+ *         type: string
+ *         format: date-time
+ *         description: Date when episode was posted
+ *         example: 2017-10-10T02:00:40.000Z
+ *       score:
+ *         type: integer
+ *         description: Number of upvotes given to episode by logged in users
+ *         example: 3
+ *       upvote:
+ *         type: boolean
+ *         description: if authenticated, returns if user upvoted episode
+ *       downvote:
+ *         type: boolean
+ *         description: if authenticated, returns if user downvoted episode
+ *     required:
+ *       - _id
+ *       - title
+ *       - content
+ *       - date
+ *       - score
  */
+
 const PostSchema = new mongoose.Schema({
   id: String,
   score: { type: Number, default: 0 },
@@ -89,7 +133,17 @@ PostSchema.statics = {
 
     if (tags.length > 0) query.tags = { $all: tags };
     if (categories.length > 0) query.categories = { $all: categories };
-    if (search) query.$text = { $search: search };
+    if (search) {
+      let titleSerach = {}
+      let searchWords = search.split(' ').join('|');
+      titleSerach['title.rendered'] = { $regex: new RegExp(`${searchWords}`, 'i') };
+
+      // @TODO: Add this when content doesn't have so much extra data
+      // let contentSearch = {}
+      // contentSearch['content.rendered'] = { $regex: new RegExp(`${search}`, 'i') };
+
+      query.$or = [titleSerach];
+    }
 
     const limitOption = parseInt(limit, 10);
 
@@ -170,10 +224,6 @@ PostSchema.statics = {
   }
 };
 
-// Indexes
 PostSchema.index({ 'title.rendered': 'text', 'content.rendered': 'text' });
 
-/**
- * @typedef Post
- */
 export default mongoose.model('Post', PostSchema);
