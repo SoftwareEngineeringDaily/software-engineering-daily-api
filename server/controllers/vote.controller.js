@@ -53,42 +53,7 @@ function get(req, res) {
   return res.json(req.vote);
 }
 
-/**
- * TODO: use/remove - do we need because of upvote/downvote functions?
- */
 
-function create(req, res, next) {
-  const vote = new Vote({
-    userId: req.body.userId,
-    postId: req.body.postId,
-    active: req.body.active,
-    direction: req.body.direction
-  });
-
-  vote.save()
-    .then(savedVote => res.json(savedVote))
-    .catch(e => next(e));
-}
-
-/**
- * TODO: use/remove - do we need because of upvote/downvote functions?
- * Update existing vote
- * @property {string} req.body.userId - The user id of vote.
- * @property {string} req.body.postId - The id of the post the vote is associated with.
- * @property {string} req.body.active - Whether or not the vote is in an upvoted or downvoted state.
- * @property {string} req.body.direction - The direction (upvote/downvote) of the vote.
- * @returns {Vote}
- */
-function update(req, res, next) {
-  const vote = req.vote;
-  vote.userId = req.body.userId;
-  vote.postId = req.body.postId;
-  vote.active = req.body.active;
-  vote.direction = req.body.direction;
-  vote.save()
-    .then(savedVote => res.json(savedVote))
-    .catch(e => next(e));
-}
 
 /**
  * @swagger

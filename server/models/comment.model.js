@@ -2,14 +2,8 @@ import Promise from 'bluebird';
 import mongoose, {Schema} from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
-<<<<<<< HEAD
 import Vote from './vote.model';
 import each from 'lodash/each';
-//
-=======
-
-
->>>>>>> develop
 /**
  * @swagger
  * definitions:
