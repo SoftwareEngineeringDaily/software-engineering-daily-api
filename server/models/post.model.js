@@ -4,6 +4,8 @@ import moment from 'moment';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Vote from './vote.model';
+import raccoon from 'raccoon';
+import VoteService from '../helpers/VoteService';
 
 /**
  * @swagger
@@ -76,6 +78,41 @@ const PostSchema = new mongoose.Schema({
  * Methods
  */
 PostSchema.method({
+  updateVote (vote, user) {
+    vote.upVote();
+
+    const userIdString = user._id.toString();
+    const postIdString = this._id.toString();
+    if (vote.active) {
+      this.score += incrementValue;
+      raccoon.liked(userIdString, postIdString);
+    } else {
+      this.score -= incrementValue;
+      raccoon.unliked(userIdString, postIdString);
+    }
+
+    return Bluebird.all([vote.save(), this.save()]);
+  },
+  createNewVote(user) {
+    let newvote = VoteService.createFromEntity(this, user);
+
+    newvote.postId = this._id;
+    this.score += 1;
+    raccoon.liked(user._id.toString(), this._id.toString());
+
+    return Promise.all([newvote.save(), this.save()]);
+  },
+  upVote(user) {
+    return Vote.findOne({
+      postId: this._id,
+      userId: user._id,
+    })
+    .then((voteFound) => {
+      const vote = voteFound;
+      if (vote) return this.updateVote(vote, user);
+      return this.createNewVote(user);
+    });
+  },
 });
 
 /**

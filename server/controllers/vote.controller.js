@@ -159,52 +159,10 @@ function remove(req, res, next) {
 function upvote(req, res, next) {
   const post = req.post;
 
+  // @TODO: remove this to default
   if (!post.score) post.score = 0;
 
-  Vote.findOne({
-    postId: post._id,
-    userId: req.user._id,
-  })
-  .then((voteFound) => {
-    const vote = voteFound;
-    const userIdString = req.user._id.toString();
-    const postIdString = post._id.toString();
-
-    if (vote) {
-      let incrementValue = 1;
-
-      // We are changing directly from down to up
-      if (vote.direction !== 'upvote' && vote.active) {
-        incrementValue = 2;
-      }
-
-      vote.active = !vote.active;
-
-      if (vote.direction !== 'upvote') {
-        vote.direction = 'upvote';
-        vote.active = true;
-      }
-
-      if (vote.active) {
-        post.score += incrementValue;
-        raccoon.liked(userIdString, postIdString);
-      } else {
-        post.score -= incrementValue;
-        raccoon.unliked(userIdString, postIdString);
-      }
-
-      return Bluebird.all([vote.save(), post.save()]);
-    }
-
-    const newvote = new Vote();
-    newvote.postId = post._id;
-    newvote.userId = req.user._id;
-    newvote.direction = 'upvote'; // @TODO: Make constant
-    post.score += 1;
-    raccoon.liked(userIdString, postIdString);
-
-    return Bluebird.all([newvote.save(), post.save()]);
-  })
+  return post.upVote(req.user)
   .then((vote) => {
     req.vote = vote[0]; // eslint-disable-line no-param-reassign
     return res.json(vote[0]);
