@@ -69,7 +69,7 @@ function list(req, res, next) {
   }
 
   Post.list(query)
-    .then(users => res.json(users))
+    .then(posts => res.json(posts))
     .catch(e => next(e));
 }
 
