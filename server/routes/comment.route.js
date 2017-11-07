@@ -10,7 +10,6 @@ const router = express.Router(); // eslint-disable-line new-cap
 
 router.route('/:commentId/upvote')
   .post(expressJwt({ secret: config.jwtSecret })
-  // middleware:
   // TODO: refactor to have these into one call like upvote: [method1, method2,...]
   // upvoteHandlers
   , transferField({source: 'comment', target: 'entity'})
@@ -18,6 +17,16 @@ router.route('/:commentId/upvote')
   , voteCtrl.upvote // rename to upvoteHelper
   , voteCtrl.finish // IF we add a model.unlike we don't really need this..
 );
+
+
+router.route('/:commentId/downvote')
+  .post(expressJwt({ secret: config.jwtSecret })
+  , transferField({source: 'comment', target: 'entity'})
+  , voteCtrl.findVote
+  , voteCtrl.downvote
+  , voteCtrl.finish 
+);
+
 
 // TODO: load comment
 router.param('commentId', commentCtrl.load);
