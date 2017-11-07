@@ -168,7 +168,6 @@ function upvote(req, res, next) {
     return res.json(vote[0]);
   })
   .catch((e) => {
-    console.log(e);
     next(e);
   });
 }

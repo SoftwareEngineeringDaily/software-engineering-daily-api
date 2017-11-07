@@ -118,7 +118,7 @@ describe('## Vote APIs', () => {
     });
   });
 
-  describe.only('# POST /api/votes', () => {
+  describe('# POST /api/votes', () => {
     it('errors when not logged in', (done) => {
       request(app)
         .post(`/api/posts/${postId}/upvote`)
