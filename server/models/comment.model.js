@@ -105,9 +105,54 @@ CommentSchema.statics = {
       });
   },
 
+  upateVoteInfo(comment, vote) {
+    comment.upvoted = false;
+    comment.downvoted = false;
+    if (!vote) {
+      return comment;
+    }
+
+    if (vote.direction === 'upvote' && vote.active) {
+      comment.upvoted = true;
+    }
+
+    if (vote.direction === 'downvote' && vote.active) {
+      comment.downvoted = true;
+    }
+    return comment;
+  },
+  // Take all comments, including their children/replies
+  // and fill in the vote information.
+  // NOTE: this requires parentComments to not be a mongoose objects
+  // but rather normal objects.j
   populateVoteInfo(parentComments) {
     const commentIds = this.getAllIds(parentComments);
-
+    return Vote.find( {
+      userId: user._id,
+      entityId: {$in: commentIds},
+    }).exec()
+    .then((vote) => {
+        const voteMap = {};
+        // Create a map of votes by entityId
+        for (let index in votes) { // eslint-disable-line
+          const vote = votes[index];
+          const voteKey = vote.entityId;
+          voteMap[voteKey] = vote;
+        }
+        // Fill up the actual parent comments to contain
+        // vote info.
+        for (let index in parentComments) {
+          let parentComment = parentComments[index];
+          this.updateVoteInfo(parentComment, voteMap[parentComment._id]);
+          // Now fill in the child comments / replies:
+          const replies = comment.replies;
+          for (let index in replies) {
+            let comment = replies[index];
+            this.updateVoteInfo(comment, voteMap[comment._id]);
+          }
+        }
+        return parentComments;
+    });
   },
   // Gets all comment ids, for both children and parents:
   getAllIds(parentComments) {

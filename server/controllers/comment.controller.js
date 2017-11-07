@@ -66,8 +66,8 @@ function create(req, res, next) {
    .then((parentComments) => {
      // If authed then fill in if user has liked:
      if (req.user) {
-       // Let's get all our comment ids, for both children and parent comments:
-       const commentIds = Comment.getAllIds(parentComments);
+       // Let's get all our voe info for both children and parent comments:
+       return Comment.populateVoteInfo(parentComments);
      } else {
        return parentComments;
      }
