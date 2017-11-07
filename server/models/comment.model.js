@@ -2,8 +2,8 @@ import Promise from 'bluebird';
 import mongoose, {Schema} from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
-
-
+import Vote from './vote.model';
+import each from 'lodash/each';
 //
 /**
  * Comment Schema
@@ -14,6 +14,7 @@ const CommentSchema = new Schema({
     type: String,
     required: true
   },
+  score: { type: Number, default: 0 },
   dateCreated: {
     type: Date,
     default: Date.now
@@ -97,11 +98,72 @@ CommentSchema.statics = {
       .exec()
       .then((comment) => {
         if (comment) {
-          return commment;
+          return comment;
         }
         const err = new APIError('No such comment exists!', httpStatus.NOT_FOUND);
         return Promise.reject(err);
       });
+  },
+
+  updateVoteInfo(comment, vote) {
+    comment.upvoted = false;
+    comment.downvoted = false;
+    if (!vote) {
+      return comment;
+    }
+
+    if (vote.direction === 'upvote' && vote.active) {
+      comment.upvoted = true;
+    }
+
+    if (vote.direction === 'downvote' && vote.active) {
+      comment.downvoted = true;
+    }
+    return comment;
+  },
+  // Take all comments, including their children/replies
+  // and fill in the vote information.
+  // NOTE: this requires parentComments to not be a mongoose objects
+  // but rather normal objects.j
+  populateVoteInfo(parentComments, user) {
+    const commentIds = this.getAllIds(parentComments);
+    return Vote.find( {
+      userId: user._id,
+      entityId: {$in: commentIds},
+    }).exec()
+    .then((votes) => {
+        const voteMap = {};
+        // Create a map of votes by entityId
+        for (let index in votes) { // eslint-disable-line
+          const vote = votes[index];
+          const voteKey = vote.entityId;
+          voteMap[voteKey] = vote;
+        }
+        // Fill up the actual parent comments to contain
+        // vote info.
+        for (let index in parentComments) {
+          let parentComment = parentComments[index];
+          this.updateVoteInfo(parentComment, voteMap[parentComment._id]);
+          // Now fill in the child comments / replies:
+          const replies = parentComment.replies;
+          for (let index in replies) {
+            let comment = replies[index];
+            this.updateVoteInfo(comment, voteMap[comment._id]);
+          }
+        }
+        return parentComments;
+    });
+  },
+  // Gets all comment ids, for both children and parents:
+  getAllIds(parentComments) {
+    var commentIds = parentComments.map((comment) => { return comment._id });
+    // now the children:
+    each(parentComments, (parent) => {
+      commentIds = commentIds.concat(
+        parent.replies.map((comment) => { return comment._id })
+      );
+    });
+    return commentIds;
   },
 
   getTopLevelCommentsForItem(postId) {

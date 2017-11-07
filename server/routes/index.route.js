@@ -1,5 +1,6 @@
 import express from 'express';
 import postRoutes from './post.route';
+import commentRoutes from './comment.route';
 import voteRoutes from './vote.route';
 import favoriteRoutes from './favorite.route';
 import authRoutes from './auth.route';
@@ -16,6 +17,7 @@ router.get('/health-check', (req, res) =>
   res.send('OK'));
 
 router.use('/posts', postRoutes);
+router.use('/comments', commentRoutes);
 router.use('/votes', voteRoutes);
 router.use('/favorites', favoriteRoutes);
 router.use('/listened', listenedRoutes);

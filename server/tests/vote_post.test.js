@@ -136,7 +136,7 @@ describe('## Vote APIs', () => {
         .expect(httpStatus.OK)
         .then((res) => {
           const vote = res.body;
-          expect(vote.entityId).to.eql(`${postId}`);
+          expect(vote.postId).to.eql(`${postId}`);
           expect(vote.direction).to.eql('upvote');
           expect(vote.active).to.be.true; //eslint-disable-line
           expect(vote.userId).to.exist; //eslint-disable-line
@@ -152,7 +152,7 @@ describe('## Vote APIs', () => {
         .expect(httpStatus.OK)
         .then((res) => {
           const vote = res.body;
-          expect(vote.entityId).to.eql(`${postId}`);
+          expect(vote.postId).to.eql(`${postId}`);
           expect(vote.direction).to.eql('upvote');
           expect(vote.active).to.be.true; //eslint-disable-line
           expect(vote.userId).to.exist; //eslint-disable-line
@@ -168,7 +168,7 @@ describe('## Vote APIs', () => {
         .expect(httpStatus.OK)
         .then((res) => {
           const vote = res.body;
-          expect(vote.entityId).to.eql(`${postId}`);
+          expect(vote.postId).to.eql(`${postId}`);
           expect(vote.direction).to.eql('downvote');
           expect(vote.active).to.be.true; //eslint-disable-line
           expect(vote.userId).to.exist; //eslint-disable-line
@@ -184,7 +184,7 @@ describe('## Vote APIs', () => {
         .expect(httpStatus.OK)
         .then((res) => {
           const vote = res.body;
-          expect(vote.entityId).to.eql(`${postId}`);
+          expect(vote.postId).to.eql(`${postId}`);
           expect(vote.direction).to.eql('downvote');
           expect(vote.active).to.be.true; //eslint-disable-line
           expect(vote.userId).to.exist; //eslint-disable-line

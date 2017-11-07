@@ -69,7 +69,7 @@ function list(req, res, next) {
   }
 
   Post.list(query)
-    .then(users => res.json(users))
+    .then(posts => res.json(posts))
     .catch(e => next(e));
 }
 
@@ -92,5 +92,24 @@ function recommendations(req, res, next) {
   });
 }
 
+function upvote(req, res, next) {
+  const userIdString = req.user._id.toString();
+  const postIdString = req.post._id.toString();
+  if (req.liked) {
+    raccoon.liked(userIdString, postIdString);
+  } else if (req.unliked) {
+    raccoon.unliked(userIdString, postIdString);
+  }
+  next();
+}
 
-export default { load, get, list, recommendations };
+function downvote(req, res, next) {
+  if(req.undisliked) {
+    raccoon.undisliked(req.user._id.toString(), req.post._id.toString());
+  } else if(req.disliked) {
+    raccoon.disliked(req.user._id.toString(), req.post._id.toString());
+  }
+  next();
+}
+
+export default { load, get, list, recommendations, downvote, upvote };
