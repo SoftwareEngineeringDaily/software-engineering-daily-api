@@ -116,6 +116,12 @@ function upvote(req, res, next) {
 
     const newvote = new Vote();
     newvote.entityId = entity._id;
+    // SPECIAL CASE to be removed when vote.postId is deprecreated from mobile
+    // we should really be versioning the API.....
+    if (req.post && req.post._id === req.entity._id)  {
+      newvote.postId = entity._id;
+    }
+
     newvote.userId = req.user._id;
     newvote.direction = 'upvote'; // @TODO: Make constant
     entity.score += 1;
@@ -171,6 +177,10 @@ function downvote(req, res, next) {
 
     const newvote = new Vote();
     newvote.entityId = entity._id;
+    // SPECIAL CASE to be removed when vote.postId is deprecreated from mobile
+    if (req.post && req.post._id === req.entity._id)  {
+      newvote.postId = entity._id;
+    }
     newvote.userId = req.user._id;
     newvote.direction = 'downvote'; // @TODO: Make constant
     entity.score -= 1;
