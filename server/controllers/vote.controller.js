@@ -37,14 +37,6 @@ function list(req, res, next) {
     .catch(e => next(e));
 }
 
-// To have the mobile clients start putting vote info insode of entityId
-// instead of postId. This will make vote.model more general.
-function movePostToEntity(req, res, next) {
-  if (req.post) {
-    req.entity = req.post;
-  }
-  next();
-}
 
 function findVote(req, res, next) {
   // TODO: REMOVE once we migrate over to entityId only
@@ -201,4 +193,4 @@ function finish(req, res, next) {
     return res.json(req.vote);
 }
 
-export default { load, get, findVote, movePostToEntity, finish, list, upvote, downvote };
+export default { load, get, findVote, finish, list, upvote, downvote };

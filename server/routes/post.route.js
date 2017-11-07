@@ -2,6 +2,7 @@ import express from 'express';
 import expressJwt from 'express-jwt';
 import postCtrl from '../controllers/post.controller';
 import voteCtrl from '../controllers/vote.controller';
+import transferField from '../middleware/transferField';
 import commentCtrl from '../controllers/comment.controller';
 import favoriteCtrl from '../controllers/favorite.controller';
 import listenedCtrl from '../controllers/listened.controller';
@@ -29,7 +30,7 @@ router.route('/:postId/comment')
 
 router.route('/:postId/upvote')
   .post(expressJwt({ secret: config.jwtSecret })
-  , voteCtrl.movePostToEntity
+  , transferField({source: 'post', target: 'entity'})
   , voteCtrl.findVote
   , voteCtrl.upvote
   , postCtrl.upvote
