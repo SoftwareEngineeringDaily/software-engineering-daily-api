@@ -98,7 +98,7 @@ CommentSchema.statics = {
       .exec()
       .then((comment) => {
         if (comment) {
-          return commment;
+          return comment;
         }
         const err = new APIError('No such comment exists!', httpStatus.NOT_FOUND);
         return Promise.reject(err);
