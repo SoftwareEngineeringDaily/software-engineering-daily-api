@@ -20,7 +20,7 @@ after((done) => {
   done();
 });
 
-describe('## Vote APIs', () => {
+describe.only('## Vote APIs', () => {
   const validUserCredentials = {
     username: 'react',
     password: 'express'
@@ -118,7 +118,7 @@ describe('## Vote APIs', () => {
     });
   });
 
-  describe('# POST /api/votes', () => {
+  describe.only('# POST /api/votes', () => {
     it('errors when not logged in', (done) => {
       request(app)
         .post(`/api/posts/${postId}/upvote`)

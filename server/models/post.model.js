@@ -4,6 +4,7 @@ import moment from 'moment';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Vote from './vote.model';
+import raccoon from 'raccoon';
 
 /**
  * @swagger
@@ -76,6 +77,52 @@ const PostSchema = new mongoose.Schema({
  * Methods
  */
 PostSchema.method({
+  upVote(user) {
+    return Vote.findOne({
+      postId: this._id,
+      userId: user._id,
+    })
+    .then((voteFound) => {
+      const vote = voteFound;
+      const userIdString = user._id.toString();
+      const postIdString = this._id.toString();
+
+      if (vote) {
+        let incrementValue = 1;
+
+        // We are changing directly from down to up
+        if (vote.direction !== 'upvote' && vote.active) {
+          incrementValue = 2;
+        }
+
+        vote.active = !vote.active;
+
+        if (vote.direction !== 'upvote') {
+          vote.direction = 'upvote';
+          vote.active = true;
+        }
+
+        if (vote.active) {
+          this.score += incrementValue;
+          raccoon.liked(userIdString, postIdString);
+        } else {
+          this.score -= incrementValue;
+          raccoon.unliked(userIdString, postIdString);
+        }
+
+        return Bluebird.all([vote.save(), this.save()]);
+      }
+
+      const newvote = new Vote();
+      newvote.postId = this._id;
+      newvote.userId = user._id;
+      newvote.direction = 'upvote'; // @TODO: Make constant
+      this.score += 1;
+      raccoon.liked(userIdString, postIdString);
+
+      return Promise.all([newvote.save(), this.save()]);
+    });
+  },
 });
 
 /**
