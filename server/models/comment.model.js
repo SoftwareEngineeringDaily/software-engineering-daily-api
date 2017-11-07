@@ -159,7 +159,7 @@ CommentSchema.statics = {
     var commentIds = parentComments.map((comment) => { return comment._id });
     // now the children:
     each(parentComments, (parent) => {
-      commentIds.concat(
+      commentIds = commentIds.concat(
         parent.replies.map((comment) => { return comment._id })
       );
     });
