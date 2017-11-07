@@ -133,7 +133,17 @@ PostSchema.statics = {
 
     if (tags.length > 0) query.tags = { $all: tags };
     if (categories.length > 0) query.categories = { $all: categories };
-    if (search) query.$text = { $search: search };
+    if (search) {
+      let titleSerach = {}
+      let searchWords = search.split(' ').join('|');
+      titleSerach['title.rendered'] = { $regex: new RegExp(`${searchWords}`, 'i') };
+
+      // @TODO: Add this when content doesn't have so much extra data
+      // let contentSearch = {}
+      // contentSearch['content.rendered'] = { $regex: new RegExp(`${search}`, 'i') };
+
+      query.$or = [titleSerach];
+    }
 
     const limitOption = parseInt(limit, 10);
 
