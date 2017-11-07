@@ -43,6 +43,21 @@ const VoteSchema = new mongoose.Schema({
  * Methods
  */
 VoteSchema.method({
+  upVote () {
+    let incrementValue = 1;
+
+    // We are changing directly from down to up
+    if (this.direction !== 'upvote' && this.active) {
+      incrementValue = 2;
+    }
+
+    this.active = !this.active;
+
+    if (this.direction !== 'upvote') {
+      this.direction = 'upvote';
+      this.active = true;
+    }
+  },
 });
 
 /**
