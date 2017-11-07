@@ -3,7 +3,7 @@ import mongoose, {Schema} from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Vote from './vote.model';
-
+import each from 'lodash/each';
 //
 /**
  * Comment Schema
@@ -105,7 +105,7 @@ CommentSchema.statics = {
       });
   },
 
-  upateVoteInfo(comment, vote) {
+  updateVoteInfo(comment, vote) {
     comment.upvoted = false;
     comment.downvoted = false;
     if (!vote) {
@@ -125,13 +125,13 @@ CommentSchema.statics = {
   // and fill in the vote information.
   // NOTE: this requires parentComments to not be a mongoose objects
   // but rather normal objects.j
-  populateVoteInfo(parentComments) {
+  populateVoteInfo(parentComments, user) {
     const commentIds = this.getAllIds(parentComments);
     return Vote.find( {
       userId: user._id,
       entityId: {$in: commentIds},
     }).exec()
-    .then((vote) => {
+    .then((votes) => {
         const voteMap = {};
         // Create a map of votes by entityId
         for (let index in votes) { // eslint-disable-line
@@ -145,7 +145,7 @@ CommentSchema.statics = {
           let parentComment = parentComments[index];
           this.updateVoteInfo(parentComment, voteMap[parentComment._id]);
           // Now fill in the child comments / replies:
-          const replies = comment.replies;
+          const replies = parentComment.replies;
           for (let index in replies) {
             let comment = replies[index];
             this.updateVoteInfo(comment, voteMap[comment._id]);
@@ -158,7 +158,7 @@ CommentSchema.statics = {
   getAllIds(parentComments) {
     var commentIds = parentComments.map((comment) => { return comment._id });
     // now the children:
-    _.each(parentComments, (parent) => {
+    each(parentComments, (parent) => {
       commentIds.concat(
         parent.replies.map((comment) => { return comment._id })
       );

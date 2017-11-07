@@ -67,7 +67,7 @@ function create(req, res, next) {
      // If authed then fill in if user has liked:
      if (req.user) {
        // Let's get all our voe info for both children and parent comments:
-       return Comment.populateVoteInfo(parentComments);
+       return Comment.populateVoteInfo(parentComments, req.user);
      } else {
        return parentComments;
      }
