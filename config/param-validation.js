@@ -33,5 +33,12 @@ export default {
       website: Joi.string().allow(''),
       email: Joi.string().email().allow('')
     }
+  },
+  comment: {
+    body: {
+      content: Joi.string().required(),
+      post: Joi.string().required(),
+    }
   }
+
 };

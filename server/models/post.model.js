@@ -178,18 +178,23 @@ PostSchema.statics = {
           return post._id;
         });
 
-        return Vote.find({
-          userId: user._id,
-          postId: { $in: postIds },
-        }).exec();
+        return Vote.find({$or: [
+          {
+            userId: user._id,
+            postId:  {$in: postIds},
+          },            {
+            userId: user._id,
+            entityId: {$in: postIds},
+          },
+        ]}).exec();
       })
       .then((votes) => {
         if (!user) return posts;
-
         const voteMap = {};
         for (let index in votes) { // eslint-disable-line
           const vote = votes[index];
-          voteMap[vote.postId] = vote;
+          const voteKey = vote.postId?  vote.postId : vote.entityId;
+          voteMap[voteKey] = vote;
         }
 
         const updatedPosts = [];

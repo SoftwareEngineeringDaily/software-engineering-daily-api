@@ -2,6 +2,7 @@ import express from 'express';
 import expressJwt from 'express-jwt';
 import postCtrl from '../controllers/post.controller';
 import voteCtrl from '../controllers/vote.controller';
+import transferField from '../middleware/transferField';
 import commentCtrl from '../controllers/comment.controller';
 import favoriteCtrl from '../controllers/favorite.controller';
 import listenedCtrl from '../controllers/listened.controller';
@@ -21,14 +22,29 @@ router.route('/:postId')
 router.route('/:postId/comments')
   .get(expressJwt({ secret: config.jwtSecret, credentialsRequired: false }), commentCtrl.list);
 
+// Create a comment:
 router.route('/:postId/comment')
-  .post(expressJwt({ secret: config.jwtSecret }), commentCtrl.create);
+  .post(
+    expressJwt({ secret: config.jwtSecret })
+    , commentCtrl.create);
 
 router.route('/:postId/upvote')
-  .post(expressJwt({ secret: config.jwtSecret }), voteCtrl.upvote);
+  .post(expressJwt({ secret: config.jwtSecret })
+  , transferField({source: 'post', target: 'entity'})
+  , voteCtrl.findVote
+  , voteCtrl.upvote
+  , postCtrl.upvote
+  , voteCtrl.finish
+);
 
 router.route('/:postId/downvote')
-  .post(expressJwt({ secret: config.jwtSecret }), voteCtrl.downvote);
+  .post(expressJwt({ secret: config.jwtSecret })
+  , transferField({source: 'post', target: 'entity'})
+  , voteCtrl.findVote
+  , voteCtrl.downvote
+  , postCtrl.downvote
+  , voteCtrl.finish
+);
 
 router.route('/:postId/favorite')
   .post(expressJwt({ secret: config.jwtSecret }), favoriteCtrl.favorite);

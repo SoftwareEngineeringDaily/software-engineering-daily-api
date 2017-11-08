@@ -30,9 +30,6 @@ function me(req, res, next) {
     });
 }
 
-// TODO: maybe a quick version of me that only loads a shallow verison of
-// user id
-
 /**
  * Get user
  * @returns {User}

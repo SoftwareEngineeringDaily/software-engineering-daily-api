@@ -1,7 +1,20 @@
-import Bluebird from 'bluebird';
+import Promise from 'bluebird';
 import mongoose from 'mongoose';
+import map from 'lodash/map';
 
 import Comment from '../models/comment.model';
+
+/*
+* Load comment and append to req.
+*/
+function load(req, res, next, id) {
+ Comment.get(id)
+   .then((comment) => {
+     req.comment = comment; // eslint-disable-line no-param-reassign
+     return next();
+   })
+   .catch(e => next(e));
+}
 
 /**
  * @swagger
@@ -42,12 +55,17 @@ import Comment from '../models/comment.model';
 
 function create(req, res, next) {
   const { postId } = req.params;
+  const { parentCommentId } = req.body;
   const { content } = req.body;
   const { user } = req;
 
   const comment = new Comment();
   comment.content = content
   comment.post = postId
+  // If this is a child comment we need to assign it's parent
+  if (parentCommentId) {
+    comment.parentComment = parentCommentId
+  }
   comment.author = user._id
   comment.save()
   .then((commentSaved)  => {
@@ -80,15 +98,30 @@ function create(req, res, next) {
  *       '404':
  *         $ref: '#/responses/NotFound'
  */
+ function list(req, res, next) {
+   const { postId } = req.params;
 
-function list(req, res, next) {
-  const { postId } = req.params;
-  Comment.getCommentsForItem(postId)
-    .then((comments) => {
-      // TODO: result key is not consistent with other responses, consider changing this
-      res.json({result: comments});
-    })
-    .catch(e => next(e));
-}
+   Comment.getTopLevelCommentsForItem(postId)
+   .then((comments) => {
+     // Here we are fetching our nested comments, and need everything to finish
+     let nestedCommentPromises = map(comments, (comment) => {
+       return Comment.fillNestedComments(comment);
+     });
+     return Promise.all(nestedCommentPromises);
+   })
+   .then((parentComments) => {
+     // If authed then fill in if user has liked:
+     if (req.user) {
+       // Let's get all our voe info for both children and parent comments:
+       return Comment.populateVoteInfo(parentComments, req.user);
+     } else {
+       return parentComments;
+     }
+   })
+   .then( (parentComments) => {
+     res.json({result: parentComments});
+   })
+   .catch(e => next(e));
+ }
 
-export default {list, create};
+  export default {load, list, create};
