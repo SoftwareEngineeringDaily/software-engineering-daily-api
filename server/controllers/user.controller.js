@@ -35,7 +35,10 @@ function me(req, res, next) {
  * @returns {User}
  */
 function get(req, res) {
-  return res.json(req.userLoaded);
+  const user = req.userLoaded.toObject();
+  delete user.password;
+  delete user.email;
+  return res.json(user);
 }
 
 /**
