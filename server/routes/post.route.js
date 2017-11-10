@@ -4,6 +4,7 @@ import postCtrl from '../controllers/post.controller';
 import voteCtrl from '../controllers/vote.controller';
 import transferField from '../middleware/transferField';
 import commentCtrl from '../controllers/comment.controller';
+import relatedLinkCtrl from '../controllers/relatedLink.controller';
 import favoriteCtrl from '../controllers/favorite.controller';
 import listenedCtrl from '../controllers/listened.controller';
 import config from '../../config/config';
@@ -11,22 +12,31 @@ import config from '../../config/config';
 const router = express.Router(); // eslint-disable-line new-cap
 
 router.route('/')
-  .get(expressJwt({ secret: config.jwtSecret, credentialsRequired: false }), postCtrl.list);
+  .get(expressJwt({ secret: config.jwtSecret
+    , credentialsRequired: false }), postCtrl.list);
 
 router.route('/recommendations')
-  .get(expressJwt({ secret: config.jwtSecret }), postCtrl.recommendations);
+  .get(expressJwt({ secret: config.jwtSecret })
+  , postCtrl.recommendations);
 
 router.route('/:postId')
   .get(postCtrl.get);
 
 router.route('/:postId/comments')
-  .get(expressJwt({ secret: config.jwtSecret, credentialsRequired: false }), commentCtrl.list);
+  .get(expressJwt({ secret: config.jwtSecret
+    , credentialsRequired: false }), commentCtrl.list);
 
 // Create a comment:
 router.route('/:postId/comment')
   .post(
     expressJwt({ secret: config.jwtSecret })
     , commentCtrl.create);
+
+// Add a related-link:
+router.route('/:postId/relatedLink')
+  .post(
+    expressJwt({ secret: config.jwtSecret })
+    , relatedLinkCtrl.create);
 
 router.route('/:postId/upvote')
   .post(expressJwt({ secret: config.jwtSecret })
