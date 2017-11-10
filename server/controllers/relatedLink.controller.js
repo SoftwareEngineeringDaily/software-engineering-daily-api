@@ -9,7 +9,7 @@ import RelatedLink from '../models/relatedLink.model';
  * @swagger
  * tags:
  * - name: relatedLink
- *   description: Related links for episodes. 
+ *   description: Related links for episodes.
  */
 
 /**
@@ -56,4 +56,13 @@ function create(req, res, next) {
   .catch( (err) => next(err));
 }
 
-export default {create};
+function list(req, res, next) {
+  const { postId } = req.params;
+  RelatedLink.find({post: postId})
+  .then((relatedLinks) => {
+    res.json(relatedLinks);
+  })
+  .catch( (err) => next(err));
+}
+
+export default {create, list};

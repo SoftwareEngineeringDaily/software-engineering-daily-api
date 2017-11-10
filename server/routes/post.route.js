@@ -32,8 +32,12 @@ router.route('/:postId/comment')
     expressJwt({ secret: config.jwtSecret })
     , commentCtrl.create);
 
+router.route('/:postId/related-links')
+  .get(expressJwt({ secret: config.jwtSecret
+    , credentialsRequired: false }), relatedLinkCtrl.list);
+
 // Add a related-link:
-router.route('/:postId/relatedLink')
+router.route('/:postId/related-link')
   .post(
     expressJwt({ secret: config.jwtSecret })
     , relatedLinkCtrl.create);
