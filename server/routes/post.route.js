@@ -1,5 +1,7 @@
 import express from 'express';
 import expressJwt from 'express-jwt';
+import validate from 'express-validation';
+import paramValidation from '../../config/param-validation';
 import postCtrl from '../controllers/post.controller';
 import voteCtrl from '../controllers/vote.controller';
 import transferField from '../middleware/transferField';
@@ -30,16 +32,19 @@ router.route('/:postId/comments')
 router.route('/:postId/comment')
   .post(
     expressJwt({ secret: config.jwtSecret })
+    , validate(paramValidation.comment)
     , commentCtrl.create);
 
+// Get related links associated with postId
 router.route('/:postId/related-links')
-  .get(expressJwt({ secret: config.jwtSecret
-    , credentialsRequired: false }), relatedLinkCtrl.list);
+  .get(expressJwt({ secret: config.jwtSecret, credentialsRequired: false })
+    , relatedLinkCtrl.list);
 
-// Add a related-link:
+// Add a related-link to postId:
 router.route('/:postId/related-link')
   .post(
     expressJwt({ secret: config.jwtSecret })
+    , validate(paramValidation.relatedLinkCreate)
     , relatedLinkCtrl.create);
 
 router.route('/:postId/upvote')
