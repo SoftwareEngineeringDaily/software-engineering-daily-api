@@ -3,8 +3,23 @@ import Bluebird from 'bluebird';
 import Favorite from '../models/favorite.model';
 
 /**
- * Load favorite and append to req.
+ * @swagger
+ * tags:
+ * - name: favorite
+ *   description: Favoriting (aka staring/bookmarking) of Episodes
  */
+
+/**
+ * @swagger
+ * parameters:
+ *   favoriteId:
+ *     name: favoriteId
+ *     in: path
+ *     description: Mongo ObjectId of favorite
+ *     required: true
+ *     type: string
+ */
+
 function load(req, res, next, id) {
   Favorite.get(id, req.user._id)
     .then((favoriteFound) => {
@@ -15,18 +30,31 @@ function load(req, res, next, id) {
 }
 
 /**
- * Get favorite
- * @returns {Favorite}
+ * @swagger
+ *   /favorites/{favoriteId}:
+ *     get:
+ *       summary: Get specific favorite
+ *       description: Get specific favorite picked by user
+ *       tags: [favorite]
+ *       security:
+ *         - Token: []
+ *       parameters:
+ *         - $ref: '#/parameters/favoriteId'
+ *       responses:
+ *         '200':
+ *           description: successful operation
+ *           schema:
+ *             $ref: '#/definitions/Favorite'
+ *         '401':
+ *           $ref: '#/responses/Unauthorized'
+ *         '404':
+ *           $ref: '#/responses/NotFound'
  */
 function get(req, res) {
   return res.json(req.favorite);
 }
 
-/**
- * Create new favorite
- * @property {string} req.body.active - The active state of the favorite.
- * @returns {Favorite}
- */
+// TODO: Remove or use in route - necessary because of favorite/unfavorite?
 function create(req, res, next) {
   const newFavorite = new Favorite({
     active: req.body.active
@@ -37,11 +65,7 @@ function create(req, res, next) {
     .catch(e => next(e));
 }
 
-/**
- * Update existing favorite
- * @property {string} req.body.active - The active state of the favorite.
- * @returns {Favorite}
- */
+// TODO: Remove or use in route - necessary because of favorite/unfavorite?
 function update(req, res, next) {
   const updateFavorite = req.favorite;
   updateFavorite.active = req.body.active;
@@ -52,11 +76,26 @@ function update(req, res, next) {
 }
 
 /**
- * Get favorite list.
- * @property {number} req.query.skip - Number of favorites to be skipped.
- * @property {number} req.query.limit - Limit number of favorites to be returned.
- * @returns {Favorite[]}
+ * @swagger
+ * /favorites:
+ *   get:
+ *     summary: Get favorited episodes
+ *     description: Get list of favorited episodes for current user.
+ *     tags: [favorite]
+ *     security:
+ *       - Token: []
+ *     parameters:
+ *       - $ref: '#/parameters/limit'
+ *       - $ref: '#/parameters/skip'
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/Favorite'
  */
+
 function list(req, res, next) {
   const { limit = 50, skip = 0 } = req.query;
   Favorite.list({ limit, skip }, req.user._id)
@@ -64,10 +103,7 @@ function list(req, res, next) {
     .catch(e => next(e));
 }
 
-/**
- * Delete favorite.
- * @returns {Favorite}
- */
+// TODO: Remove or use in route
 function remove(req, res, next) {
   const existingVavorite = req.favorite;
   existingVavorite.remove()
@@ -75,9 +111,27 @@ function remove(req, res, next) {
     .catch(e => next(e));
 }
 
-/*
- * This function should be called from the post.route.
- * At this point the post should be part of the request.
+/**
+ * @swagger
+ * /posts/{postId}/favorite:
+ *   post:
+ *     summary: Favorite episode
+ *     description: |
+ *       Favorite or star episode for current user.
+ *     tags: [favorite]
+ *     security:
+ *       - Token: []
+ *     parameters:
+ *       - $ref: '#/parameters/postId'
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           $ref: '#/definitions/Favorite'
+ *       '401':
+ *         $ref: '#/responses/Unauthorized'
+ *       '404':
+ *         $ref: '#/responses/NotFound'
  */
 function favorite(req, res, next) {
   const post = req.post;
@@ -113,9 +167,27 @@ function favorite(req, res, next) {
     });
 }
 
-/*
- * This function should be called from the post.route.
- * At this point the post should be part of the request.
+/**
+ * @swagger
+ * /posts/{postId}/unfavorite:
+ *   post:
+ *     summary: Unfavorite episode
+ *     description: |
+ *       Unfavorite episode for current user.
+ *     tags: [favorite]
+ *     security:
+ *       - Token: []
+ *     parameters:
+ *       - $ref: '#/parameters/postId'
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           $ref: '#/definitions/Favorite'
+ *       '401':
+ *         $ref: '#/responses/Unauthorized'
+ *       '404':
+ *         $ref: '#/responses/NotFound'
  */
 function unfavorite(req, res, next) {
   const post = req.post;
@@ -141,7 +213,7 @@ function unfavorite(req, res, next) {
       newFavorite.active = false;
       newFavorite.postId = post._id;
       newFavorite.userId = req.user._id;
-      
+
       return Bluebird.all([newFavorite.save()]);
     })
     .then((favorite) => {

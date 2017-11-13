@@ -2,10 +2,36 @@ import Bluebird from 'bluebird';
 import Listened from '../models/listened.model';
 
 /**
- * Create new favorite
- * @property {string} req.body.active - The active state of the favorite.
- * @returns {Listened}
+ * @swagger
+ * tags:
+ * - name: listened
+ *   description: Tracking and Retrieving Episode Listening Data
  */
+
+/**
+ * @swagger
+ * /posts/{postId}/listened:
+ * get:
+ *   summary: Flag episode as listened
+ *   description: Flag episode as listened by user
+ *   tags: [listened]
+ *   security:
+ *     - Token: []
+ *   parameters:
+ *     - $ref: '#/parameters/postId'
+ *   responses:
+ *     '200':
+ *       description: successful operation
+ *       schema:
+ *         type: array
+ *         items:
+ *           $ref: '#/definitions/Post'
+ *     '401':
+ *       $ref: '#/responses/Unauthorized'
+ *     '404':
+ *       $ref: '#/responses/NotFound'
+ */
+
 function create(req, res, next) {
   const post = req.post;
   const userId = req.user._id;
@@ -31,6 +57,7 @@ function create(req, res, next) {
 }
 
 /**
+ * TODO: Use/remove
  * Get the list of listened posts by post Id
  * .
  * @property {number} req.query.skip - Number of favorites to be skipped.
@@ -45,12 +72,28 @@ function listByPost(req, res, next) {
 }
 
 /**
- * Get the list of listened posts by post Id
- * .
- * @property {number} req.query.skip - Number of favorites to be skipped.
- * @property {number} req.query.limit - Limit number of favorites to be returned.
- * @returns {Listened[]}
+ * @swagger
+ * /listened:
+ *   get:
+ *     summary: Get listened episodes
+ *     description: Get list of listened episodes for current user
+ *     tags: [listened]
+ *     security:
+ *       - Token: []
+ *     parameters:
+ *       - $ref: '#/parameters/limit'
+ *       - $ref: '#/parameters/skip'
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/Post'
+ *       '401':
+ *         $ref: '#/responses/Unauthorized'
  */
+
 function listByUser(req, res, next) {
   const { limit = 50, skip = 0 } = req.query;
   Listened.listByUser({ limit, skip }, req.user._id)

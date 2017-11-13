@@ -6,8 +6,23 @@ import Post from '../models/post.model';
 import Vote from '../models/vote.model';
 
 /**
- * Load post and append to req.
+ * @swagger
+ * tags:
+ * - name: post
+ *   description: Podcast Episode (post) Information
  */
+
+/**
+ * @swagger
+ * parameters:
+ *   postId:
+ *     name: postId
+ *     in: path
+ *     description: Mongo ObjectId of episode/post
+ *     required: true
+ *     type: string
+ */
+
 function load(req, res, next, id) {
   Post.get(id)
     .then((post) => {
@@ -18,19 +33,80 @@ function load(req, res, next, id) {
 }
 
 /**
- * Get post.
- * @returns {Post}
+ * @swagger
+ * /posts/{postId}:
+ *   get:
+ *     summary: Get episode by ID
+ *     description: Get episode by ID
+ *     tags: [post]
+ *     security: []
+ *     parameters:
+ *       - $ref: '#/parameters/postId'
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           $ref: '#/definitions/Post'
+ *       '404':
+ *         $ref: '#/responses/NotFound'
  */
+
 function get(req, res) {
   return res.json(req.post);
 }
 
 /**
- * Get post list.
- * @property {number} req.query.skip - Number of users to be skipped.
- * @property {number} req.query.limit - Limit number of users to be returned.
- * @returns {Post[]}
+ * @swagger
+ * /posts:
+ *   get:
+ *     summary: Get list of episodes
+ *     description: Get list of most recent episodes. Use query paramters to filter results.
+ *     tags: [post]
+ *     security: [] #indicates no authorization required to use route
+ *     parameters:
+ *       - $ref: '#/parameters/limit'
+ *       - in: query
+ *         name: createdAtBefore
+ *         type: string
+ *         format: date-time #All date-time format follow https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14
+ *         required: false
+ *         description: |
+ *           The date/time the episode was created at or before,
+ *           if not set ten latest episodes will be returned relative to current date
+ *       - in: query
+ *         name: createdAfter
+ *         type: string
+ *         format: date-time
+ *         required: false
+ *         description: The date/time the episode was created after
+ *       - in: query
+ *         name: type
+ *         type: string
+ *         required: false
+ *         description: The type of episode
+ *         enum: [new, top]
+ *       - in: query
+ *         name: search
+ *         type: string
+ *         required: false
+ *         description: Search pattern for episode text
+ *       - in: query
+ *         name: tags
+ *         type: array
+ *         required: false
+ *         collectionFormat: csv
+ *         items:
+ *           type: string
+ *         description: Episode tag
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/Post'
  */
+
 function list(req, res, next) {
   const {
     limit = null,
@@ -69,11 +145,34 @@ function list(req, res, next) {
   }
 
   Post.list(query)
-    .then(users => res.json(users))
+    .then(posts => res.json(posts))
     .catch(e => next(e));
 }
 
 // @TODO: maybe this should be in a recommendation controller
+
+/**
+ * @swagger
+ * /recommendations:
+ * get:
+ *   summary: Get list of recommended episodes
+ *   description: Get list of recommended episodes for authorized user
+ *   tags: [post]
+ *   security:
+ *     - Token: []
+ *   responses:
+ *     '200':
+ *       description: successful operation
+ *       schema:
+ *         type: array
+ *         items:
+ *           $ref: '#/definitions/Post'
+ *     '401':
+ *       $ref: '#/responses/Unauthorized'
+ *     '404':
+ *       $ref: '#/responses/NotFound'
+ */
+
 function recommendations(req, res, next) {
   const numberOfRecommendations = 10;
   raccoon.recommendFor(req.user._id.toString(), numberOfRecommendations)
@@ -92,5 +191,24 @@ function recommendations(req, res, next) {
   });
 }
 
+function upvote(req, res, next) {
+  const userIdString = req.user._id.toString();
+  const postIdString = req.post._id.toString();
+  if (req.liked) {
+    raccoon.liked(userIdString, postIdString);
+  } else if (req.unliked) {
+    raccoon.unliked(userIdString, postIdString);
+  }
+  next();
+}
 
-export default { load, get, list, recommendations };
+function downvote(req, res, next) {
+  if(req.undisliked) {
+    raccoon.undisliked(req.user._id.toString(), req.post._id.toString());
+  } else if(req.disliked) {
+    raccoon.disliked(req.user._id.toString(), req.post._id.toString());
+  }
+  next();
+}
+
+export default { load, get, list, recommendations, downvote, upvote };

@@ -22,8 +22,6 @@ router.route('/:userId')
     , userCtrl.get)
 
   /** PUT /api/users/:userId - Update user */
-
-  // TODO: make sure to check for AUTH!!!!!!!!!
   .put(
     expressJwt({ secret: config.jwtSecret})
     ,validate(paramValidation.updateUser), userCtrl.update)

@@ -4,15 +4,31 @@ import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 
 /**
- * Vote Schema
- * @property {String} userId - The id of the user.
- * @property {ObjectId} postId - The id of the post.
- * @property {Boolean} active - Whether or not the vote is in an upvoted or downvoted state.
- * @property {String} direction - The direction of the vote: upvote or downvote.
+ * @swagger
+ * definitions:
+ *  Vote:
+ *    type: object
+ *    properties:
+ *      _id:
+ *        $ref '#/definitions/ObjectId'
+ *      __v:
+ *        $ref: '#/definitions/MongoVersion'
+ *      direction:
+ *        type: string
+ *        enum: [upvote, downvote]
+ *      userId:
+ *        $ref '#/definitions/ObjectId'
+ *      postId:
+ *        $ref '#/definitions/ObjectId'
+ *      active:
+ *        type: boolean
+ *        description: Indicates vote's up or downvoted state is active
  */
+
 const VoteSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
+  entityId: { type: mongoose.Schema.Types.ObjectId },
   active: { type: Boolean, default: true },
   direction: String,
 });

@@ -33,5 +33,19 @@ export default {
       website: Joi.string().allow(''),
       email: Joi.string().email().allow('')
     }
+  },
+
+  // POST
+  relatedLinkCreate: {
+    body: {
+      url: Joi.string().required()
+    }
+  },
+
+  comment: {
+    body: {
+      content: Joi.string().required()
+    }
   }
+
 };

@@ -30,15 +30,15 @@ function me(req, res, next) {
     });
 }
 
-// TODO: maybe a quick version of me that only loads a shallow verison of
-// user id
-
 /**
  * Get user
  * @returns {User}
  */
 function get(req, res) {
-  return res.json(req.userLoaded);
+  const user = req.userLoaded.toObject();
+  delete user.password;
+  delete user.email;
+  return res.json(user);
 }
 
 /**
