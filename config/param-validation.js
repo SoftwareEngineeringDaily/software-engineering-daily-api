@@ -34,10 +34,17 @@ export default {
       email: Joi.string().email().allow('')
     }
   },
+
+  // POST
+  relatedLinkCreate: {
+    body: {
+      url: Joi.string().required()
+    }
+  },
+
   comment: {
     body: {
-      content: Joi.string().required(),
-      post: Joi.string().required(),
+      content: Joi.string().required()
     }
   }
 
