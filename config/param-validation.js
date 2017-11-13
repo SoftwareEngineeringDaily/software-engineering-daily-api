@@ -38,7 +38,8 @@ export default {
   // POST
   relatedLinkCreate: {
     body: {
-      url: Joi.string().required()
+      url: Joi.string().required(),
+      title: Joi.string().required()
     }
   },
 

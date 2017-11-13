@@ -43,10 +43,11 @@ import RelatedLink from '../models/relatedLink.model';
 function create(req, res, next) {
   const { user } = req;
   const { postId } = req.params;
-  const { url } = req.body;
+  const { url, title } = req.body;
 
   const relatedLink = new RelatedLink();
   relatedLink.url = url;
+  relatedLink.title = title;
   relatedLink.post = postId
   relatedLink.author = user._id
   relatedLink.save()
