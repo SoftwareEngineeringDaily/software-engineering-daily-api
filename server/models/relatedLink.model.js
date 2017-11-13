@@ -17,6 +17,10 @@ import Vote from './vote.model';
  *         type: string
  *         description: Related URL
  *         example: google.com
+ *       title:
+ *         type: string
+ *         description: Related URL
+ *         example: google.com
  *       clicks:
  *         type: number
  *         description: Number of clicks this url has received
@@ -34,6 +38,10 @@ import Vote from './vote.model';
 const RelatedLinkSchema = new Schema({
   id: String,
   url: {
+    type: String,
+    required: true
+  },
+  title: {
     type: String,
     required: true
   },
