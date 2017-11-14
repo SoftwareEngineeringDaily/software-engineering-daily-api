@@ -46,6 +46,7 @@ const RelatedLinkSchema = new Schema({
     required: true
   },
   clicks: { type: Number, default: 0 },
+  score: { type: Number, default: 0 },
   dateCreated: {
     type: Date,
     default: Date.now
