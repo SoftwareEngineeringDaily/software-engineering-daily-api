@@ -12,6 +12,19 @@ import RelatedLink from '../models/relatedLink.model';
  *   description: Related links for episodes.
  */
 
+
+/*
+* Load comment and append to req.
+*/
+function load(req, res, next, id) {
+ RelatedLink.get(id)
+   .then((relatedLink) => {
+     req.relatedLink = relatedLink; // eslint-disable-line no-param-reassign
+     return next();
+   })
+   .catch(error => next(error));
+}
+
 /**
  * @swagger
  * /posts/{postId}/relatedLink:
@@ -66,4 +79,4 @@ function list(req, res, next) {
   .catch( (err) => next(err));
 }
 
-export default {create, list};
+export default {create, list, load};
