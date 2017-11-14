@@ -70,13 +70,13 @@ const RelatedLinkSchema = new Schema({
  * Statics
  */
 RelatedLinkSchema.statics = {
-  list({post, user = null}) {
+  list({post, user}) {
     const query = {};
     query.post = post;
 
     return this.find(query).sort({score: 1}).lean()
       .then((links) => {
-        if (!user) return links;
+        if (!user){ return {links} }
 
         const linkIds = links.map((link) => {
           return link._id;

@@ -72,7 +72,7 @@ function create(req, res, next) {
 
 function list(req, res, next) {
   const { postId } = req.params;
-  RelatedLink.list({post: postId})
+  RelatedLink.list({post: postId, user: req.user})
   .then((relatedLinks) => {
     res.json(relatedLinks);
   })
