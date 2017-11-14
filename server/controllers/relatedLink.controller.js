@@ -17,7 +17,7 @@ import RelatedLink from '../models/relatedLink.model';
 * Load comment and append to req.
 */
 function load(req, res, next, id) {
- RelatedLink.get(id)
+ RelatedLink.findById(id)
    .then((relatedLink) => {
      req.relatedLink = relatedLink; // eslint-disable-line no-param-reassign
      return next();
