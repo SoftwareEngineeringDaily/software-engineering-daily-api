@@ -198,10 +198,13 @@ function signS3(req, res, next) {
   // We should Make this options a helper method:
   const S3_BUCKET = 'sd-profile-pictures';
   aws.config.region = 'us-west-2';
-  const s3 = new aws.S3();
+  const s3 = new aws.S3({
+    accessKeyId: process.env.S3_KEY,
+    secretAccessKey: process.env.S3_SECRET
+  });
 
-  const fileName = 'USER_ID_HERE.jpg'; // This can be anything
-  const fileType = 'jpg'; // req.query['file-type'];
+  const fileName = 'record-red-bg-180.png'; // This can be anything
+  const fileType = 'image/png'; // req.query['file-type'];
   const s3Params = {
     Bucket: S3_BUCKET,
     Key: fileName,
