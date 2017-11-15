@@ -8,8 +8,8 @@ import config from '../../config/config';
 const router = express.Router(); // eslint-disable-line new-cap
 
 
-router.route('/:relatedLinkId')
-  .delete(
+router.route('/:relatedLinkId/delete')
+  .post(
     expressJwt({ secret: config.jwtSecret }),
     relatedLinkCtrl.remove
   );

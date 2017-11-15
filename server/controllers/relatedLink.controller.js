@@ -32,12 +32,15 @@ function remove(req, res, next) {
       return res.status(401).json({'Error': 'Please login'});
     } else {
       relatedLink.deleted = true;
+      if (!relatedLink.title) {
+        // For old links :/
+        relatedLink.title = relatedLink.url
+      }
       return relatedLink.save().then(()=> {
-        console.log('success--------------------------');
         // Sucess:
-        return res.json({'deleted': true});
+        res.json({'deleted': true});
       })
-      .catch((e)=>{ console.log('-----error?---------'); next(e);});
+      .catch((e)=>{next(e);});
     }
   } else {
     return res.status(500).json({});
