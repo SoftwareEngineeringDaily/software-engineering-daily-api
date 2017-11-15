@@ -45,6 +45,7 @@ const RelatedLinkSchema = new Schema({
     type: String,
     required: true
   },
+  image: {type: String},
   clicks: { type: Number, default: 0 },
   score: { type: Number, default: 0 },
   dateCreated: {
