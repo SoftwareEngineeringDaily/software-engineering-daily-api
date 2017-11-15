@@ -41,6 +41,9 @@ function get(req, res) {
   return res.json(user);
 }
 
+// Bucket name:
+// sd-profile-pictures
+
 /**
  * Update existing user
  * @property {string} req.body.username - The username of user.

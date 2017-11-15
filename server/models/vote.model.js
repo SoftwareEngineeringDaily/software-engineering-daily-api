@@ -50,6 +50,23 @@ VoteSchema.method({
  * Statics
  */
 VoteSchema.statics = {
+  updateEntity(entity, vote) {
+    entity.upvoted = false;
+    entity.downvoted = false;
+
+    if (!vote) {
+      return entity;
+    }
+
+    if (vote.direction === 'upvote' && vote.active) {
+      entity.upvoted = true;
+    }
+
+    if (vote.direction === 'downvote' && vote.active) {
+      entity.downvoted = true;
+    }
+    return entity;
+  },
   /**
    * Get vote
    * @param {ObjectId} id - The objectId of vote.
