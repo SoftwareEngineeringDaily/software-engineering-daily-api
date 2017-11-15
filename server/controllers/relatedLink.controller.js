@@ -12,6 +12,41 @@ import RelatedLink from '../models/relatedLink.model';
  *   description: Related links for episodes.
  */
 
+
+/*
+* Load comment and append to req.
+*/
+function load(req, res, next, id) {
+ RelatedLink.findById(id)
+   .then((relatedLink) => {
+     req.relatedLink = relatedLink; // eslint-disable-line no-param-reassign
+     return next();
+   })
+   .catch(error => next(error));
+}
+
+function remove(req, res, next) {
+  const {relatedLink, user} = req;
+  if (relatedLink &&  user) {
+    if (relatedLink.author.toString() !== user._id.toString() ) {
+      return res.status(401).json({'Error': 'Please login'});
+    } else {
+      relatedLink.deleted = true;
+      if (!relatedLink.title) {
+        // For old links :/
+        relatedLink.title = relatedLink.url
+      }
+      return relatedLink.save().then(()=> {
+        // Sucess:
+        res.json({'deleted': true});
+      })
+      .catch((e)=>{next(e);});
+    }
+  } else {
+    return res.status(500).json({});
+  }
+}
+
 /**
  * @swagger
  * /posts/{postId}/relatedLink:
@@ -59,11 +94,11 @@ function create(req, res, next) {
 
 function list(req, res, next) {
   const { postId } = req.params;
-  RelatedLink.find({post: postId})
+  RelatedLink.list({post: postId, user: req.user})
   .then((relatedLinks) => {
     res.json(relatedLinks);
   })
   .catch( (err) => next(err));
 }
 
-export default {create, list};
+export default {create, list, load, remove};

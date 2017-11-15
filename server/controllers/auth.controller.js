@@ -6,6 +6,8 @@ import passport from 'passport';
 import FacebookTokenStrategy from 'passport-facebook-token';
 import User from '../models/user.model';
 import _ from 'lodash';
+import aws from 'aws-sdk';
+
 
 /**
  * @swagger
@@ -192,6 +194,40 @@ function socialAuth(req, res, next) {
   });
 }
 
+function signS3(req, res, next) {
+  // We should Make this options a helper method:
+  const S3_BUCKET = 'sd-profile-pictures';
+  aws.config.region = 'us-west-2';
+  const s3 = new aws.S3({
+    accessKeyId: process.env.S3_KEY,
+    secretAccessKey: process.env.S3_SECRET
+  });
+
+  const fileName = 'record-red-bg-180.png'; // This can be anything
+  const fileType = 'image/png'; // req.query['file-type'];
+  const s3Params = {
+    Bucket: S3_BUCKET,
+    Key: fileName,
+    Expires: 600, // in seconds
+    ContentType: fileType,
+    ACL: 'public-read'
+  };
+
+  s3.getSignedUrl('putObject', s3Params, (err, data) => {
+    if(err){
+      console.log(err);
+      return res.end();
+    }
+    const returnData = {
+      signedRequest: data, // <-- the useful one
+      url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`
+    };
+    res.write(JSON.stringify(returnData));
+    res.end();
+  });
+
+}
+
 /**
  * TODO: add swagger doc
  * This is a protected route. Will return random number only if jwt token is provided in header.
@@ -207,4 +243,4 @@ function getRandomNumber(req, res) {
   });
 }
 
-export default { login, getRandomNumber, register, socialAuth };
+export default { login, getRandomNumber, register, socialAuth, signS3 };
