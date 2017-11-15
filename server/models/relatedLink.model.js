@@ -73,6 +73,7 @@ RelatedLinkSchema.statics = {
   list({post, user}) {
     const query = {};
     query.post = post;
+    query.deleted = false;
 
     return this.find(query).sort({score: -1}).lean()
       .then((links) => {

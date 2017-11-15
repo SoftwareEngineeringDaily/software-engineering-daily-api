@@ -36,9 +36,9 @@ router.get('/health-check', (req, res) =>
   res.send('OK'));
 
 router.use('/docs', docRoutes);
+router.use('/related-links', relatedLinkRoutes);
 router.use('/posts', postRoutes);
 router.use('/comments', commentRoutes);
-router.use('/related-links', relatedLinkRoutes);
 router.use('/votes', voteRoutes);
 router.use('/favorites', favoriteRoutes);
 router.use('/listened', listenedRoutes);

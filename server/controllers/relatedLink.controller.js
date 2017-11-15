@@ -25,6 +25,25 @@ function load(req, res, next, id) {
    .catch(error => next(error));
 }
 
+function remove(req, res, next) {
+  const {relatedLink, user} = req;
+  if (relatedLink &&  user) {
+    if (relatedLink.author.toString() !== user._id.toString() ) {
+      return res.status(401).json({'Error': 'Please login'});
+    } else {
+      relatedLink.deleted = true;
+      return relatedLink.save().then(()=> {
+        console.log('success--------------------------');
+        // Sucess:
+        return res.json({'deleted': true});
+      })
+      .catch((e)=>{ console.log('-----error?---------'); next(e);});
+    }
+  } else {
+    return res.status(500).json({});
+  }
+}
+
 /**
  * @swagger
  * /posts/{postId}/relatedLink:
@@ -79,4 +98,4 @@ function list(req, res, next) {
   .catch( (err) => next(err));
 }
 
-export default {create, list, load};
+export default {create, list, load, remove};

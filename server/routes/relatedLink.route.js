@@ -7,6 +7,13 @@ import config from '../../config/config';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
+
+router.route('/:relatedLinkId')
+  .delete(
+    expressJwt({ secret: config.jwtSecret }),
+    relatedLinkCtrl.remove
+  );
+
 router.route('/:relatedLinkId/upvote')
   .post(expressJwt({ secret: config.jwtSecret })
   // TODO: refactor to have these into one call like upvote: [method1, method2,...]
