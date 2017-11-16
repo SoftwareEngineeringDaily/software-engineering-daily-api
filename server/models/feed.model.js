@@ -3,13 +3,14 @@ import mongoose, {Schema} from 'mongoose';
 import {RelatedLinkSchema} from './relatedLink.model';
 
 
+var feedItemSchema = new Schema(); // TODO: replace with proper import
 const FeedSchema = new Schema({
   user: {
     type: Schema.Types.ObjectId,
     ref: 'User'
   },
-  feedItems: [RelatedLinkSchema]
+  feedItems: [feedItemSchema]
 });
 
 
-export default mongoose.model('FeedSchema', FeedSchema);
+export default mongoose.model('Feed', FeedSchema);

@@ -5,9 +5,13 @@ import APIError from '../helpers/APIError';
 import Feed from '../models/Feed.model';
 
 function list(req, res, next) {
+  console.log('user')
   Feed.findOne({user: req.user._id})
-  .then(({feedItems}) => {
-    res.json(feedItems);
+  .exec()
+
+  .then((feed) => {
+    if (!feed) { return res.json([])}
+    res.json(feed.feedItems);
   })
   .catch((error) => {
       const err = new APIError('Error fetching user feed', httpStatus.INTERNAL_SERVER_ERROR, true); //eslint-disable-line

@@ -9,7 +9,7 @@ const router = express.Router(); // eslint-disable-line new-cap
 
 router.route('/')
   .get(
-    expressJwt({ secret: config.jwtSecret })
+    expressJwt({ secret: config.jwtSecret }),
     feedCtrl.list
   );
 
