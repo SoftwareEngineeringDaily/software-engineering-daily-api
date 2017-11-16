@@ -36,7 +36,6 @@ import Vote from './vote.model';
  *         $ref: '#/definitions/ObjectId'
  */
 const RelatedLinkSchema = new Schema({
-  id: String,
   url: {
     type: String,
     required: true
@@ -108,4 +107,5 @@ RelatedLinkSchema.statics = {
 // Indexes
 RelatedLinkSchema.index({ 'url': 'text' });
 
+exports.RelatedLinkSchema = RelatedLinkSchema;
 export default mongoose.model('RelatedLink', RelatedLinkSchema);
