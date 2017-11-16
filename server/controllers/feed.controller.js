@@ -5,7 +5,6 @@ import APIError from '../helpers/APIError';
 import Feed from '../models/Feed.model';
 
 function list(req, res, next) {
-  console.log('user')
   Feed.findOne({user: req.user._id})
   .exec()
 
