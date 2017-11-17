@@ -1,6 +1,7 @@
 import express from 'express';
 import docRoutes from '../docs';
 import postRoutes from './post.route';
+import feedRoutes from './feed.route';
 import commentRoutes from './comment.route';
 import relatedLinkRoutes from './relatedLink.route';
 import voteRoutes from './vote.route';
@@ -44,6 +45,7 @@ router.use('/favorites', favoriteRoutes);
 router.use('/listened', listenedRoutes);
 router.use('/tags', tagsRoutes);
 router.use('/users', userRoutes);
+router.use('/feed', feedRoutes);
 
 
 // mount auth routes at /auth
