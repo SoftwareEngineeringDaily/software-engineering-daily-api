@@ -199,11 +199,11 @@ function signS3(req, res, next) {
   const S3_BUCKET = 'sd-profile-pictures';
   aws.config.region = 'us-west-2';
   const s3 = new aws.S3({
-    accessKeyId: process.env.S3_KEY,
-    secretAccessKey: process.env.S3_SECRET
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
   });
 
-  const fileName = 'record-red-bg-180.png'; // This can be anything
+  const fileName = 'record-red-bg-180-2.png'; // This can be anything
   const fileType = 'image/png'; // req.query['file-type'];
   const s3Params = {
     Bucket: S3_BUCKET,
