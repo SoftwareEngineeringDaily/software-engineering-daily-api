@@ -53,6 +53,7 @@ function get(req, res) {
 function update(req, res, next) {
   const user = req.userLoaded;
   const username = req.body.username;
+  const avatarWasSet = req.body.isAvatarSet;
   // We gotta check a few things:
   // First we make sure we are the actual user we are modifying.
   if(!req.user || user._id != req.user._id) {
@@ -71,9 +72,12 @@ function update(req, res, next) {
     // otherwise user can set themselves to verified, etc :)
     const newValues = _.pick(req.body, User.updatableFields);
     Object.assign(user, newValues);
-    delete user.password;
+    if (avatarWasSet) {
+      // This should be pulled from utils:
+      const S3_BUCKET = 'sd-profile-pictures';
+      user.avatarUrl = `https://${S3_BUCKET}.s3.amazonaws.com/${user._id}`
+    }
     user.save();
-    delete user.password; // Why doesn't this work?
     user.password = null;
     res.json(user);
   })
