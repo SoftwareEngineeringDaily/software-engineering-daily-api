@@ -2,7 +2,7 @@ import Promise from 'bluebird';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
-import Feed from '../models/Feed.model';
+import Feed from '../models/feed.model';
 
 function list(req, res, next) {
   Feed.findOne({user: req.user._id})
