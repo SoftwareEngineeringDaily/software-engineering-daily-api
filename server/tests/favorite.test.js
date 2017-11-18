@@ -89,22 +89,20 @@ describe('## Favorite APIs', () => {
     });
 
     it('toggles the favorite for a post', (done) => {
-       request(app)
+      request(app)
         .post(`/api/posts/${postId}/favorite`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.OK)
-        .then((res) => {
-          return request(app)
-            .post(`/api/posts/${postId}/favorite`)
-            .set('Authorization', `Bearer ${userToken}`)
-            .expect(httpStatus.OK);
-        })
+        .then(res => request(app)
+          .post(`/api/posts/${postId}/favorite`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(httpStatus.OK))
         .then((res) => {
           const favorite = res.body;
           expect(favorite.postId).to.eql(`${postId}`);
           expect(favorite.active).to.be.false; //eslint-disable-line
           expect(favorite.userId).to.exist; //eslint-disable-line
-          done()
+          done();
         })
         .catch(done);
     });
@@ -188,6 +186,73 @@ describe('## Favorite APIs', () => {
         .expect(httpStatus.OK)
         .then((res) => {
           expect(res.body).to.be.an('array');
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# GET /api/posts/ bookmarked/favorited status', () => {
+    let favorite;
+    it('should have bookmarked undefined if not auth', (done) => {
+      request(app)
+        .get('/api/posts')
+        .expect(httpStatus.OK)
+        .then((res) => {
+          expect(res.body).to.be.an('array');
+          expect(res.body[0].bookmarked).to.be.undefined; //eslint-disable-line
+          done();
+        })
+        .catch(done);
+    });
+    it('should have bookmarked false by default', (done) => {
+      request(app)
+        .get('/api/posts')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          expect(res.body).to.be.an('array');
+          expect(res.body[0].bookmarked).to.equal(false);
+          done();
+        })
+        .catch(done);
+    });
+    it('should have bookmarked true if bookmarked/favorited', (done) => {
+      request(app)
+        .post(`/api/posts/${postId}/favorite`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          favorite = res.body;
+          return request(app)
+            .get('/api/posts')
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK);
+        })
+        .then((res) => {
+          expect(res.body).to.be.an('array');
+          expect(res.body[0]._id).to.equal(favorite.postId);
+          expect(res.body[0].bookmarked).to.equal(true);
+          done();
+        })
+        .catch(done);
+    });
+    it('should have bookmarked false if un-bookmarked/favorited', (done) => {
+      request(app)
+        .post(`/api/posts/${postId}/favorite`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then(() => request(app)
+          .post(`/api/posts/${postId}/unfavorite`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(httpStatus.OK))
+        .then(() => request(app)
+          .get('/api/posts')
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(httpStatus.OK))
+        .then((res) => {
+          expect(res.body).to.be.an('array');
+          expect(res.body[0].bookmarked).to.equal(false);
           done();
         })
         .catch(done);

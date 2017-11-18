@@ -44,6 +44,9 @@ import Vote from './vote.model';
  *       downvote:
  *         type: boolean
  *         description: if authenticated, returns if user downvoted episode
+ *       bookmarked:
+ *         type: boolean
+ *         description: if authenticated, returns if user bookmarked the episode
  *     required:
  *       - _id
  *       - title
@@ -71,6 +74,14 @@ const PostSchema = new mongoose.Schema({
  * - validations
  * - virtuals
  */
+
+// TODO: decide - refactor as bookmark for consistency w clients
+PostSchema.virtual('favoritedByUser', {
+  ref: 'Favorite',
+  localField: '_id',
+  foreignField: 'postId',
+  justOne: true
+});
 
 /**
  * Methods
@@ -134,15 +145,15 @@ PostSchema.statics = {
     if (tags.length > 0) query.tags = { $all: tags };
     if (categories.length > 0) query.categories = { $all: categories };
     if (search) {
-      let titleSerach = {}
-      let searchWords = search.split(' ').join('|');
-      titleSerach['title.rendered'] = { $regex: new RegExp(`${searchWords}`, 'i') };
+      const titleSearch = {};
+      const searchWords = search.split(' ').join('|');
+      titleSearch['title.rendered'] = { $regex: new RegExp(`${searchWords}`, 'i') };
 
       // @TODO: Add this when content doesn't have so much extra data
       // let contentSearch = {}
       // contentSearch['content.rendered'] = { $regex: new RegExp(`${search}`, 'i') };
 
-      query.$or = [titleSerach];
+      query.$or = [titleSearch];
     }
 
     const limitOption = parseInt(limit, 10);
@@ -152,56 +163,67 @@ PostSchema.statics = {
     if (type === 'top') {
       sort = { score: -1 };
     }
-
-    // return this.find().count()
-    //   .then((count) => {
-    //     numberOfPages = Math.floor(count / limit);
-    //
-    //     return this.find(query)
-    //       .sort(sort)
-    //       .limit(limit)
-    //       .exec();
-    //   })
-
-    return this.find(query, 'content title date mp3 link score featuredImage upvoted downvoted tags categories')
+    const queryPromise = this.find(query, 'content title date mp3 link score featuredImage upvoted downvoted tags categories')
       .sort(sort)
-      .limit(limitOption)
+      .limit(limitOption);
+
+    if (!user) {
+      return queryPromise.then((postsFound) => {
+        posts = postsFound;
+        // Flip direct back
+        if (dateDirection === 1) {
+          posts.reverse();
+        }
+        return postsFound;
+      });
+    }
+
+    return queryPromise
+      .populate({
+        path: 'favoritedByUser',
+        select: 'active',
+        match: { userId: user._id }
+      }).exec()
       .then((postsFound) => {
         posts = postsFound;
         // Flip direct back
         if (dateDirection === 1) {
           posts.reverse();
         }
-        if (!user) return posts;
-
         const postIds = posts.map((post) => { //eslint-disable-line
           return post._id;
         });
 
-        return Vote.find({$or: [
-          {
-            userId: user._id,
-            postId:  {$in: postIds},
-          },            {
-            userId: user._id,
-            entityId: {$in: postIds},
-          },
-        ]}).exec();
+        return Vote.find({
+          $or: [
+            {
+              userId: user._id,
+              postId: { $in: postIds },
+            }, {
+              userId: user._id,
+              entityId: { $in: postIds },
+            },
+          ]
+        }).exec();
       })
       .then((votes) => {
-        if (!user) return posts;
         const voteMap = {};
         for (let index in votes) { // eslint-disable-line
           const vote = votes[index];
-          const voteKey = vote.postId?  vote.postId : vote.entityId;
+          const voteKey = vote.postId ? vote.postId : vote.entityId;
           voteMap[voteKey] = vote;
         }
 
         const updatedPosts = [];
         for (let index in posts) { // eslint-disable-line
           const post = posts[index].toObject();
+          post.bookmarked = false;
           post.upvoted = false;
           post.downvoted = false;
+          // virtual is lost in toObject()
+          // even if the following set in schema: { toJSON: { virtuals: true } });
+          const { favoritedByUser } = posts[index];
+          if (favoritedByUser) post.bookmarked = favoritedByUser.active;
 
           if (!voteMap[post._id]) {
             updatedPosts.push(post);
