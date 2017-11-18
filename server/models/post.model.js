@@ -167,15 +167,13 @@ PostSchema.statics = {
       .sort(sort)
       .limit(limitOption);
 
+    // Flip direction back if originally limited by descending date filter
+    if (dateDirection === 1) {
+      queryPromise
+        .sort({ date: -1 });
+    }
     if (!user) {
-      return queryPromise.then((postsFound) => {
-        posts = postsFound;
-        // Flip direct back
-        if (dateDirection === 1) {
-          posts.reverse();
-        }
-        return postsFound;
-      });
+      return queryPromise.then(postsFound => postsFound);
     }
 
     return queryPromise
@@ -186,10 +184,6 @@ PostSchema.statics = {
       }).exec()
       .then((postsFound) => {
         posts = postsFound;
-        // Flip direct back
-        if (dateDirection === 1) {
-          posts.reverse();
-        }
         const postIds = posts.map((post) => { //eslint-disable-line
           return post._id;
         });
@@ -220,8 +214,7 @@ PostSchema.statics = {
           post.bookmarked = false;
           post.upvoted = false;
           post.downvoted = false;
-          // virtual is lost in toObject()
-          // even if the following set in schema: { toJSON: { virtuals: true } });
+          // note: virtuals not including in toObject by default
           const { favoritedByUser } = posts[index];
           if (favoritedByUser) post.bookmarked = favoritedByUser.active;
 
