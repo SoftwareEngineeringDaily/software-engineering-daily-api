@@ -9,7 +9,8 @@ The backend services and API for the Software Engineering Daily [Android](https:
 ## Set up (local) 
 ### *[More details here...](https://softwareengineeringdaily.github.io/Backend/gettingstarted/)
   - Install and run a local redis client
-  - Install and run a local mongo client 
+  - Install and run a local mongo client
+  - seed mongo with data from a recent backup
   - `cp .env.local_example .env`
   - `npm install` or `yarn install`
   - `npm start` or `yarn start`
