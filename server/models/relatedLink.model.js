@@ -101,6 +101,9 @@ RelatedLinkSchema.statics = {
 
         return links;
       });
+  },
+  listProfileFeed({userId}) {
+    return this.find({author: userId}).lean()
   }
 };
 
