@@ -3,13 +3,14 @@ import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Feed from '../models/feed.model';
+import RelatedLink from '../models/relatedLink.model'
 
 function list(req, res, next) {
   Feed.findOne({user: req.user._id})
   .exec()
 
   .then((feed) => {
-    if (!feed) { return res.json([])}
+    if (!feed) { return res.json([]);}
     res.json(feed.feedItems);
   })
   .catch((error) => {
@@ -18,4 +19,17 @@ function list(req, res, next) {
   });
 };
 
-export default {list};
+function listProfileFeed(req, res, next) {
+    const {userId} = req.params;
+    RelatedLink.listProfileFeed({userId})
+    .then((relatedLinks) => {
+      if(!relatedLinks) { return res.json([]);}
+      res.json(relatedLinks);
+    })
+    .catch((error) => {
+      const err = new APIError('Error fetching user feed', httpStatus.INTERNAL_SERVER_ERROR, true); //eslint-disable-line
+      return next(err);
+    });
+};
+
+export default {list, listProfileFeed};

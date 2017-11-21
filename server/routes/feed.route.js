@@ -13,4 +13,10 @@ router.route('/')
     feedCtrl.list
   );
 
+router.route('/profile-feed/:userId')
+  .get(
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
+    feedCtrl.listProfileFeed
+  );
+
 export default router;
