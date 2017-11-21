@@ -14,36 +14,31 @@ function create(req, res, next) {
   })
   .then(customer => {
         // TODO: save customer in DB
-        stripe.subscriptions.create({
+        return stripe.subscriptions.create({
           customer: customer.id,
           items: [
             {
               plan: "standard_subscription",
             },
           ],
-          // TODO: turn this into promise chain:
-        }, function(err, subscription) {
-          // asynchronously called
-          if (err) {
-            console.log('err', err);
-            return next(err);
-          }
-          console.log('subscription', subscription);
-          const newSubscription = new Subscription();
-          newSubscription.stripe.subscriptionId = subscription.id;
-          newSubscription.stripe.customerId = customer.id;
-          newSubscription.stripe.email = stripeEmail;
-          newSubscription.user = user._id;
-          newSubscription.save();
-          req.json({'succes': 'sucess'})
-        });
+        })
+        .then((subscription) => {
+          return {subscription, customer}
+        })
   })
   .catch(err => {
-    console.log("Error:", err)
+    console.log("Error:", err);
+    next(err);
   })
-  .then(charge => {
-    console.log('charge', charge);
-    res.json({charge})
+  .then(({subscription, customer}) => {
+    console.log('subscription', subscription);
+    const newSubscription = new Subscription();
+    newSubscription.stripe.subscriptionId = subscription.id;
+    newSubscription.stripe.customerId = customer.id;
+    newSubscription.stripe.email = stripeEmail;
+    newSubscription.user = user._id;
+    newSubscription.save();
+    res.json({'succes': 'sucess'})
   });
 }
 
