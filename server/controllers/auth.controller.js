@@ -194,17 +194,12 @@ function socialAuth(req, res, next) {
   });
 }
 
-function signS3(req, res, next) {
-  // We should Make this options a helper method:
-  const S3_BUCKET = 'sd-profile-pictures';
-  aws.config.region = 'us-west-2';
-  const s3 = new aws.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-  });
 
-  const fileName = 'record-red-bg-180-2.png'; // This can be anything
-  const fileType = 'image/png'; // req.query['file-type'];
+function getS3Config(S3_BUCKET, fileType, fileName) {
+  // We should Make this options a helper method:
+  aws.config.region = 'us-west-2';
+  // const fileName = 'record-red-bg-180-2.png'; // This can be anything
+  // const fileType = 'image/png'; // req.query['file-type'];
   const s3Params = {
     Bucket: S3_BUCKET,
     Key: fileName,
@@ -212,6 +207,20 @@ function signS3(req, res, next) {
     ContentType: fileType,
     ACL: 'public-read'
   };
+  return s3Params;
+}
+
+// This should be a helper library and perhaps part of user.controller isntead:
+function signS3(req, res, next) {
+  const S3_BUCKET = 'sd-profile-pictures';
+  // Probably only need to do this once:
+  const s3 = new aws.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  });
+  const fileType = req.fileType;
+  const fileName = req.user._id;
+  const s3Params = getS3Config(S3_BUCKET, fileType, fileName);
 
   s3.getSignedUrl('putObject', s3Params, (err, data) => {
     if(err){
@@ -225,7 +234,6 @@ function signS3(req, res, next) {
     res.write(JSON.stringify(returnData));
     res.end();
   });
-
 }
 
 /**
