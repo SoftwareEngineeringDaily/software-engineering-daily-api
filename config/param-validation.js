@@ -8,6 +8,7 @@ export default {
       name: Joi.string().required(),
       bio: Joi.string().allow(''),
       website: Joi.string().allow(''),
+      isAvatarSet: Joi.boolean().required(),
       email: Joi.string().email().allow('')
     },
     params: {
