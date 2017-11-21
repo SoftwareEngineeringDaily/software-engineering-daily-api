@@ -6,9 +6,10 @@ import Subscription from '../models/subscription.model';
 function create(req, res, next) {
   const { stripeToken, stripeEmail } = req.body;
   const { user } = req;
+  const stripeEmail = user.email;
 
   stripe.customers.create({
-    email: stripeEmail
+    email: stripeEmail,
     card: stripeToken
   })
   .then(customer => {
@@ -20,6 +21,7 @@ function create(req, res, next) {
               plan: "standard_subscription",
             },
           ],
+          // TODO: turn this into promise chain:
         }, function(err, subscription) {
           // asynchronously called
           if (err) {
@@ -30,6 +32,7 @@ function create(req, res, next) {
           const newSubscription = new Subscription();
           newSubscription.stripe.subscriptionId = subscription.id;
           newSubscription.stripe.customerId = customer.id;
+          newSubscription.stripe.email = stripeEmail;
           newSubscription.user = user._id;
           newSubscription.save();
         });
