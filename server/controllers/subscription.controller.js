@@ -4,7 +4,7 @@ import httpStatus from 'http-status';
 import Subscription from '../models/subscription.model';
 
 function create(req, res, next) {
-  const { stripeToken, stripeEmail } = req.body;
+  const { stripeToken } = req.body;
   const { user } = req;
   const stripeEmail = user.email;
 
@@ -35,6 +35,7 @@ function create(req, res, next) {
           newSubscription.stripe.email = stripeEmail;
           newSubscription.user = user._id;
           newSubscription.save();
+          req.json({'succes': 'sucess'})
         });
   })
   .catch(err => {
