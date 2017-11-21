@@ -210,6 +210,7 @@ function getS3Config(S3_BUCKET, fileType, fileName) {
   return s3Params;
 }
 
+require('dotenv').config();
 // This should be a helper library and perhaps part of user.controller isntead:
 function signS3(req, res, next) {
   const S3_BUCKET = 'sd-profile-pictures';
