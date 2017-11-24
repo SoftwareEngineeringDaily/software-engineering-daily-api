@@ -258,4 +258,35 @@ describe('## Favorite APIs', () => {
         .catch(done);
     });
   });
+
+  describe('# GET /api/users/:userId/bookmarked', () => {
+    it('should get bookmarked for authenticated user with "me" shortcut', (done) => {
+      request(app)
+        .post(`/api/posts/${postId}/favorite`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then(() => request(app)
+          .get('/api/users/me/bookmarked')
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(httpStatus.OK))
+        .then((res) => {
+          expect(res.body).to.be.an('array');
+          expect(res.body[0]._id).to.equal(`${postId}`);
+          done();
+        })
+        .catch(done);
+    });
+    it('should not get non-bookmarked for authenticated user with "me" shortcut', (done) => {
+      request(app)
+        .get('/api/users/me/bookmarked')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          expect(res.body).to.be.an('array');
+          expect(res.body).to.have.lengthOf(0);
+          done();
+        })
+        .catch(done);
+    });
+  });
 });

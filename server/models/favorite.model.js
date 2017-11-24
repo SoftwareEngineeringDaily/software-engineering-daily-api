@@ -2,6 +2,7 @@ import Promise from 'bluebird';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
+import Post from './post.model';
 
 /**
  * @swagger
@@ -47,7 +48,6 @@ FavoriteSchema.method({
  */
 FavoriteSchema.statics = {
   /**
-   * TODO - remove? not in use
    * Get favorite.
    * @param {ObjectId} id - The objectId of favorite.
    * @returns {Promise<Favorite, APIError>}
@@ -76,6 +76,23 @@ FavoriteSchema.statics = {
       .skip(+skip)
       .limit(+limit)
       .exec();
+  },
+  listBookmarkedPostsForUser(userId) {
+    return this.find({ userId }, 'postId')
+      .then((bookmarks) => {
+      // return empty array if nothing yet bookmarked
+        if (bookmarks.length === 0) {
+          return [];
+        }
+        const postIds = bookmarks.map(bookmark => bookmark.postId);
+        return Post.find({ _id: { $in: postIds } }, Post.defaultSelected)
+          .sort({ date: -1 })
+          .lean() // return as plain object
+          .exec();
+      }).then((posts) => {
+        const postsWithVotes = Post.addVotesForUserToPosts(posts, userId);
+        return postsWithVotes.map(post => Object.assign({}, post, { bookmarked: true }));
+      });
   }
 };
 

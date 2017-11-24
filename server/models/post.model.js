@@ -130,8 +130,7 @@ PostSchema.statics = {
     categories = [],
     search = null
   } = {}) {
-    const query = { };
-    let posts;
+    const query = {};
     // @TODO use
     let numberOfPages = 0; //eslint-disable-line
 
@@ -147,7 +146,9 @@ PostSchema.statics = {
     if (search) {
       const titleSearch = {};
       const searchWords = search.split(' ').join('|');
-      titleSearch['title.rendered'] = { $regex: new RegExp(`${searchWords}`, 'i') };
+      titleSearch['title.rendered'] = {
+        $regex: new RegExp(`${searchWords}`, 'i')
+      };
 
       // @TODO: Add this when content doesn't have so much extra data
       // let contentSearch = {}
@@ -163,43 +164,54 @@ PostSchema.statics = {
     if (type === 'top') {
       sort = { score: -1 };
     }
-    const queryPromise = this.find(query, 'content title date mp3 link score featuredImage upvoted downvoted tags categories')
+    const queryPromise = this.find(query, this.defaultSelected)
       .sort(sort)
       .limit(limitOption);
 
     // Flip direction back if originally limited by descending date filter
     if (dateDirection === 1) {
-      queryPromise
-        .sort({ date: -1 });
+      queryPromise.sort({ date: -1 });
     }
     if (!user) {
       return queryPromise.then(postsFound => postsFound);
     }
 
-    return queryPromise
-      .populate({
-        path: 'favoritedByUser',
-        select: 'active',
-        match: { userId: user._id }
-      }).exec()
+    return queryPromise.populate({
+      path: 'favoritedByUser',
+      select: 'active',
+      match: { userId: user._id }
+    })
+      .lean() // returns as plain object
+      .exec()
       .then((postsFound) => {
-        posts = postsFound;
-        const postIds = posts.map((post) => { //eslint-disable-line
-          return post._id;
+      // add bookmarked/favorited info
+        const postsWithBookmarked = postsFound.map((post) => {
+          const _post = post;
+          const { favoritedByUser } = _post;
+          const bookmarked = favoritedByUser ? favoritedByUser.active : false;
+          delete _post.favoritedByUser;
+          return Object.assign({}, post, { bookmarked });
         });
-
-        return Vote.find({
-          $or: [
-            {
-              userId: user._id,
-              postId: { $in: postIds },
-            }, {
-              userId: user._id,
-              entityId: { $in: postIds },
-            },
-          ]
-        }).exec();
-      })
+        // add vote info
+        return this.addVotesForUserToPosts(postsWithBookmarked, user._id);
+      });
+  },
+  addVotesForUserToPosts(posts, userId) {
+    const postIds = posts.map((post) => { //eslint-disable-line
+      return post._id;
+    });
+    return Vote.find({
+      $or: [
+        {
+          userId,
+          postId: { $in: postIds },
+        }, {
+          userId,
+          entityId: { $in: postIds },
+        },
+      ]
+    })
+      .exec()
       .then((votes) => {
         const voteMap = {};
         for (let index in votes) { // eslint-disable-line
@@ -210,13 +222,9 @@ PostSchema.statics = {
 
         const updatedPosts = [];
         for (let index in posts) { // eslint-disable-line
-          const post = posts[index].toObject();
-          post.bookmarked = false;
+          const post = posts[index];
           post.upvoted = false;
           post.downvoted = false;
-          // note: virtuals not including in toObject by default
-          const { favoritedByUser } = posts[index];
-          if (favoritedByUser) post.bookmarked = favoritedByUser.active;
 
           if (!voteMap[post._id]) {
             updatedPosts.push(post);
@@ -236,7 +244,8 @@ PostSchema.statics = {
 
         return updatedPosts;
       });
-  }
+  },
+  defaultSelected: 'content title date mp3 link score featuredImage upvoted downvoted tags categories'
 };
 
 PostSchema.index({ 'title.rendered': 'text', 'content.rendered': 'text' });
