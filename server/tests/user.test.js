@@ -77,6 +77,7 @@ describe('## User APIs', () => {
   describe('# PUT /api/users/:userId', () => {
     it('should update user details', (done) => {
       user.username = 'KK';
+      user.isAvatarSet = false;
       request(app)
         .put(`/api/users/${user._id}`)
         .set('Authorization', `Bearer ${userToken}`)
