@@ -15,7 +15,8 @@ const SubscriptionSchema = new mongoose.Schema({
     customerId: {type: String},
     subscriptionId: {type: String},
     email: {type: String}
-  }
+  },
+  active: {type: Boolean}
   // date expired
   // date created
 });

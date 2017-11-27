@@ -36,6 +36,7 @@ function create(req, res, next) {
     newSubscription.stripe.subscriptionId = subscription.id;
     newSubscription.stripe.customerId = customer.id;
     newSubscription.stripe.email = stripeEmail;
+    newSubscription.active = true;
     newSubscription.user = user._id;
     newSubscription.save();
     res.json({'succes': 'sucess'})
