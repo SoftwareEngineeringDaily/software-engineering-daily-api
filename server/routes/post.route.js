@@ -22,7 +22,8 @@ router.route('/recommendations')
   , postCtrl.recommendations);
 
 router.route('/:postId')
-  .get(postCtrl.get);
+  .get(expressJwt({ secret: config.jwtSecret
+    , credentialsRequired: false }), postCtrl.get);
 
 router.route('/:postId/comments')
   .get(expressJwt({ secret: config.jwtSecret

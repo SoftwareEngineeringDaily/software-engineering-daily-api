@@ -5,7 +5,6 @@ import mongoose from 'mongoose';
 import Post from '../models/post.model';
 import Vote from '../models/vote.model';
 import User from '../models/user.model';
-import config from '../../config/config';
 import { replaceWithAdFree } from '../helpers/post.helper';
 
 /**
@@ -54,9 +53,23 @@ function load(req, res, next, id) {
  *         $ref: '#/responses/NotFound'
  */
 
-function get(req, res) {
-  return res.json(req.post);
-}
+ function get(req, res, next) {
+   if (req.user) {
+     return User.get(req.user._id)
+     .then((_user) => {
+       if( _user.subscription && _user.subscription.active) {
+         res.json(
+           replaceWithAdFree(req.post.toObject(), next);
+         );
+       } else {
+         return res.json(req.post);
+       }
+     })
+     .catch(e => next(e));
+   } else  {
+     return res.json(req.post);
+   }
+ }
 
 /**
  * @swagger
@@ -155,7 +168,7 @@ function list(req, res, next) {
       .then(posts => {
         if( _user.subscription && _user.subscription.active) {
           const _posts = posts.map( (post) => {
-            return replaceWithAdFree(post);
+            return replaceWithAdFree(post, next);
           });
           res.json(_posts);
         } else {
@@ -202,7 +215,6 @@ function recommendations(req, res, next) {
     const ids = recommendationsFound.map((rec) => {  //eslint-disable-line
       return mongoose.Types.ObjectId(rec); //eslint-disable-line
     });
-
     return Post.find({ _id: { $in: ids } });
   })
   .then((posts) => { //eslint-disable-line
