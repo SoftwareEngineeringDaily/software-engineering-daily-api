@@ -8,7 +8,10 @@
 function loadFullUser(req, res, next) {
    if (req.user) {
      return User.get(req.user._id)
-     .then((_user) => {
+     .then((fullUser) => {
+       if (fullUser) {
+         req.fullUser = fullUser;
+       }
      })
      .catch(e => next(e));
    }
