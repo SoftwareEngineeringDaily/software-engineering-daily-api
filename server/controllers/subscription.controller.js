@@ -15,6 +15,7 @@ function create(req, res, next) {
   })
   .then(customer => {
         // TODO: save customer in DB
+        // TODO: look up customer and see if it already exists?
         return stripe.subscriptions.create({
           customer: customer.id,
           items: [
@@ -41,14 +42,16 @@ function create(req, res, next) {
     newSubscription.user = user._id;
     newSubscription.save()
     .then((subscriptionCreated) => {
-      console.log('subscription created!!!!!!------', subscriptionCreated);
-      return User.get(user._id)
-      .then((_user) => {
-        _user.subscription = subscriptionCreated._id;
-        return _user.save().then(() => {
-          res.json({'succes': 'sucess'})
-        });
+      return User.get(user._id).then((_user) => {
+        return {_user, subscriptionCreated};
       });
+    })
+    .then(({_user, subscriptionCreated}) => {
+      _user.subscription = subscriptionCreated._id;
+      return _user.save();
+    })
+    .then((_user) => {
+      return res.json({'succes': 'sucess'});
     })
     .catch((error) => {
       console.log('error', error);
