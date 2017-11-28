@@ -1,4 +1,4 @@
-import stripe from '../helpers/stripe';
+import stripe from '../helpers/stripe.helper';
 import APIError from '../helpers/APIError';
 import httpStatus from 'http-status';
 import Subscription from '../models/subscription.model';
