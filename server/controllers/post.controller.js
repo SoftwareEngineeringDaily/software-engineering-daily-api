@@ -4,6 +4,9 @@ import mongoose from 'mongoose';
 
 import Post from '../models/post.model';
 import Vote from '../models/vote.model';
+import User from '../models/user.model';
+import config from '../../config/config';
+
 
 /**
  * @swagger
@@ -144,9 +147,40 @@ function list(req, res, next) {
     query.categories = newTags;
   }
 
-  Post.list(query)
+  // Here we do this so we can fetch subscritions:
+  if (req.user) {
+    User.get(req.user._id)
+    .then((_user) => {
+      return Post.list(query)
+      .then(posts => {
+        console.log('-------------------------------');
+        console.log('_user', _user);
+        console.log('-------------------------------');
+        if( _user.subscription && _user.subscription.active) {
+          const _posts = posts.map( (post) => {
+            // post.toObject();
+            // Translate url:
+            // Trach catch
+            const originalMP3Split = post.mp3.split('/');
+            if( originalMP3Split.length > 0 ) {
+              const fileName =  originalMP3Split[originalMP3Split.length -1];
+              const newFileName = fileName.replace('.mp3', '_adfree.mp3');
+              post.mp3 = config.adFreeURL + newFileName;
+            }
+            return post;
+          });
+          res.json(_posts);
+        } else {
+          res.json(posts);
+        }
+      })
+      .catch(e => next(e));
+    });
+  } else {
+    Post.list(query)
     .then(posts => res.json(posts))
     .catch(e => next(e));
+  }
 }
 
 // @TODO: maybe this should be in a recommendation controller
