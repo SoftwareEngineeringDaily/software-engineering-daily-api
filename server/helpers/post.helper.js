@@ -15,4 +15,4 @@ function replaceWithAdFree(post, next) {
   return post;
 }
 
-export { replaceWithAdFree }
+export { replaceWithAdFree };

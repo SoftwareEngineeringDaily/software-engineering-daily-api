@@ -59,7 +59,7 @@ function load(req, res, next, id) {
      .then((_user) => {
        if( _user.subscription && _user.subscription.active) {
          res.json(
-           replaceWithAdFree(req.post.toObject(), next);
+           replaceWithAdFree(req.post.toObject(), next)
          );
        } else {
          return res.json(req.post);
