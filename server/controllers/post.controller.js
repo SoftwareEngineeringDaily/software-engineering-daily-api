@@ -53,12 +53,14 @@ function load(req, res, next, id) {
  *         $ref: '#/responses/NotFound'
  */
 
+ // TODO: fetch the fullUser in middleware
+ 
  function get(req, res, next) {
    if (req.user) {
      return User.get(req.user._id)
      .then((_user) => {
-       if( _user.subscription && _user.subscription.active) {
-         res.json(
+       if ( _user.subscription && _user.subscription.active ) {
+         return res.json(
            replaceWithAdFree(req.post.toObject(), next)
          );
        } else {
