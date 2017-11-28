@@ -16,10 +16,12 @@ function replaceWithAdFree(post, next) {
 }
 
 
-function getAdFreeSinglePostIfSubscribed(post, fullUser) {
-   if (req.fullUser && req.fullUser.subscription && req.fullUser.subscription.active ) {
-     return
-   }
+function getAdFreeSinglePostIfSubscribed(post, fullUser, next) {
+  if (fullUser && fullUser.subscription && fullUser.subscription.active ) {
+    return replaceWithAdFree(post, next);
+  } else {
+    return post;
+  }
 }
 
 function getAdFreePostsIfSubscribed(posts, fullUser, next) {

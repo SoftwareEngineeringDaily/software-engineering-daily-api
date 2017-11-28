@@ -1,4 +1,4 @@
-
+import User from '../models/user.model';
 /**
  * Custom middleware
  * @param req
@@ -12,8 +12,11 @@ function loadFullUser(req, res, next) {
        if (fullUser) {
          req.fullUser = fullUser;
        }
+       next();
      })
      .catch(e => next(e));
+   } else {
+     next();
    }
 }
 
