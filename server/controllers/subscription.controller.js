@@ -2,6 +2,7 @@ import stripe from '../helpers/stripe';
 import APIError from '../helpers/APIError';
 import httpStatus from 'http-status';
 import Subscription from '../models/subscription.model';
+import User from '../models/user.model';
 
 function create(req, res, next) {
   const { stripeToken } = req.body;
@@ -38,8 +39,23 @@ function create(req, res, next) {
     newSubscription.stripe.email = stripeEmail;
     newSubscription.active = true;
     newSubscription.user = user._id;
-    newSubscription.save();
-    res.json({'succes': 'sucess'})
+    newSubscription.save()
+    .then((subscriptionCreated) => {
+      console.log('subscription created!!!!!!------', subscriptionCreated);
+      return User.get(user._id)
+      .then((_user) => {
+        _user.subscription = subscriptionCreated._id;
+        return _user.save().then(() => {
+          res.json({'succes': 'sucess'})
+        });
+      });
+    })
+    .catch((error) => {
+      console.log('error', error);
+      let err = new APIError('An error ocurred when creating your subscription.', httpStatus.INTERNAL_SERVER_ERROR, true); //eslint-disable-line
+      return next(err);
+    });
+
   });
 }
 
