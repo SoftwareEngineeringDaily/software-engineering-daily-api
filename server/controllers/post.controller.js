@@ -6,7 +6,7 @@ import Post from '../models/post.model';
 import Vote from '../models/vote.model';
 import User from '../models/user.model';
 import config from '../../config/config';
-
+import { replaceWithAdFree } from '../helpers/post.helper';
 
 /**
  * @swagger
@@ -153,21 +153,9 @@ function list(req, res, next) {
     .then((_user) => {
       return Post.list(query)
       .then(posts => {
-        console.log('-------------------------------');
-        console.log('_user', _user);
-        console.log('-------------------------------');
         if( _user.subscription && _user.subscription.active) {
           const _posts = posts.map( (post) => {
-            // post.toObject();
-            // Translate url:
-            // Trach catch
-            const originalMP3Split = post.mp3.split('/');
-            if( originalMP3Split.length > 0 ) {
-              const fileName =  originalMP3Split[originalMP3Split.length -1];
-              const newFileName = fileName.replace('.mp3', '_adfree.mp3');
-              post.mp3 = config.adFreeURL + newFileName;
-            }
-            return post;
+            return replaceWithAdFree(post);
           });
           res.json(_posts);
         } else {
