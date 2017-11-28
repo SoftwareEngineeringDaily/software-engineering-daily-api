@@ -15,4 +15,23 @@ function replaceWithAdFree(post, next) {
   return post;
 }
 
-export { replaceWithAdFree };
+
+function getAdFreeSinglePostIfSubscribed(post, fullUser) {
+   if (req.fullUser && req.fullUser.subscription && req.fullUser.subscription.active ) {
+     return
+   }
+}
+
+function getAdFreePostsIfSubscribed(posts, fullUser, next) {
+  if (fullUser && fullUser.subscription && fullUser.subscription.active ) {
+    // Here we do this so we can fetch subscritions:
+    const _posts = posts.map( (post) => { return replaceWithAdFree(post, next); });
+    return _posts;
+  } else {
+    return posts;
+  }
+}
+
+
+
+export { replaceWithAdFree, getAdFreeSinglePostIfSubscribed, getAdFreePostsIfSubscribed };

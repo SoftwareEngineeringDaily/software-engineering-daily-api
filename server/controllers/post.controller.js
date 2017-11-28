@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import Post from '../models/post.model';
 import Vote from '../models/vote.model';
 import User from '../models/user.model';
-import { replaceWithAdFree } from '../helpers/post.helper';
+import { getAdFreeSinglePostIfSubscribed, getAdFreePostsIfSubscribed } from '../helpers/post.helper';
 
 /**
  * @swagger
@@ -53,24 +53,11 @@ function load(req, res, next, id) {
  *         $ref: '#/responses/NotFound'
  */
 
- // TODO: fetch the fullUser in middleware
- 
  function get(req, res, next) {
-   if (req.user) {
-     return User.get(req.user._id)
-     .then((_user) => {
-       if ( _user.subscription && _user.subscription.active ) {
-         return res.json(
-           replaceWithAdFree(req.post.toObject(), next)
-         );
-       } else {
-         return res.json(req.post);
-       }
-     })
-     .catch(e => next(e));
-   } else  {
-     return res.json(req.post);
-   }
+     // Load ad free version of podcast episode if subscrbied:
+     return res.json(
+       getAdFreeSinglePostIfSubscribed(req.post.toObject(), req.fullUser, next)
+     );
  }
 
 /**
@@ -162,28 +149,12 @@ function list(req, res, next) {
     query.categories = newTags;
   }
 
-  // Here we do this so we can fetch subscritions:
-  if (req.user) {
-    User.get(req.user._id)
-    .then((_user) => {
-      return Post.list(query)
-      .then(posts => {
-        if( _user.subscription && _user.subscription.active) {
-          const _posts = posts.map( (post) => {
-            return replaceWithAdFree(post, next);
-          });
-          res.json(_posts);
-        } else {
-          res.json(posts);
-        }
-      })
-      .catch(e => next(e));
-    });
-  } else {
-    Post.list(query)
-    .then(posts => res.json(posts))
-    .catch(e => next(e));
-  }
+  console.log('get posts');
+  Post.list(query)
+  .then(posts => {
+      return res.json(getAdFreePostsIfSubscribed(posts, req.fullUser, next));
+  })
+  .catch(e => next(e));
 }
 
 // @TODO: maybe this should be in a recommendation controller
@@ -217,10 +188,10 @@ function recommendations(req, res, next) {
     const ids = recommendationsFound.map((rec) => {  //eslint-disable-line
       return mongoose.Types.ObjectId(rec); //eslint-disable-line
     });
-    return Post.find({ _id: { $in: ids } });
+    return Post.find({ _id: { $in: ids } }).lean();
   })
   .then((posts) => { //eslint-disable-line
-    return res.json(posts);
+    return res.json(getAdFreePostsIfSubscribed(posts, req.fullUser, next));
   })
   .catch((e) => {
     next(e);
