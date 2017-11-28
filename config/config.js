@@ -18,6 +18,8 @@ const envVarsSchema = Joi.object({
     }),
   JWT_SECRET: Joi.string().required()
     .description('JWT Secret required to sign'),
+  AD_FREE_URL: Joi.string().required()
+    .description('URL for ad free podcasts'),
   MONGO_HOST: Joi.string().required()
     .description('Mongo DB host url'),
   MONGO_HOST_TEST: Joi.string()
@@ -40,6 +42,7 @@ const config = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   mongooseDebug: envVars.MONGOOSE_DEBUG,
+  adFreeURL: envVars.AD_FREE_URL,
   jwtSecret: envVars.JWT_SECRET,
   mongo: {
     host: envVars.MONGO_HOST,
