@@ -6,7 +6,11 @@ import Feed from '../models/feed.model';
 import RelatedLink from '../models/relatedLink.model'
 
 function list(req, res, next) {
-  Feed.findOne({user: req.user._id})
+
+  // If user is logged out, use Jeff's feed TODO cleaner solution
+  let userId = req.user ? req.user._id : '597a06d7f0dc67003db0c4c0'
+
+  Feed.findOne({user: userId})
   .exec()
 
   .then((feed) => {
@@ -27,7 +31,7 @@ function listProfileFeed(req, res, next) {
       res.json(relatedLinks);
     })
     .catch((error) => {
-      const err = new APIError('Error fetching user feed', httpStatus.INTERNAL_SERVER_ERROR, true); //eslint-disable-line
+      const err = new APIError('Error fetching profile feed', httpStatus.INTERNAL_SERVER_ERROR, true); //eslint-disable-line
       return next(err);
     });
 };
