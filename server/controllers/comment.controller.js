@@ -4,30 +4,6 @@ import map from 'lodash/map';
 
 import Comment from '../models/comment.model';
 
-function remove(req, res, next) {
-  const {comment, user} = req
-  console.log("USER", user)
-  if (comment &&  user) {
-    if (comment.author.toString() !== user._id.toString() ) {
-      return res.status(401).json({'Error': 'Please login'});
-    }
-    else {
-      relatedLink.deleted = true;
-      if (!relatedLink.title) {
-        // For old links :/
-        relatedLink.title = relatedLink.url
-      }
-      return relatedLink.save().then(()=> {
-        // Sucess:
-        res.json({'deleted': true});
-      })
-      .catch((e)=>{next(e);});
-    }
-  } else {
-    return res.status(500).json({});
-  }
-}
-
 /*
 * Load comment and append to req.
 */
@@ -38,6 +14,27 @@ function load(req, res, next, id) {
      return next();
    })
    .catch(e => next(e));
+}
+
+function remove(req, res, next) {
+  const {comment, user} = req
+  console.log("USER------------------", user)
+  console.log("COMMENT------------------", comment)
+  if (comment &&  user) {
+    if (comment.author._id.toString() !== user._id.toString() ) {
+      return res.status(401).json({'Error': 'Please login'});
+    }
+    else {
+      comment.deleted = true;
+      return comment.save().then(()=> {
+        // Sucess:
+        res.json({'deleted': true});
+      })
+      .catch((e)=>{next(e);});
+    }
+  } else {
+    return res.status(500).json({});
+  }
 }
 
 /**
