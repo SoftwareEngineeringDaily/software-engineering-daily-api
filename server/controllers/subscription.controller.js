@@ -9,12 +9,9 @@ function cancel(req, res, next) {
     const subscriptionId = req.fullUser.subscription.stripe.subscriptionId;
     stripe.subscriptions.del(subscriptionId)
     .then((confirmation) => {
-      console.log('subscription cancelled ---------------- confirmation:', confirmation);
       req.fullUser.subscription.active = false
       return req.fullUser.subscription.save()
       .then((_newSub) => {
-        console.log('saving subscription without active', _newSub);
-
         req.fullUser.subscription = null;
         return req.fullUser.save();
       })
@@ -23,11 +20,10 @@ function cancel(req, res, next) {
       });
     })
     .catch((err) => {
-      console.log('---------------------err??', err);
       next(err);
     })
   } else {
-    next('No subscription');
+    next('No subscription exists.');
   }
 }
 
