@@ -4,6 +4,17 @@ import httpStatus from 'http-status';
 import Subscription from '../models/subscription.model';
 import User from '../models/user.model';
 
+function cancel(req, res, next) {
+  if (req.fullUser && req.fullUser.subscription) {
+    stripe.subscriptions.del(subscription.id,
+    function(err, confirmation) {
+      // asynchronously called
+      console.log('---------------------err', err);
+      console.log('subscription canelled ---------------- ', confirmation);
+    });
+  }
+}
+
 function create(req, res, next) {
   const { stripeToken } = req.body;
   const { user } = req;
@@ -62,4 +73,4 @@ function create(req, res, next) {
   });
 }
 
-export default { create };
+export default { create, cancel };
