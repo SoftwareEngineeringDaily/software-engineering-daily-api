@@ -14,8 +14,26 @@ function list(req, res, next) {
   .exec()
 
   .then((feed) => {
-    if (!feed) { return res.json([]);}
-    res.json(feed.feedItems);
+    // If user is new and doesn't have a feed, use Jeff's feed
+    if (!feed) {
+      Feed.findOne({user: '597a06d7f0dc67003db0c4c0'})
+      .exec()
+      .then((jeffsFeed) => {
+        if(jeffsFeed) {
+          res.json(jeffsFeed.feedItems)
+        }
+        else{
+          res.json([])
+        }
+      })
+      .catch((error) => {
+          const err = new APIError('Error fetching Jeffs feed', httpStatus.INTERNAL_SERVER_ERROR, true); //eslint-disable-line
+          return next(err);
+      })
+    }
+    else {
+      res.json(feed.feedItems);
+    }
   })
   .catch((error) => {
       const err = new APIError('Error fetching user feed', httpStatus.INTERNAL_SERVER_ERROR, true); //eslint-disable-line
