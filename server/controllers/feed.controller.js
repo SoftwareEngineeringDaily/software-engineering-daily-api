@@ -19,7 +19,16 @@ function list(req, res, next) {
       Feed.findOne({user: '597a06d7f0dc67003db0c4c0'})
       .exec()
       .then((jeffsFeed) => {
-        res.json(jeffsFeed.feedItems)
+        if(jeffsFeed) {
+          res.json(jeffsFeed.feedItems)
+        }
+        else{
+          res.json([])
+        }
+      })
+      .catch((error) => {
+          const err = new APIError('Error fetching Jeffs feed', httpStatus.INTERNAL_SERVER_ERROR, true); //eslint-disable-line
+          return next(err);
       })
     }
     else {
