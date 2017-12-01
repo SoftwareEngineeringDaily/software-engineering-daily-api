@@ -16,10 +16,31 @@ function load(req, res, next, id) {
    .catch(e => next(e));
 }
 
+/**
+ * @swagger
+ * /comments/{commentId}:
+ *   delete:
+ *     summary: Delete a comment
+ *     description: Mark a comment as deleted
+ *     tags: [comment]
+ *     security: []
+ *     parameters:
+ *       - $ref: '#/parameters/commentId'
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           type: object
+ *           properties:
+ *             result:
+ *               type: array
+ *               items:
+ *                 $ref: '#/definitions/Comment'
+ *       '404':
+ *         $ref: '#/responses/NotFound'
+ */
 function remove(req, res, next) {
   const {comment, user} = req
-  console.log("USER------------------", user)
-  console.log("COMMENT------------------", comment)
   if (comment &&  user) {
     if (comment.author._id.toString() !== user._id.toString() ) {
       return res.status(401).json({'Error': 'Please login'});
@@ -121,7 +142,7 @@ function create(req, res, next) {
  */
  function list(req, res, next) {
    const { postId } = req.params;
-
+   //TODO loop through and replace comments that are deleted with "This comment has been deleted"
    Comment.getTopLevelCommentsForItem(postId)
    .then((comments) => {
      // Here we are fetching our nested comments, and need everything to finish
