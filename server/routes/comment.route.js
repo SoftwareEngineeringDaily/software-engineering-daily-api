@@ -18,6 +18,11 @@ router.route('/:commentId/upvote')
   , voteCtrl.finish // IF we add a model.unlike we don't really need this..
 );
 
+router.route('/:commentId')
+  .delete(
+    expressJwt({ secret: config.jwtSecret}),
+    commentCtrl.remove
+  );
 
 /*
 router.route('/:commentId/downvote')
