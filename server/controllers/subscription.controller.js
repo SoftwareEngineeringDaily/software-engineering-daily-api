@@ -56,7 +56,6 @@ function create(req, res, next) {
     next(err);
   })
   .then(({subscription, customer}) => {
-    console.log('subscription', subscription);
     const newSubscription = new Subscription();
     newSubscription.stripe.subscriptionId = subscription.id;
     newSubscription.stripe.customerId = customer.id;
