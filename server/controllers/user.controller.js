@@ -101,11 +101,26 @@ function update(req, res, next) {
  * @swagger
  * /users/me/bookmarked:
  *   get:
- *     summary: Get bookmarked for user
+ *     summary: Get bookmarked for current user
  *     description: Get list of bookmarked posts for the authenticated user.
  *     tags: [user]
  *     security:
  *       - Token: []
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/Post'
+ *
+ * /users/{userId}/bookmarked:
+ *   get:
+ *     summary: Get bookmarked for specific user
+ *     description: Get list of bookmarked posts for a specified user by userId.
+ *     tags: [user]
+ *     parameters:
+ *       - $ref: '#/parameters/userId'
  *     responses:
  *       '200':
  *         description: successful operation

@@ -77,6 +77,11 @@ FavoriteSchema.statics = {
       .limit(+limit)
       .exec();
   },
+  /**
+   * List posts bookmarked by user
+   * @param {ObjectId} userId - The objectId of user to find bookmarked posts for.
+   @returns {Promise<Post[]>}
+   */
   listBookmarkedPostsForUser(userId) {
     return this.find({ userId }, 'postId')
       .then((bookmarks) => {
@@ -85,7 +90,7 @@ FavoriteSchema.statics = {
           return [];
         }
         const postIds = bookmarks.map(bookmark => bookmark.postId);
-        return Post.find({ _id: { $in: postIds } }, Post.defaultSelected)
+        return Post.find({ _id: { $in: postIds } }, Post.standardSelectForFind)
           .sort({ date: -1 })
           .lean() // return as plain object
           .exec();

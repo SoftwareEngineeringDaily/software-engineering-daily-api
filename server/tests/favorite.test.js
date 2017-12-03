@@ -28,6 +28,7 @@ describe('## Favorite APIs', () => {
 
   let userToken;
   let postId;
+  let userId;
 
   before((done) => {
     request(app)
@@ -37,6 +38,7 @@ describe('## Favorite APIs', () => {
       .then((res) => {
         expect(res.body).to.have.property('token');
         userToken = res.body.token;
+        userId = res.body.user._id;
         const post = new Post();
         return post.save();
       })
@@ -260,6 +262,21 @@ describe('## Favorite APIs', () => {
   });
 
   describe('# GET /api/users/:userId/bookmarked', () => {
+    it('should get bookmarked with userId', (done) => {
+      request(app)
+        .post(`/api/posts/${postId}/favorite`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then(() => request(app)
+          .get(`/api/users/${userId}/bookmarked`)
+          .expect(httpStatus.OK))
+        .then((res) => {
+          expect(res.body).to.be.an('array');
+          expect(res.body[0]._id).to.equal(`${postId}`);
+          done();
+        })
+        .catch(done);
+    });
     it('should get bookmarked for authenticated user with "me" shortcut', (done) => {
       request(app)
         .post(`/api/posts/${postId}/favorite`)

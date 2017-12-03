@@ -109,7 +109,8 @@ PostSchema.statics = {
         return Promise.reject(err);
       });
   },
-
+  // standard list of fields to select for find Post queries
+  standardSelectForFind: 'content title date mp3 link score featuredImage upvoted downvoted tags categories',
   /**
    * List posts in descending order of 'createdAt' timestamp.
    * @param {number} limit - Limit number of posts to be returned.
@@ -164,7 +165,7 @@ PostSchema.statics = {
     if (type === 'top') {
       sort = { score: -1 };
     }
-    const queryPromise = this.find(query, this.defaultSelected)
+    const queryPromise = this.find(query, this.standardSelectForFind)
       .sort(sort)
       .limit(limitOption);
 
@@ -244,8 +245,7 @@ PostSchema.statics = {
 
         return updatedPosts;
       });
-  },
-  defaultSelected: 'content title date mp3 link score featuredImage upvoted downvoted tags categories'
+  }
 };
 
 PostSchema.index({ 'title.rendered': 'text', 'content.rendered': 'text' });
