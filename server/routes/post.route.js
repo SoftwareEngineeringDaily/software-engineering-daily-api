@@ -10,19 +10,26 @@ import relatedLinkCtrl from '../controllers/relatedLink.controller';
 import favoriteCtrl from '../controllers/favorite.controller';
 import listenedCtrl from '../controllers/listened.controller';
 import config from '../../config/config';
+import loadFullUser from '../middleware/loadFullUser.middleware';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
 router.route('/')
-  .get(expressJwt({ secret: config.jwtSecret
-    , credentialsRequired: false }), postCtrl.list);
+  .get(
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false })
+    , loadFullUser
+    , postCtrl.list);
 
 router.route('/recommendations')
   .get(expressJwt({ secret: config.jwtSecret })
+  , loadFullUser
   , postCtrl.recommendations);
 
 router.route('/:postId')
-  .get(postCtrl.get);
+  .get(
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false })
+    , loadFullUser
+    , postCtrl.get);
 
 router.route('/:postId/comments')
   .get(expressJwt({ secret: config.jwtSecret

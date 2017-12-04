@@ -82,6 +82,6 @@ function update(req, res, next) {
     res.json(user);
   })
   .catch(e => next(e));
-  }
+}
 
 export default {load, get, me, update};

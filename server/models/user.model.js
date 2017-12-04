@@ -1,5 +1,5 @@
 import Promise from 'bluebird';
-import mongoose from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import httpStatus from 'http-status';
 import bcrypt from 'bcrypt-nodejs';
 import APIError from '../helpers/APIError';
@@ -15,6 +15,10 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String
     // TODO: Should be required.
+  },
+  subscription: {
+    type: Schema.Types.ObjectId,
+    ref: 'Subscription'
   },
   name: {
     type: String
@@ -89,6 +93,7 @@ UserSchema.statics = {
    */
   get(id) {
     return this.findById(id)
+      .populate('subscription')
       .exec()
       .then((user) => {
         if (user) {
