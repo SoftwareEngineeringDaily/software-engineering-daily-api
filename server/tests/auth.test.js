@@ -14,6 +14,18 @@ describe('## Auth APIs', () => {
     password: 'express'
   };
 
+  const validUserCredentialsWithEmail = {
+    username: 'react',
+    email: 'react@email.com',
+    name: 'Softare Dev',
+    password: 'express'
+  };
+
+  const validWithEmailLogin = {
+    email: 'react@email.com',
+    password: 'express'
+  }
+
   const invalidUserCredentials = {
     username: 'react',
   };
