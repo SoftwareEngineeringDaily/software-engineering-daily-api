@@ -78,7 +78,6 @@ function update(req, res, next) {
       user.avatarUrl = `https://${S3_BUCKET}.s3.amazonaws.com/${user._id}`
     }
     return user.save().then((newUser) => {
-      console.log('new user---------', newUser);
       const userMinusPassword = Object.assign(newUser, {password: null});
       res.json(userMinusPassword);
     })
