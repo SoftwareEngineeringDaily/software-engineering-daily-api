@@ -4,6 +4,8 @@ import mongoose from 'mongoose';
 
 import Post from '../models/post.model';
 import Vote from '../models/vote.model';
+import User from '../models/user.model';
+import { getAdFreeSinglePostIfSubscribed, getAdFreePostsIfSubscribed } from '../helpers/post.helper';
 
 /**
  * @swagger
@@ -51,9 +53,12 @@ function load(req, res, next, id) {
  *         $ref: '#/responses/NotFound'
  */
 
-function get(req, res) {
-  return res.json(req.post);
-}
+ function get(req, res, next) {
+     // Load ad free version of podcast episode if subscrbied:
+     return res.json(
+       getAdFreeSinglePostIfSubscribed(req.post.toObject(), req.fullUser, next)
+     );
+ }
 
 /**
  * @swagger
@@ -144,9 +149,12 @@ function list(req, res, next) {
     query.categories = newTags;
   }
 
+  console.log('get posts');
   Post.list(query)
-    .then(posts => res.json(posts))
-    .catch(e => next(e));
+  .then(posts => {
+      return res.json(getAdFreePostsIfSubscribed(posts, req.fullUser, next));
+  })
+  .catch(e => next(e));
 }
 
 // @TODO: maybe this should be in a recommendation controller
@@ -180,11 +188,10 @@ function recommendations(req, res, next) {
     const ids = recommendationsFound.map((rec) => {  //eslint-disable-line
       return mongoose.Types.ObjectId(rec); //eslint-disable-line
     });
-
-    return Post.find({ _id: { $in: ids } });
+    return Post.find({ _id: { $in: ids } }).lean();
   })
   .then((posts) => { //eslint-disable-line
-    return res.json(posts);
+    return res.json(getAdFreePostsIfSubscribed(posts, req.fullUser, next));
   })
   .catch((e) => {
     next(e);
