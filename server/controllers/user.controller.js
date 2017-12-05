@@ -77,9 +77,11 @@ function update(req, res, next) {
       const S3_BUCKET = 'sd-profile-pictures';
       user.avatarUrl = `https://${S3_BUCKET}.s3.amazonaws.com/${user._id}`
     }
-    user.save();
-    user.password = null;
-    res.json(user);
+    return user.save().then((newUser) => {
+      const userMinusPassword = Object.assign(newUser, {password: null});
+      res.json(userMinusPassword);
+    })
+
   })
   .catch(e => next(e));
 }
