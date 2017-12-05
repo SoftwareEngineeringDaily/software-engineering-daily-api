@@ -73,12 +73,13 @@ function update(req, res, next) {
     let err = new APIError('Not enough  permissions to modify that user.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
     return next(err);
   }
+
   // Next we are making sure the username doens't already exist:
   User.findOne({ username })
     .exec()
     .then((_user) => {
       if (_user && _user.id != user.id) {
-      let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+        let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
         return next(err);
       }
       // Using _.pick to only get a few properties:
@@ -86,13 +87,14 @@ function update(req, res, next) {
       const newValues = _.pick(req.body, User.updatableFields);
       Object.assign(user, newValues);
       if (avatarWasSet) {
-      // This should be pulled from utils:
+        // This should be pulled from utils:
         const S3_BUCKET = 'sd-profile-pictures';
         user.avatarUrl = `https://${S3_BUCKET}.s3.amazonaws.com/${user._id}`;
       }
-      user.save();
-      user.password = null;
-      res.json(user);
+      return user.save().then((newUser) => {
+        const userMinusPassword = Object.assign(newUser, { password: null });
+        res.json(userMinusPassword);
+      });
     })
     .catch(e => next(e));
 }

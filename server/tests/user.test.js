@@ -76,7 +76,7 @@ describe('## User APIs', () => {
 
   describe('# PUT /api/users/:userId', () => {
     it('should update user details', (done) => {
-      user.username = 'KK';
+      user.username = 'RANDOM';
       user.isAvatarSet = false;
       request(app)
         .put(`/api/users/${user._id}`)
@@ -84,8 +84,13 @@ describe('## User APIs', () => {
         .send(user)
         .expect(httpStatus.OK)
         .then((res) => {
-          expect(res.body.username).to.equal('KK');
-          done();
+          return request(app)
+          .get(`/api/users/${user._id}`)
+          .expect(httpStatus.OK)
+          .then((res) => {
+            expect(res.body.username).to.equal('RANDOM');
+            done();
+          })
         })
         .catch(done);
     });
