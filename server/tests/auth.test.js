@@ -101,6 +101,30 @@ describe('## Auth APIs', () => {
     });
   });
 
+  describe('# POST /api/auth/loginWithEmail v2', () => {
+    it('should return Authentication error', (done) => {
+      request(app)
+        .post('/api/auth/register')
+        .send(validUserCredentialsWithEmail)
+        .expect(httpStatus.CREATED)
+        // We want to make sure we reject bad login
+        .then((res) => {  //eslint-disable-line
+          return request(app)
+          .post('/api/auth/loginWithEmail')
+          // THIS is an improperly formatted loginf ormat without an email field:
+          .send(invalidLogin)
+          .expect(httpStatus.BAD_REQUEST);
+        })
+        .then((res) => {
+          expect(res.body.message).to.equal('"email" is required');
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+
+
 
   describe('# POST /api/auth/register', () => {
     it('should return bad request error', (done) => {
