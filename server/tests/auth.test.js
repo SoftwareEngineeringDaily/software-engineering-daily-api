@@ -14,17 +14,20 @@ describe('## Auth APIs', () => {
     password: 'express'
   };
 
+  // Email based login
   const validUserCredentialsWithEmail = {
-    username: 'react',
-    email: 'react@email.com',
-    name: 'Softare Dev',
+    username: 'react2',
+    email: 'react2@email.com',
+    name: 'Software Dev',
     password: 'express'
   };
 
-  const validWithEmailLogin = {
-    email: 'react@email.com',
+  const validEmailLogin = {
+    email: 'react2@email.com',
     password: 'express'
   }
+
+  // -------------------------
 
   const invalidUserCredentials = {
     username: 'react',
@@ -43,6 +46,37 @@ describe('## Auth APIs', () => {
         done();
       });
   });
+
+
+
+  describe('# POST /api/auth/register (with email & name)', () => {
+
+    it('should get valid JWT token', (done) => {
+      request(app)
+        .post('/api/auth/register')
+        .send(validUserCredentialsWithEmail)
+        .expect(httpStatus.CREATED)
+        .then((res) => {  //eslint-disable-line
+          return request(app)
+            .post('/api/auth/loginWithEmail')
+            .send(validEmailLogin)
+            .expect(httpStatus.OK);
+        })
+        .then((res) => {
+          expect(res.body).to.have.property('token');
+          jwt.verify(res.body.token, config.jwtSecret, (err, decoded) => {
+            expect(err).to.not.be.ok; // eslint-disable-line no-unused-expressions
+            expect(decoded.username).to.equal(validUserCredentialsWithEmail.username);
+            jwtToken = `Bearer ${res.body.token}`;
+            done();
+          });
+        })
+        .catch(done);
+    });
+
+
+  });
+
 
   describe('# POST /api/auth/register', () => {
     it('should return bad request error', (done) => {
