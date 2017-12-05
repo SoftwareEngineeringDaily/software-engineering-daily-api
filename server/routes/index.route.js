@@ -8,6 +8,7 @@ import voteRoutes from './vote.route';
 import favoriteRoutes from './favorite.route';
 import authRoutes from './auth.route';
 import userRoutes from './user.route';
+import subscriptionRoutes from './subscription.route';
 import listenedRoutes from './listened.route';
 import tagsRoutes from './tag.route';
 // import userRoutes from './user.route';
@@ -45,6 +46,7 @@ router.use('/favorites', favoriteRoutes);
 router.use('/listened', listenedRoutes);
 router.use('/tags', tagsRoutes);
 router.use('/users', userRoutes);
+router.use('/subscription', subscriptionRoutes);
 router.use('/feed', feedRoutes);
 
 
