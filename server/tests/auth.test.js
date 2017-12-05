@@ -26,6 +26,10 @@ describe('## Auth APIs', () => {
     email: 'react2@email.com',
     password: 'express'
   }
+    const invalidEmailLogin = {
+    email: 'react2@email.com',
+    password: 'express21321'
+  }
 
   // -------------------------
 
@@ -56,6 +60,7 @@ describe('## Auth APIs', () => {
         .post('/api/auth/register')
         .send(validUserCredentialsWithEmail)
         .expect(httpStatus.CREATED)
+        // We make sure we actually login:
         .then((res) => {  //eslint-disable-line
           return request(app)
             .post('/api/auth/loginWithEmail')
@@ -73,8 +78,27 @@ describe('## Auth APIs', () => {
         })
         .catch(done);
     });
+  });
 
-
+  describe('# POST /api/auth/loginWithEmail', () => {
+    it('should return Authentication error', (done) => {
+      request(app)
+        .post('/api/auth/register')
+        .send(validUserCredentialsWithEmail)
+        .expect(httpStatus.CREATED)
+        // We want to make sure we reject bad login
+        .then((res) => {  //eslint-disable-line
+          return request(app)
+          .post('/api/auth/loginWithEmail')
+          .send(invalidEmailLogin)
+          .expect(httpStatus.UNAUTHORIZED);
+        })
+        .then((res) => {
+          expect(res.body.message).to.equal('Password is incorrect.');
+          done();
+        })
+        .catch(done);
+    });
   });
 
 
@@ -109,6 +133,8 @@ describe('## Auth APIs', () => {
     });
   });
 
+
+
   describe('# POST /api/auth/login', () => {
     it('should return not found with unkown user', (done) => {
       request(app)
@@ -139,6 +165,11 @@ describe('## Auth APIs', () => {
         })
         .catch(done);
     });
+
+
+
+
+
 
     it('should get valid JWT token', (done) => {
       request(app)
