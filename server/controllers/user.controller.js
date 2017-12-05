@@ -1,5 +1,11 @@
 import APIError from '../helpers/APIError';
 import httpStatus from 'http-status';
+// TODO: validate this key and pull from config:
+// var sendgrid = require('sendgrid')(process.env.SEND_GRID_KEY);
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SEND_GRID_KEY);
+
+
 import User from '../models/user.model';
 import _ from 'lodash';
 
@@ -77,11 +83,26 @@ function update(req, res, next) {
       const S3_BUCKET = 'sd-profile-pictures';
       user.avatarUrl = `https://${S3_BUCKET}.s3.amazonaws.com/${user._id}`
     }
-    user.save();
-    user.password = null;
-    res.json(user);
+    return user.save().then(() => {
+      res.json({...user, password: null});
+    })
   })
-  .catch(e => next(e));
+  .catch(e => {
+    console.log('error saving user', e);
+    next(e)
+  });
 }
 
-export default {load, get, me, update};
+function resetPassword(req, res, next) {
+  const msg = {
+    to: 'bjason@gmail.com',
+    from: 'jason@softwaredaily.com',
+    subject: 'Sending with SendGrid is Fun',
+    text: 'and easy to do anywhere, even with Node.js',
+    html: '<strong> some link kand easy to do anywhere, even with Node.js</strong>',
+  };
+  sgMail.send(msg);
+  res.json({});
+}
+
+export default { load, get, me, update, resetPassword };

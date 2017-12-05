@@ -13,7 +13,8 @@ const UserSchema = new mongoose.Schema({
     // , required: true // Should be requied since it is also validated
   },
   password: {
-    type: String
+    type: String,
+    required: true
     // TODO: Should be required.
   },
   subscription: {
