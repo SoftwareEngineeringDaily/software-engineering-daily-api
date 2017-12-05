@@ -102,6 +102,30 @@ function login(req, res, next) {
     });
 }
 
+function loginWithEmail(req, res, next) {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  User
+    .findOne({ email }).exec()
+    .then((user) => {
+      if (!user) return res.status(404).json({ message: 'User not found.' });
+
+      if (!user.validPassword(password)) return res.status(401).json({ message: 'Password is incorrect.' });
+
+      const token = jwt.sign(user.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
+
+      return res.status(200).json({
+        token,
+      });
+    })
+    .catch((err) => {
+      err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+      return next(err);
+    });
+}
+
+
 /**
  * @swagger
  *   /auth/register:
@@ -252,4 +276,4 @@ function getRandomNumber(req, res) {
   });
 }
 
-export default { login, getRandomNumber, register, socialAuth, signS3 };
+export default { login, loginWithEmail, getRandomNumber, register, socialAuth, signS3 };
