@@ -14,6 +14,25 @@ describe('## Auth APIs', () => {
     password: 'express'
   };
 
+  // Email based login
+  const validUserCredentialsWithEmail = {
+    username: 'react2',
+    email: 'react2@email.com',
+    name: 'Software Dev',
+    password: 'express'
+  };
+
+  const validEmailLogin = {
+    email: 'react2@email.com',
+    password: 'express'
+  }
+    const invalidEmailLogin = {
+    email: 'react2@email.com',
+    password: 'express21321'
+  }
+
+  // -------------------------
+
   const invalidUserCredentials = {
     username: 'react',
   };
@@ -31,6 +50,81 @@ describe('## Auth APIs', () => {
         done();
       });
   });
+
+
+
+  describe('# POST /api/auth/register (with email & name)', () => {
+
+    it('should get valid JWT token', (done) => {
+      request(app)
+        .post('/api/auth/register')
+        .send(validUserCredentialsWithEmail)
+        .expect(httpStatus.CREATED)
+        // We make sure we actually login:
+        .then((res) => {  //eslint-disable-line
+          return request(app)
+            .post('/api/auth/loginWithEmail')
+            .send(validEmailLogin)
+            .expect(httpStatus.OK);
+        })
+        .then((res) => {
+          expect(res.body).to.have.property('token');
+          jwt.verify(res.body.token, config.jwtSecret, (err, decoded) => {
+            expect(err).to.not.be.ok; // eslint-disable-line no-unused-expressions
+            expect(decoded.username).to.equal(validUserCredentialsWithEmail.username);
+            jwtToken = `Bearer ${res.body.token}`;
+            done();
+          });
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# POST /api/auth/loginWithEmail', () => {
+    it('should return Authentication error', (done) => {
+      request(app)
+        .post('/api/auth/register')
+        .send(validUserCredentialsWithEmail)
+        .expect(httpStatus.CREATED)
+        // We want to make sure we reject bad login
+        .then((res) => {  //eslint-disable-line
+          return request(app)
+          .post('/api/auth/loginWithEmail')
+          .send(invalidEmailLogin)
+          .expect(httpStatus.UNAUTHORIZED);
+        })
+        .then((res) => {
+          expect(res.body.message).to.equal('Password is incorrect.');
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# POST /api/auth/loginWithEmail v2', () => {
+    it('should return Authentication error', (done) => {
+      request(app)
+        .post('/api/auth/register')
+        .send(validUserCredentialsWithEmail)
+        .expect(httpStatus.CREATED)
+        // We want to make sure we reject bad login
+        .then((res) => {  //eslint-disable-line
+          return request(app)
+          .post('/api/auth/loginWithEmail')
+          // THIS is an improperly formatted loginf ormat without an email field:
+          .send(invalidLogin)
+          .expect(httpStatus.BAD_REQUEST);
+        })
+        .then((res) => {
+          expect(res.body.message).to.equal('"email" is required');
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+
+
 
   describe('# POST /api/auth/register', () => {
     it('should return bad request error', (done) => {
@@ -63,6 +157,8 @@ describe('## Auth APIs', () => {
     });
   });
 
+
+
   describe('# POST /api/auth/login', () => {
     it('should return not found with unkown user', (done) => {
       request(app)
@@ -93,6 +189,11 @@ describe('## Auth APIs', () => {
         })
         .catch(done);
     });
+
+
+
+
+
 
     it('should get valid JWT token', (done) => {
       request(app)
