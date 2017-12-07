@@ -178,33 +178,6 @@ describe('## Auth APIs', () => {
     });
   });
 
-  describe('# POST /api/auth/register (+ login with email field as username)', () => {
-
-    it('should get valid JWT token', (done) => {
-      request(app)
-        .post('/api/auth/register')
-        .send(validUserCredentialsWithEmail)
-        .expect(httpStatus.CREATED)
-        // We make sure we actually login:
-        .then((res) => {  //eslint-disable-line
-          return request(app)
-            .post('/api/auth/login')
-            .send(validEmailAsUsernameLogin)
-            .expect(httpStatus.OK);
-        })
-        .then((res) => {
-          expect(res.body).to.have.property('token');
-          jwt.verify(res.body.token, config.jwtSecret, (err, decoded) => {
-            expect(err).to.not.be.ok; // eslint-disable-line no-unused-expressions
-            expect(decoded.username).to.equal(validUserCredentialsWithEmail.username);
-            jwtToken = `Bearer ${res.body.token}`;
-            done();
-          });
-        })
-        .catch(done);
-    });
-  });
-
   //-------- regular register + login unit tests
 
   describe('# POST /api/auth/register', () => {
