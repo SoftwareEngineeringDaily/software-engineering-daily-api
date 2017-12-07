@@ -115,7 +115,7 @@ describe('## Auth APIs', () => {
         .then((res) => {  //eslint-disable-line
           return request(app)
           .post('/api/auth/loginWithEmail')
-          // THIS is an improperly formatted loginf ormat without an email field:
+          // THIS is an improperly formatted login format without an email field:
           .send(invalidLogin)
           .expect(httpStatus.BAD_REQUEST);
         })
