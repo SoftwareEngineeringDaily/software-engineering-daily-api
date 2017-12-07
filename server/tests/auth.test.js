@@ -10,7 +10,6 @@ chai.config.includeStack = true;
 
 describe('## Auth APIs', () => {
 
-
   // Email based login
   const validUserCredentialsWithEmail = {
     username: 'react2',
@@ -84,8 +83,6 @@ describe('## Auth APIs', () => {
     });
   });
 
-
-
   describe('# POST /api/auth/login fail on not including username field', () => {
     it('should return Authentication error', (done) => {
       request(app)
@@ -107,7 +104,6 @@ describe('## Auth APIs', () => {
         .catch(done);
     });
   });
-
 
   describe('# POST /api/auth/register (+ login with email field as username)', () => {
 
@@ -135,8 +131,6 @@ describe('## Auth APIs', () => {
         .catch(done);
     });
   });
-
-
 
   describe('# POST /api/auth/register (with email & name)', () => {
 
@@ -208,9 +202,6 @@ describe('## Auth APIs', () => {
     });
   });
 
-
-
-
   describe('# POST /api/auth/register', () => {
     it('should return bad request error', (done) => {
       request(app)
@@ -242,8 +233,6 @@ describe('## Auth APIs', () => {
     });
   });
 
-
-
   describe('# POST /api/auth/login', () => {
     it('should return not found with unkown user', (done) => {
       request(app)
@@ -274,11 +263,6 @@ describe('## Auth APIs', () => {
         })
         .catch(done);
     });
-
-
-
-
-
 
     it('should get valid JWT token', (done) => {
       request(app)
