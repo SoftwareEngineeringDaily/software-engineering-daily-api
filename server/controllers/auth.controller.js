@@ -66,7 +66,9 @@ passport.use(new FacebookTokenStrategy({
  * /auth/login:
  *   post:
  *     summary: Existing user login
- *     description: Login for existing user
+ *     description: Login for existing user. The field username will look up
+ *      users the username field but also username will be matched against emails.
+ *      This is because of legacy issues.
  *     tags: [auth]
  *     parameters:
  *       - $ref: '#/parameters/userParam'
@@ -84,8 +86,11 @@ function login(req, res, next) {
   const password = req.body.password;
 
   User
-    .findOne({ username }).exec()
-    .then((user) => {
+  .findOne({ $or: [
+    {username},
+    {email: username}
+  ]}).exec()
+  .then((user) => {
       if (!user) return res.status(404).json({ message: 'User not found.' });
 
       if (!user.validPassword(password)) return res.status(401).json({ message: 'Password is incorrect.' });
