@@ -76,25 +76,24 @@ function update(req, res, next) {
 
   // Next we are making sure the username doens't already exist:
   User.findOne({ username })
-    .exec()
-    .then((_user) => {
-      if (_user && _user.id != user.id) {
-        let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
-        return next(err);
-      }
-      // Using _.pick to only get a few properties:
-      // otherwise user can set themselves to verified, etc :)
-      const newValues = _.pick(req.body, User.updatableFields);
-      Object.assign(user, newValues);
-      if (avatarWasSet) {
-        // This should be pulled from utils:
-        const S3_BUCKET = 'sd-profile-pictures';
-        user.avatarUrl = `https://${S3_BUCKET}.s3.amazonaws.com/${user._id}`;
-      }
-      return user.save().then((newUser) => {
-        const userMinusPassword = Object.assign(newUser, { password: null });
-        res.json(userMinusPassword);
-      });
+  .exec()
+  .then((_user) => {
+    if (_user && _user.id != user.id) {
+      let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+      return next(err);
+    }
+    // Using _.pick to only get a few properties:
+    // otherwise user can set themselves to verified, etc :)
+    const newValues = _.pick(req.body, User.updatableFields);
+    Object.assign(user, newValues);
+    if (avatarWasSet) {
+      // This should be pulled from utils:
+      const S3_BUCKET = 'sd-profile-pictures';
+      user.avatarUrl = `https://${S3_BUCKET}.s3.amazonaws.com/${user._id}`
+    }
+    return user.save().then((newUser) => {
+      const userMinusPassword = Object.assign({}, newUser, {password: null});
+      res.json(userMinusPassword);
     })
     .catch(e => next(e));
 }
