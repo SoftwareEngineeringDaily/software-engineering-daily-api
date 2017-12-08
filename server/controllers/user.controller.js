@@ -147,8 +147,6 @@ function requestResetPassword(req, res, next) {
     err = new APIError('User not found error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
     return next(err);
   });
-
-
 }
 
 /**
