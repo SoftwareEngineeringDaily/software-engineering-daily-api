@@ -95,7 +95,8 @@ function update(req, res, next) {
       const userMinusPassword = Object.assign({}, newUser, {password: null});
       res.json(userMinusPassword);
     })
-    .catch(e => next(e));
+  })
+  .catch(e => next(e));
 }
 
 /**
