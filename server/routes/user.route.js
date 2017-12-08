@@ -24,10 +24,10 @@ router.route('/:userId')
     expressJwt({ secret: config.jwtSecret})
     ,validate(paramValidation.updateUser), userCtrl.update)
 
-router.route('/reset-password')
+router.route('/request-reset-password')
   .post(
-    paramValidation.resetPassword
-    userCtrl.resetPassword
+    paramValidation.requestResetPassword
+    userCtrl.requestResetPassword
   )
 
 /** Load user when API with userId route parameter is hit */

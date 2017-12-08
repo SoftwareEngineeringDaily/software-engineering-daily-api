@@ -1,13 +1,14 @@
 import APIError from '../helpers/APIError';
 import httpStatus from 'http-status';
+import randomstring from "randomstring";
 // TODO: validate this key and pull from config:
 // var sendgrid = require('sendgrid')(process.env.SEND_GRID_KEY);
-const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey(process.env.SEND_GRID_KEY);
-
-
-import User from '../models/user.model';
 import _ from 'lodash';
+import User from '../models/user.model';
+import ResetPassword from '../models/resetPassword.model';
+const sgMail = require('@sendgrid/mail');
+//TODO: move this out of here:
+sgMail.setApiKey(process.env.SEND_GRID_KEY);
 
 /**
  * Load user and append to req.
@@ -93,22 +94,46 @@ function update(req, res, next) {
   });
 }
 
-function resetPassword(req, res, next) {
-  const fullUser = req.fullUser;
-  if (!fullUser || !fullUser.email) {
-    const userHasNoEmail = new APIError('User has no email.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
-    return userHasNoEmail;
-  }
+function requestResetPassword(req, res, next) {
+  const { email }  = req;
+  User.findOne({ $or: [
+    {username: email},
+    {email}
+  ]}).exec()
+  .then( (user) => {
+    if (!user) return res.status(404).json({ message: 'User not found.' });
+    // This is the key we send out:
+    const userKey = randomstring.generate();
+    // This is what we store in the db:
+    const hash = User.generateHash(userKey);
 
-  const msg = {
-    to: 'bjason@gmail.com',
-    from: 'jason@softwaredaily.com',
-    subject: 'Sending with SendGrid is Fun',
-    text: 'and easy to do anywhere, even with Node.js',
-    html: '<strong> some link kand easy to do anywhere, even with Node.js</strong>',
-  };
-  sgMail.send(msg);
-  res.json({});
+    const newResetPassword = new ResetPassword();
+    newResetPassword.userId = user._id;
+    newResetPassword.hash = hash;
+
+    newRestPassword.save()
+    .then((resetPass) => {
+      // TODO: throttle how many emails we send to same email per time.
+      const msg = {
+        to: email,
+        from: 'jason@softwaredaily.com',
+        subject: 'Password reset email',
+        text: 'and easy to do anywhere, even with Node.js',
+        html: '<strong> <a href="http://www.softwaredaily.com/regain-account/' + userKey + '"> Click Here </a> some link kand easy to do anywhere, even with Node.js</strong>',
+      };
+      // TODO: is this async?
+      sgMail.send(msg);
+      res.json({});
+    })
+    .catch((error) => {
+    });
+  })
+  .catch((err) => {
+    err = new APIError('User not found error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+    return next(err);
+  });
+
+
 }
 
-export default { load, get, me, update, resetPassword };
+export default { load, get, me, update, requestResetPassword

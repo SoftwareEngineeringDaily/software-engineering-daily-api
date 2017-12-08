@@ -16,11 +16,11 @@ ResetPasswordSchema.statics = {
   getTokenAndHash() {
     return {
       hash: 'hash', // this is what is stored in the DB
-      token: 'token' // This is what we send to the user
+      userKey: 'userKey' // This is what we send to the user
     };
   },
-  
-  decodeToken(token) {
+
+  decodeToken(userKey) {
     return 'hash'; // this is what we look for in the db
   }
 };
