@@ -15,7 +15,14 @@ export default {
       userId: Joi.string().hex().required()
     }
   },
-    // POST /api/auth/login
+
+  resetPassword: {
+    body: {
+      email: Joi.string().email().require()
+    }
+  },
+
+  // POST /api/auth/login
   login: {
     body: {
       username: Joi.string().required(),
@@ -49,5 +56,4 @@ export default {
       content: Joi.string().required()
     }
   }
-
 };

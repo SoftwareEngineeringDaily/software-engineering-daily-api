@@ -4,7 +4,6 @@ import validate from 'express-validation';
 import paramValidation from '../../config/param-validation';
 import userCtrl from '../controllers/user.controller';
 import config from '../../config/config';
-import loadFullUser from '../middleware/loadFullUser.middleware';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
@@ -27,7 +26,7 @@ router.route('/:userId')
 
 router.route('/reset-password')
   .post(
-    loadFullUser,
+    paramValidation.resetPassword
     userCtrl.resetPassword
   )
 
