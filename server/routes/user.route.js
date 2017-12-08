@@ -27,12 +27,14 @@ router.route('/:userId')
     , validate(paramValidation.updateUser), userCtrl.update
   );
 
+  /*
 router.route('/request-reset-password')
   .post(
-    paramValidation.requestResetPassword
+    paramValidation.requestResetPassword,
     userCtrl.requestResetPassword
   )
-  
+  */
+
 router.route('/me/bookmarked')
 /** GET /api/users/me/bookmarked - Get bookmarked items for current user */
   .get(
