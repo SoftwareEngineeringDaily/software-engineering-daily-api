@@ -12,6 +12,9 @@ const router = express.Router(); // eslint-disable-line new-cap
 router.route('/login')
   .post(validate(paramValidation.login), authCtrl.login);
 
+router.route('/loginWithEmail')
+  .post(validate(paramValidation.loginWithEmail), authCtrl.loginWithEmail);
+
 router.route('/register')
   .post(validate(paramValidation.register), authCtrl.register);
 

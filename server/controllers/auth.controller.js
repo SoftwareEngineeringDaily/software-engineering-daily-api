@@ -66,7 +66,9 @@ passport.use(new FacebookTokenStrategy({
  * /auth/login:
  *   post:
  *     summary: Existing user login
- *     description: Login for existing user
+ *     description: Login for existing user. The field username will look up
+ *      users the username field but also username will be matched against emails.
+ *      This is because of legacy issues.
  *     tags: [auth]
  *     parameters:
  *       - $ref: '#/parameters/userParam'
@@ -84,7 +86,33 @@ function login(req, res, next) {
   const password = req.body.password;
 
   User
-    .findOne({ username }).exec()
+  .findOne({ $or: [
+    {username},
+    {email: username}
+  ]}).exec()
+  .then((user) => {
+      if (!user) return res.status(404).json({ message: 'User not found.' });
+
+      if (!user.validPassword(password)) return res.status(401).json({ message: 'Password is incorrect.' });
+
+      const token = jwt.sign(user.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
+
+      return res.status(200).json({
+        token,
+      });
+    })
+    .catch((err) => {
+      err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+      return next(err);
+    });
+}
+
+function loginWithEmail(req, res, next) {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  User
+    .findOne({ email }).exec()
     .then((user) => {
       if (!user) return res.status(404).json({ message: 'User not found.' });
 
@@ -101,6 +129,7 @@ function login(req, res, next) {
       return next(err);
     });
 }
+
 
 /**
  * @swagger
@@ -252,4 +281,4 @@ function getRandomNumber(req, res) {
   });
 }
 
-export default { login, getRandomNumber, register, socialAuth, signS3 };
+export default { login, loginWithEmail, getRandomNumber, register, socialAuth, signS3 };

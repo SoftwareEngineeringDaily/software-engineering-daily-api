@@ -22,14 +22,20 @@ export default {
     }
   },
 
-  // POST /api/auth/login
+    // POST /api/auth/loginWithEmail
+  loginWithEmail: {
+    body: {
+      email: Joi.string().email().required(),
+      password: Joi.string().required()
+    }
+  },
+
   login: {
     body: {
       username: Joi.string().required(),
       password: Joi.string().required()
     }
   },
-
   // POST /api/auth/register
   register: {
     body: {

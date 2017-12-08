@@ -48,9 +48,6 @@ router.use('/tags', tagsRoutes);
 router.use('/users', userRoutes);
 router.use('/subscription', subscriptionRoutes);
 router.use('/feed', feedRoutes);
-
-
-// mount auth routes at /auth
 router.use('/auth', authRoutes);
 
 export default router;
