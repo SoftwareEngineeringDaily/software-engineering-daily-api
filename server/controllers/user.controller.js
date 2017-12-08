@@ -94,6 +94,12 @@ function update(req, res, next) {
 }
 
 function resetPassword(req, res, next) {
+  const fullUser = req.fullUser;
+  if (!fullUser || !fullUser.email) {
+    const userHasNoEmail = new APIError('User has no email.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+    return userHasNoEmail;
+  }
+
   const msg = {
     to: 'bjason@gmail.com',
     from: 'jason@softwaredaily.com',
