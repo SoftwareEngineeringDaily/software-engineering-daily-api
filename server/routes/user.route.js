@@ -27,10 +27,10 @@ router.route('/:userId')
     , validate(paramValidation.updateUser), userCtrl.update
   );
 
-router.route('/request-reset-password')
+router.route('/request-password-reset')
   .post(
-    validate(paramValidation.requestResetPassword),
-    userCtrl.requestResetPassword
+    validate(paramValidation.requestPasswordReset),
+    userCtrl.requestPasswordReset
   )
 
 router.route('/me/bookmarked')

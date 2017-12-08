@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 
-const ResetPasswordSchema = new mongoose.Schema({
+const PasswordResetSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   hash: { type: String, required: true},
   dateCreated: {
@@ -12,7 +12,7 @@ const ResetPasswordSchema = new mongoose.Schema({
   }
 });
 
-ResetPasswordSchema.statics = {
+PasswordResetSchema.statics = {
   getTokenAndHash() {
     return {
       hash: 'hash', // this is what is stored in the DB
@@ -26,4 +26,4 @@ ResetPasswordSchema.statics = {
 };
 
 
-export default mongoose.model('ResetPassword', ResetPasswordSchema);
+export default mongoose.model('PasswordReset', PasswordResetSchema);

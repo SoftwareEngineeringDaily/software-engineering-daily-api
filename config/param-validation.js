@@ -16,7 +16,7 @@ export default {
     }
   },
 
-  requestResetPassword: {
+  requestPasswordReset: {
     body: {
       email: Joi.string().email().required()
     }

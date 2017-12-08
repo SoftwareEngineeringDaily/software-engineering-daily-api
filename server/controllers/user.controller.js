@@ -6,7 +6,7 @@ import randomstring from "randomstring";
 import Favorite from '../models/favorite.model';
 import _ from 'lodash';
 import User from '../models/user.model';
-import ResetPassword from '../models/resetPassword.model';
+import PasswordReset from '../models/passwordReset.model';
 const sgMail = require('@sendgrid/mail');
 //TODO: move this out of here:
 sgMail.setApiKey(process.env.SEND_GRID_KEY);
@@ -109,7 +109,7 @@ function update(req, res, next) {
   });
 }
 
-function requestResetPassword(req, res, next) {
+function requestPasswordReset(req, res, next) {
   const { email }  = req;
   User.findOne({ $or: [
     {username: email},
@@ -122,7 +122,7 @@ function requestResetPassword(req, res, next) {
     // This is what we store in the db:
     const hash = User.generateHash(userKey);
 
-    const newResetPassword = new ResetPassword();
+    const newResetPassword = new PasswordReset();
     newResetPassword.userId = user._id;
     newResetPassword.hash = hash;
 
@@ -133,8 +133,8 @@ function requestResetPassword(req, res, next) {
         to: email,
         from: 'jason@softwaredaily.com',
         subject: 'Password reset email',
-        text: 'and easy to do anywhere, even with Node.js',
-        html: '<strong> <a href="http://www.softwaredaily.com/regain-account/' + userKey + '"> Click Here </a> some link kand easy to do anywhere, even with Node.js</strong>',
+        text: 'Reset your password here http://www.softwaredaily.com/regain-account/' + userKey,
+        html: '<strong> <a href="http://www.softwaredaily.com/regain-account/' + userKey + '"> Click Here </a> to reset password',
       };
       // TODO: is this async?
       sgMail.send(msg);
@@ -195,5 +195,5 @@ function listBookmarked(req, res, next) {
 }
 
 export default {
-  load, get, me, update, listBookmarked, requestResetPassword
+  load, get, me, update, listBookmarked, requestPasswordReset
 };
