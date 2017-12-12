@@ -132,7 +132,7 @@ function resetPassword(req, res, next) {
     const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
     console.log('diffDays', diffDays);
     // TODO: delete entry in db for PasswordResetSchema
-    // TODO: return JWT token 
+    // TODO: return JWT token
   })
   .catch((error) => {
     console.log('------------------------', error);
@@ -166,7 +166,7 @@ function requestPasswordReset(req, res, next) {
         from: 'jason@softwaredaily.com',
         subject: 'Password reset email',
         text: 'Reset your password here http://www.softwaredaily.com/regain-account/' + userKey,
-        html: `<strong> <a href="${config.baseUrl}/regain-account/` + userKey + '"> Click Here </a> to reset password',
+        html: `<strong> <a href="${config.baseUrl}/#/regain-account/` + userKey + '"> Click Here </a> to reset password',
       };
       // TODO: is this async?
       sgMail.send(msg);
