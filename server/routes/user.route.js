@@ -29,7 +29,7 @@ router.route('/:userId')
 
 router.route('/regain-password')
   .post(
-    validate(paramValidation.requestPasswordReset),
+    validate(paramValidation.regainPassword),
     userCtrl.regainPassword
   )
 
