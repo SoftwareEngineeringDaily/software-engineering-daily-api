@@ -112,18 +112,20 @@ function update(req, res, next) {
 
 function regainPassword(req, res, next) {
   const { userKey } = req.body;
-  const { email } = req.body;
+  const { newPassword } = req.body;
   const hash = User.generateHash(userKey);
 
+  console.log('------------------ userKey', userKey);
+  console.log('---------newPassword', newPassword);
   PasswordReset.findOne({ $and: [
-    {email},
     {hash}
   ]}).exec()
   .then( (passwordReset) => {
-    console.log('passwordReset.dateCreated', passwordReset.dateCreated);
     if (!passwordReset) {
+      console.log('Invalid passwordReset', passwordReset);
       throw 'Invalid reset password.';
     }
+    console.log('passwordReset.dateCreated', passwordReset.dateCreated);
 
     // Check that dateCreated is within a certain time period:
     const date1 = new Date(passwordReset.dateCreated);
@@ -133,9 +135,11 @@ function regainPassword(req, res, next) {
     console.log('diffDays', diffDays);
     // TODO: delete entry in db for PasswordResetSchema
     // TODO: return JWT token
+    res.json({success: true});
   })
   .catch((error) => {
     console.log('------------------------', error);
+    next(error);
   });
 }
 
