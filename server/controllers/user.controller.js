@@ -110,8 +110,8 @@ function update(req, res, next) {
 }
 
 function resetPassword(req, res, next) {
-  const { userKey } = req;
-  const { email } = email;
+  const { userKey } = req.body;
+  const { email } = req.body;
   const hash = User.generateHash(userKey);
 
   PasswordReset.findOne({ $and: [
@@ -121,7 +121,7 @@ function resetPassword(req, res, next) {
   .then( (passwordReset) => {
     console.log('passwordReset.dateCreated', passwordReset.dateCreated);
     if (!passwordReset) {
-      throw 'Invalid reset password.'.
+      throw 'Invalid reset password.';
     }
 
     // Check that dateCreated is within a certain time period:
@@ -131,12 +131,14 @@ function resetPassword(req, res, next) {
     const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
     console.log('diffDays', diffDays);
   })
-  .catch (error) => {
+  .catch((error) => {
+    console.log('------------------------', error);
   });
 }
 
 function requestPasswordReset(req, res, next) {
-  const { email }  = req;
+  const { email }  = req.body;
+  console.log('req', req);
   User.findOne({ $or: [
     {username: email},
     {email}
