@@ -16,6 +16,10 @@ const PasswordResetSchema = new mongoose.Schema({
   dateCreated: {
     type: Date,
     default: Date.now
+  },
+  deleted: {
+    type: Boolean,
+    default: false
   }
 });
 

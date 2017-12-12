@@ -117,9 +117,9 @@ function regainPassword(req, res, next) {
   console.log('------------------ userKey', userKey);
   console.log('---------newPassword', newPassword);
   console.log('---------hash', hash);
-  PasswordReset.findOne({ $and: [
-    {userId}
-  ]}).exec()
+  PasswordReset.findOne(
+    {userId, deleted: false}
+  ).exec()
   .then( (passwordReset) => {
     if (!passwordReset) {
       console.log('Invalid passwordReset', passwordReset);
@@ -134,14 +134,34 @@ function regainPassword(req, res, next) {
     console.log('passwordReset.dateCreated', passwordReset.dateCreated);
 
     // Check that dateCreated is within a certain time period:
+    /*
+    // TODO: check for date not over 1 day old
     const date1 = new Date(passwordReset.dateCreated);
     const date2 = new Date(); // today
     const timeDiff = Math.abs(date2.getTime() - date1.getTime());
     const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
     console.log('diffDays', diffDays);
-    // TODO: delete entry in db for PasswordResetSchema
-    // TODO: return JWT token
-    res.json({success: true});
+    */
+
+   // This is a little ugly and nested:
+    return User.find({_id: userId})
+    .then((existingUser) => {
+      if (!existingUser) {
+        console.log('ResetPassword: User not found?---');
+        throw 'Invalid reset password.';
+      }
+      existingUser.password = User.generateHash(password);
+      return existingUser.save()
+      .then(() => {
+        passwordReset.delete = true;
+        return passwordReset.save()
+        .then(()=> {
+          // TODO: return jwt:
+          res.json({success: true});
+        })
+      })
+    })
+
   })
   .catch((error) => {
     console.log('------------------------', error);
