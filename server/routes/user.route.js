@@ -27,10 +27,10 @@ router.route('/:userId')
     , validate(paramValidation.updateUser), userCtrl.update
   );
 
-router.route('/reset-password')
+router.route('/regain-password')
   .post(
-    // validate(paramValidation.requestPasswordReset),
-    userCtrl.resetPassword
+    validate(paramValidation.requestPasswordReset),
+    userCtrl.regainPassword
   )
 
 router.route('/request-password-reset')

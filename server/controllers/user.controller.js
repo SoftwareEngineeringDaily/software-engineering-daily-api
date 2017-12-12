@@ -110,7 +110,7 @@ function update(req, res, next) {
   });
 }
 
-function resetPassword(req, res, next) {
+function regainPassword(req, res, next) {
   const { userKey } = req.body;
   const { email } = req.body;
   const hash = User.generateHash(userKey);
@@ -226,5 +226,5 @@ function listBookmarked(req, res, next) {
 }
 
 export default {
-  load, get, me, update, listBookmarked, requestPasswordReset, resetPassword
+  load, get, me, update, listBookmarked, requestPasswordReset, regainPassword
 };

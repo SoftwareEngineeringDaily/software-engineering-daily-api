@@ -16,6 +16,13 @@ export default {
     }
   },
 
+  regainPassword: {
+    body: {
+      password: Joi.string().required(),
+      userKey: Joi.string().required()
+    }
+  },
+
   requestPasswordReset: {
     body: {
       email: Joi.string().email().required()
