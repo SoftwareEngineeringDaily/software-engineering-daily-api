@@ -7,9 +7,10 @@ import Favorite from '../models/favorite.model';
 import _ from 'lodash';
 import User from '../models/user.model';
 import PasswordReset from '../models/passwordReset.model';
+import config from '../../config/config';
 const sgMail = require('@sendgrid/mail');
 //TODO: move this out of here:
-sgMail.setApiKey(process.env.SEND_GRID_KEY);
+sgMail.setApiKey(process.env.SEND_GRID_KEY); // TODO: replace this with confi
 
 /**
  * @swagger
@@ -130,6 +131,8 @@ function resetPassword(req, res, next) {
     const timeDiff = Math.abs(date2.getTime() - date1.getTime());
     const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
     console.log('diffDays', diffDays);
+    // TODO: delete entry in db for PasswordResetSchema
+    // TODO: return JWT token 
   })
   .catch((error) => {
     console.log('------------------------', error);
@@ -163,7 +166,7 @@ function requestPasswordReset(req, res, next) {
         from: 'jason@softwaredaily.com',
         subject: 'Password reset email',
         text: 'Reset your password here http://www.softwaredaily.com/regain-account/' + userKey,
-        html: '<strong> <a href="http://www.softwaredaily.com/regain-account/' + userKey + '"> Click Here </a> to reset password',
+        html: `<strong> <a href="${config.baseUrl}/regain-account/` + userKey + '"> Click Here </a> to reset password',
       };
       // TODO: is this async?
       sgMail.send(msg);
