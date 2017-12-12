@@ -111,18 +111,24 @@ function update(req, res, next) {
 }
 
 function regainPassword(req, res, next) {
-  const { userKey } = req.body;
-  const { newPassword } = req.body;
+  const { userKey, newPassword, userId } = req.body;
   const hash = User.generateHash(userKey);
-
+  console.log('userkey.len', userKey.length);
   console.log('------------------ userKey', userKey);
   console.log('---------newPassword', newPassword);
+  console.log('---------hash', hash);
   PasswordReset.findOne({ $and: [
-    {hash}
+    {userId}
   ]}).exec()
   .then( (passwordReset) => {
     if (!passwordReset) {
       console.log('Invalid passwordReset', passwordReset);
+      throw 'Invalid reset password.';
+    }
+
+    console.log('cehcking validHash...');
+    if (!User.isValidHash({hash, original: userKey})){
+      console.log('---------Invalid hash-----------');
       throw 'Invalid reset password.';
     }
     console.log('passwordReset.dateCreated', passwordReset.dateCreated);
@@ -145,7 +151,6 @@ function regainPassword(req, res, next) {
 
 function requestPasswordReset(req, res, next) {
   const { email }  = req.body;
-  console.log('req', req);
   User.findOne({ $or: [
     {username: email},
     {email}
@@ -153,9 +158,16 @@ function requestPasswordReset(req, res, next) {
   .then( (user) => {
     if (!user) return res.status(404).json({ message: 'User not found.' });
     // This is the key we send out:
-    const userKey = randomstring.generate();
-    // This is what we store in the db:
+    const userKey = randomstring.generate({
+      charset: 'alphanumeric'
+    });
     const hash = User.generateHash(userKey);
+    // This is what we store in the db:
+    console.log('-----------REQUESTING KEY ------------------');
+    console.log('userKey', userKey);
+    console.log('hash', hash);
+    console.log('-----------REQUESTING KEY ------------------');
+
 
     const newPasswordReset = new PasswordReset();
     newPasswordReset.userId = user._id;
@@ -169,8 +181,8 @@ function requestPasswordReset(req, res, next) {
         to: email,
         from: 'jason@softwaredaily.com',
         subject: 'Password reset email',
-        text: 'Reset your password here http://www.softwaredaily.com/regain-account/' + userKey,
-        html: `<strong> <a href="${config.baseUrl}/#/regain-account/` + userKey + '"> Click Here </a> to reset password',
+        text: `Reset your password here ${config.baseUrl}/#/regain-account/${userKey}/${user._id}`,
+        html: `<strong> <a href="${config.baseUrl}/#/regain-account/${userKey}/${user._id}"> Click here </a> to reset your password. `,
       };
       // TODO: is this async?
       sgMail.send(msg);
@@ -179,6 +191,7 @@ function requestPasswordReset(req, res, next) {
   })
   .catch((err) => {
     console.log('user not found------------------', email);
+    console.log('user not found------------------error', err);
     err = new APIError('User not found error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
     return next(err);
   });

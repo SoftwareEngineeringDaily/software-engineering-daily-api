@@ -80,7 +80,7 @@ const UserSchema = new mongoose.Schema({
 UserSchema.method({
   validPassword: function validPassword(password) {
     return bcrypt.compareSync(password, this.password);
-  },
+  }
 });
 
 /**
@@ -121,6 +121,10 @@ UserSchema.statics = {
       .skip(+skip)
       .limit(+limit)
       .exec();
+  },
+
+  isValidHash: function validPassword({original, hash}) {
+    return bcrypt.compareSync(original, hash, );
   },
   updatableFields: ['username','website','bio', 'name','email']
 };
