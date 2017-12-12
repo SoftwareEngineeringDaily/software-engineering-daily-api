@@ -111,14 +111,14 @@ function update(req, res, next) {
 }
 
 function regainPassword(req, res, next) {
-  const { userKey, newPassword, userId } = req.body;
-  const hash = User.generateHash(userKey);
-  console.log('userkey.len', userKey.length);
-  console.log('------------------ userKey', userKey);
+  const { secretKey, newPassword, resetUID } = req.body;
+  const hash = User.generateHash(secretKey);
+  console.log('secretKey.len', secretKey.length);
+  console.log('------------------ secretKey', secretKey);
   console.log('---------newPassword', newPassword);
   console.log('---------hash', hash);
   PasswordReset.findOne(
-    {userId, deleted: false}
+    {_id: resetUID, deleted: false}
   )
   .exec()
   .then( (passwordReset) => {
@@ -128,7 +128,7 @@ function regainPassword(req, res, next) {
     }
 
     console.log('cehcking validHash...');
-    if (!User.isValidHash({hash, original: userKey})){
+    if (!User.isValidHash({hash, original: secretKey})){
       console.log('---------Invalid hash-----------');
       throw 'Invalid reset password.';
     }
@@ -145,7 +145,7 @@ function regainPassword(req, res, next) {
     */
 
    // This is a little ugly and nested:
-    return User.findOne({_id: userId})
+    return User.findOne({_id: passwordReset.userId})
     .exec()
     .then((existingUser) => {
       if (!existingUser) {
@@ -180,13 +180,13 @@ function requestPasswordReset(req, res, next) {
   .then( (user) => {
     if (!user) return res.status(404).json({ message: 'User not found.' });
     // This is the key we send out:
-    const userKey = randomstring.generate({
+    const secretKey = randomstring.generate({
       charset: 'alphanumeric'
     });
-    const hash = User.generateHash(userKey);
+    const hash = User.generateHash(secretKey);
     // This is what we store in the db:
     console.log('-----------REQUESTING KEY ------------------');
-    console.log('userKey', userKey);
+    console.log('secretKey', secretKey);
     console.log('hash', hash);
     console.log('-----------REQUESTING KEY ------------------');
 
@@ -203,8 +203,8 @@ function requestPasswordReset(req, res, next) {
         to: email,
         from: 'jason@softwaredaily.com',
         subject: 'Password reset email',
-        text: `Reset your password here ${config.baseUrl}/#/regain-account/${userKey}/${user._id}`,
-        html: `<strong> <a href="${config.baseUrl}/#/regain-account/${userKey}/${user._id}"> Click here </a> to reset your password. `,
+        text: `Reset your password here ${config.baseUrl}/#/regain-account/${secretKey}/${resetPass._id}`,
+        html: `<strong> <a href="${config.baseUrl}/#/regain-account/${secretKey}/${resetPass._id}"> Click here </a> to reset your password. `,
       };
       // TODO: is this async?
       sgMail.send(msg);

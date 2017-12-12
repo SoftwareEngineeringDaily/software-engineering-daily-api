@@ -18,9 +18,9 @@ export default {
 
   regainPassword: {
     body: {
-      userId: Joi.string().required(),
+      resetUID: Joi.string().required(),
       newPassword: Joi.string().required(),
-      userKey: Joi.string().required()
+      secretKey: Joi.string().required()
     }
   },
 
