@@ -4,8 +4,15 @@ import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 
 const PasswordResetSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  userId: { type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
   hash: { type: String, required: true},
+  email: {
+    type: String,
+    required: true
+  },
   dateCreated: {
     type: Date,
     default: Date.now
@@ -24,6 +31,5 @@ PasswordResetSchema.statics = {
     return 'hash'; // this is what we look for in the db
   }
 };
-
 
 export default mongoose.model('PasswordReset', PasswordResetSchema);

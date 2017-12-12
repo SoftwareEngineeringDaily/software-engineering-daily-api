@@ -109,6 +109,32 @@ function update(req, res, next) {
   });
 }
 
+function resetPassword(req, res, next) {
+  const { userKey } = req;
+  const { email } = email;
+  const hash = User.generateHash(userKey);
+
+  PasswordReset.findOne({ $and: [
+    {email},
+    {hash}
+  ]}).exec()
+  .then( (passwordReset) => {
+    console.log('passwordReset.dateCreated', passwordReset.dateCreated);
+    if (!passwordReset) {
+      throw 'Invalid reset password.'.
+    }
+
+    // Check that dateCreated is within a certain time period:
+    const date1 = new Date(passwordReset.dateCreated);
+    const date2 = new Date(); // today
+    const timeDiff = Math.abs(date2.getTime() - date1.getTime());
+    const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    console.log('diffDays', diffDays);
+  })
+  .catch (error) => {
+  });
+}
+
 function requestPasswordReset(req, res, next) {
   const { email }  = req;
   User.findOne({ $or: [
@@ -122,11 +148,12 @@ function requestPasswordReset(req, res, next) {
     // This is what we store in the db:
     const hash = User.generateHash(userKey);
 
-    const newResetPassword = new PasswordReset();
-    newResetPassword.userId = user._id;
-    newResetPassword.hash = hash;
+    const newPasswordReset = new PasswordReset();
+    newPasswordReset.userId = user._id;
+    newPasswordReset.hash = hash;
+    newPasswordReset.email = email;
 
-    newRestPassword.save()
+    return newPasswordReset.save()
     .then((resetPass) => {
       // TODO: throttle how many emails we send to same email per time.
       const msg = {
@@ -140,10 +167,9 @@ function requestPasswordReset(req, res, next) {
       sgMail.send(msg);
       res.json({});
     })
-    .catch((error) => {
-    });
   })
   .catch((err) => {
+    console.log('user not found------------------', email);
     err = new APIError('User not found error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
     return next(err);
   });
@@ -195,5 +221,5 @@ function listBookmarked(req, res, next) {
 }
 
 export default {
-  load, get, me, update, listBookmarked, requestPasswordReset
+  load, get, me, update, listBookmarked, requestPasswordReset, resetPassword
 };
