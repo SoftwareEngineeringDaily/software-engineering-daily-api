@@ -119,7 +119,7 @@ function regainPassword(req, res, next) {
   console.log('---------hash', hash);
   PasswordReset.findOne(
     {userId, deleted: false}
-  ).exec()
+  )
   .then( (passwordReset) => {
     if (!passwordReset) {
       console.log('Invalid passwordReset', passwordReset);
@@ -144,13 +144,13 @@ function regainPassword(req, res, next) {
     */
 
    // This is a little ugly and nested:
-    return User.find({_id: userId})
+    return User.findOne({_id: userId})
     .then((existingUser) => {
       if (!existingUser) {
         console.log('ResetPassword: User not found?---');
         throw 'Invalid reset password.';
       }
-      existingUser.password = User.generateHash(password);
+      existingUser.password = User.generateHash(newPassword);
       return existingUser.save()
       .then(() => {
         passwordReset.delete = true;
