@@ -129,15 +129,14 @@ function regainPassword(req, res, next) {
     }
 
     // Check that dateCreated is within a certain time period:
-    /*
-    // TODO: check for date not over 1 day old
     const date1 = new Date(passwordReset.dateCreated);
     const date2 = new Date(); // today
     const timeDiff = Math.abs(date2.getTime() - date1.getTime());
     const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-    console.log('diffDays', diffDays);
-    */
-
+    if(diffDays > 2){
+      console.log('Password reset link has expired!------');
+      throw 'Invalid reset password, has expired.';
+    }
    // This is a little ugly and nested:
     return User.findOne({_id: passwordReset.userId})
     .exec()
