@@ -113,10 +113,6 @@ function update(req, res, next) {
 function regainPassword(req, res, next) {
   const { secretKey, newPassword, resetUID } = req.body;
   const hash = User.generateHash(secretKey);
-  console.log('secretKey.len', secretKey.length);
-  console.log('------------------ secretKey', secretKey);
-  console.log('---------newPassword', newPassword);
-  console.log('---------hash', hash);
   PasswordReset.findOne(
     {_id: resetUID, deleted: false}
   )
@@ -127,12 +123,10 @@ function regainPassword(req, res, next) {
       throw 'Invalid reset password.';
     }
 
-    console.log('cehcking validHash...');
     if (!User.isValidHash({hash, original: secretKey})){
       console.log('---------Invalid hash-----------');
       throw 'Invalid reset password.';
     }
-    console.log('passwordReset.dateCreated', passwordReset.dateCreated);
 
     // Check that dateCreated is within a certain time period:
     /*
@@ -149,7 +143,6 @@ function regainPassword(req, res, next) {
     .exec()
     .then((existingUser) => {
       if (!existingUser) {
-        console.log('ResetPassword: User not found?---');
         throw 'Invalid reset password.';
       }
       existingUser.password = User.generateHash(newPassword);
@@ -166,7 +159,6 @@ function regainPassword(req, res, next) {
 
   })
   .catch((error) => {
-    console.log('------------------------', error);
     next(error);
   });
 }
@@ -185,12 +177,6 @@ function requestPasswordReset(req, res, next) {
     });
     const hash = User.generateHash(secretKey);
     // This is what we store in the db:
-    console.log('-----------REQUESTING KEY ------------------');
-    console.log('secretKey', secretKey);
-    console.log('hash', hash);
-    console.log('-----------REQUESTING KEY ------------------');
-
-
     const newPasswordReset = new PasswordReset();
     newPasswordReset.userId = user._id;
     newPasswordReset.hash = hash;
@@ -212,8 +198,6 @@ function requestPasswordReset(req, res, next) {
     })
   })
   .catch((err) => {
-    console.log('user not found------------------', email);
-    console.log('user not found------------------error', err);
     err = new APIError('User not found error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
     return next(err);
   });
