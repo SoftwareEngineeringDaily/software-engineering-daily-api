@@ -295,9 +295,17 @@ describe('## Favorite APIs', () => {
     });
     it('should not get non-bookmarked for authenticated user with "me" shortcut', (done) => {
       request(app)
-        .get('/api/users/me/bookmarked')
+        .post(`/api/posts/${postId}/favorite`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.OK)
+        .then(() => request(app)
+          .post(`/api/posts/${postId}/unfavorite`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(httpStatus.OK))
+        .then(() => request(app)
+          .get('/api/users/me/bookmarked')
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(httpStatus.OK))
         .then((res) => {
           expect(res.body).to.be.an('array');
           expect(res.body).to.have.lengthOf(0);
