@@ -29,9 +29,9 @@ function cancel(req, res, next) {
 
 function getStripePlanId(planType) {
   // TODO: make this nicer + validate + own function
-  var stripePlanId = 'standard_subscription';
+  var stripePlanId = 'sed_monthly_subscription';
   if (planType === 'monthly'){
-    stripePlanId = 'standard_subscription';
+    stripePlanId = 'sed_monthly_subscription';
   }
   else if (planType === 'yearly'){
     stripePlanId = 'sed_yearly_subscription';
@@ -81,6 +81,7 @@ function create(req, res, next) {
     const newSubscription = new Subscription();
     newSubscription.stripe.subscriptionId = subscription.id;
     newSubscription.stripe.customerId = customer.id;
+    newSubscription.stripe.planId = stripePlanId;
     newSubscription.stripe.email = stripeEmail;
     newSubscription.active = true;
     newSubscription.user = user._id;
@@ -92,7 +93,7 @@ function create(req, res, next) {
       });
     })
     .then(({_user, subscriptionCreated}) => {
-      // We actually save the current subscription into the user.
+      // We actually save the current subscription into the user  .
       _user.subscription = subscriptionCreated._id;
       return _user.save();
     })

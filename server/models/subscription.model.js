@@ -14,6 +14,7 @@ const SubscriptionSchema = new mongoose.Schema({
   stripe: {
     customerId: {type: String},
     subscriptionId: {type: String},
+    planId: {type: String},
     email: {type: String}
   },
   active: {type: Boolean}, // if the subscription is still in place...
