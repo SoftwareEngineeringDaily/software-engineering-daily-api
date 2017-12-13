@@ -92,6 +92,7 @@ function create(req, res, next) {
       });
     })
     .then(({_user, subscriptionCreated}) => {
+      // We actually save the current subscription into the user.
       _user.subscription = subscriptionCreated._id;
       return _user.save();
     })

@@ -16,9 +16,12 @@ const SubscriptionSchema = new mongoose.Schema({
     subscriptionId: {type: String},
     email: {type: String}
   },
-  active: {type: Boolean}
-  // date expired
-  // date created
+  active: {type: Boolean}, // if the subscription is still in place...
+  dateCreated: {
+    type: Date,
+    default: Date.now
+  }
+  // TODO: date expired???
 });
 
 export default mongoose.model('Subscription', SubscriptionSchema);
