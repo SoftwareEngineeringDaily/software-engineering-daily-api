@@ -11,6 +11,7 @@ const envVarsSchema = Joi.object({
   BASE_URL: Joi.string()
     // .allow(['https://www.softwaredaily.com', 'http://localhost:4040'])
     .default('https://www.softwaredaily.com'),
+  SEND_GRID_KEY: Joi.string().required(),
   PORT: Joi.number()
     .default(4040),
   MONGOOSE_DEBUG: Joi.boolean()
@@ -45,6 +46,7 @@ const config = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   baseUrl: envVars.BASE_URL,
+  sendGridKey: envVars.SEND_GRID_KEY,
   mongooseDebug: envVars.MONGOOSE_DEBUG,
   adFreeURL: envVars.AD_FREE_URL,
   jwtSecret: envVars.JWT_SECRET,

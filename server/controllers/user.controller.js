@@ -9,8 +9,8 @@ import User from '../models/user.model';
 import PasswordReset from '../models/passwordReset.model';
 import config from '../../config/config';
 const sgMail = require('@sendgrid/mail');
-//TODO: move this out of here:
-sgMail.setApiKey(process.env.SEND_GRID_KEY); // TODO: replace this with confi
+//TODO: move this out of here, probably in it's own file:
+sgMail.setApiKey(config.sendGridKey);
 
 /**
  * @swagger
