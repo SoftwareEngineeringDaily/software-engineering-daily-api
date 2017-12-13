@@ -83,7 +83,7 @@ FavoriteSchema.statics = {
    @returns {Promise<Post[]>}
    */
   listBookmarkedPostsForUser(userId) {
-    return this.find({ userId }, 'postId')
+    return this.find({ userId, active: true }, 'postId')
       .then((bookmarks) => {
       // return empty array if nothing yet bookmarked
         if (bookmarks.length === 0) {
