@@ -11,6 +11,7 @@ const SubscriptionSchema = new mongoose.Schema({
     type: Schema.Types.ObjectId,
     ref: 'User'
   },
+  planFrequency: {type: String},
   stripe: {
     customerId: {type: String},
     subscriptionId: {type: String},
