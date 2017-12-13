@@ -27,10 +27,32 @@ function cancel(req, res, next) {
   }
 }
 
+function getStripePlanId(planType) {
+  // TODO: make this nicer + validate + own function
+  var stripePlanId = 'standard_subscription';
+  if (planType === 'monthly'){
+    stripePlanId = 'standard_subscription';
+  }
+  else if (planType === 'yearly'){
+    stripePlanId = 'sed_yearly_subscription';
+  }
+  else {
+    throw 'Invalid plan type';
+  }
+  return stripePlanId
+}
+
 function create(req, res, next) {
-  const { stripeToken } = req.body;
+  const { stripeToken, planType } = req.body;
+  const stripePlanId = getStripePlanId(planType);
+
   const { user } = req;
   const stripeEmail = user.email;
+
+
+  // TODO: check first if stripe subscription already exists?
+  // but if we don't, then we have the advantage of records?
+  // but we probably don't need to create a new stripe customer though...
 
   stripe.customers.create({
     email: stripeEmail,
@@ -43,7 +65,7 @@ function create(req, res, next) {
           customer: customer.id,
           items: [
             {
-              plan: "standard_subscription",
+              plan: stripePlanId,
             },
           ],
         })
@@ -62,6 +84,7 @@ function create(req, res, next) {
     newSubscription.stripe.email = stripeEmail;
     newSubscription.active = true;
     newSubscription.user = user._id;
+    // TODO: store which subcription type we need
     newSubscription.save()
     .then((subscriptionCreated) => {
       return User.get(user._id).then((_user) => {

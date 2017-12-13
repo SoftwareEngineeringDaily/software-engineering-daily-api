@@ -16,6 +16,13 @@ export default {
     }
   },
 
+  createSubscription: {
+    body: {
+      stripeToken: Joi.string().required(),
+      planType: Joi.string().required().allow(['yearly', 'monthly'])
+    }
+  },
+
   regainPassword: {
     body: {
       resetUID: Joi.string().required(),

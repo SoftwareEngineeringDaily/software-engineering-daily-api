@@ -21,6 +21,10 @@ const UserSchema = new mongoose.Schema({
     type: Schema.Types.ObjectId,
     ref: 'Subscription'
   },
+  /* TODO
+  save StripeCustomer ID?
+  */
+
   name: {
     type: String
     // , required: true // Should be requied but need to update all clients
