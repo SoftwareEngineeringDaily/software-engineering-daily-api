@@ -55,14 +55,13 @@ function subscriptionDeletedWebhook(request, response, next) {
     console.log('Request body.data.object.object---------', objectType);
 
     Subscription.findOne({
-      stripe: {
-        subscriptionId,
-        /*customerId*/ // probably not needed?
-      }
+      'stripe.subscriptionId': subscriptionId,
+        /*'stripe.customerId' : customerId*/ // probably not needed?
     })
     .exec()
     .then((subscription) => {
       if(!subscription) {
+        console.log('subscription null', subcription);
         throw 'Subscription not found';
       }
 
