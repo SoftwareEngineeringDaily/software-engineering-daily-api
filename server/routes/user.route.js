@@ -14,7 +14,6 @@ router.route('/me')
     , userCtrl.me
   );
 
-
 router.route('/:userId')
   /** GET /api/users/:userId - Get user */
   .get(
@@ -27,6 +26,18 @@ router.route('/:userId')
     expressJwt({ secret: config.jwtSecret })
     , validate(paramValidation.updateUser), userCtrl.update
   );
+
+router.route('/regain-password')
+  .post(
+    validate(paramValidation.regainPassword),
+    userCtrl.regainPassword
+  )
+
+router.route('/request-password-reset')
+  .post(
+    validate(paramValidation.requestPasswordReset),
+    userCtrl.requestPasswordReset
+  )
 
 router.route('/me/bookmarked')
 /** GET /api/users/me/bookmarked - Get bookmarked items for current user */
