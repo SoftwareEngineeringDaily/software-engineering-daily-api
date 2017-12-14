@@ -155,7 +155,6 @@ function regainPassword(req, res, next) {
         })
       })
     })
-
   })
   .catch((error) => {
     next(error);
@@ -186,7 +185,7 @@ function requestPasswordReset(req, res, next) {
       // TODO: throttle how many emails we send to same email per time.
       const msg = {
         to: email,
-        from: 'jason@softwaredaily.com',
+        from: 'no-reply@softwaredaily.com',
         subject: 'Password reset email',
         text: `Reset your password here ${config.baseUrl}/#/regain-account/${secretKey}/${resetPass._id}`,
         html: `<strong> <a href="${config.baseUrl}/#/regain-account/${secretKey}/${resetPass._id}"> Click here </a> to reset your password. `,
