@@ -47,15 +47,43 @@ function subscriptionDeletedWebhook(request, response, next) {
   console.log('Request type---------', request.body.type);
   if (request.body.type === 'customer.subscription.deleted') {
 
-    console.log('Request body.data.object.id---------', request.body.data.object.id);
-    console.log('Request body.data.object.customer---------', request.body.data.object.customer);
-    console.log('Request body.data.object.object---------', request.body.data.object.object);
+    const subscriptionId = request.body.data.object.id;
+    const customerId = request.body.data.object.customer;
+    const objectType = request.body.data.object.object;
+    console.log('Request body.data.object.id---------', subscriptionId);
+    console.log('Request body.data.object.customer---------', customerId);
+    console.log('Request body.data.object.object---------', objectType);
 
+    Subscription.findOne({
+      stripe: {
+        subscriptionId,
+        /*customerId*/ // probably not needed?
+      }
+    })
+    .exec()
+    .then((subscription) => {
+      if(!subscription) {
+        throw 'Subscription not found';
+      }
+
+      subscription.active = false
+      return subscription.save()
+      .then(( subscriptionInactive)=> {
+        response.send(200);
+      })
+    })
+    .catch((error) => {
+      console.log('stripe subscription not found or error setting to inactive', error);
+      response.send(500);
+    });
+  } else {
+    // TODO: log this somewhere...
+    console.log('Stripe webhook  (not cancellation?)-----', request.body.data.object);
+    response.send(200);
   }
 
   // Do something with event_json
 
-  response.send(200);
 }
 
 function create(req, res, next) {
