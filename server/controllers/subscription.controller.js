@@ -42,6 +42,23 @@ function getStripePlanId(planType) {
   return stripePlanId
 }
 
+function subscriptionDeletedWebhook(request, response, next) {
+  // Retrieve the request's body and parse it as JSON
+  console.log('----------------------------------Stripe Event -----------------------------------------------');
+  console.log('Request body.data.object---------', request.body.data.object);
+  /*
+  if (request.body.type === 'customer.subscription.deleted') {
+
+  }
+  */
+  console.log('Request type---------', request.body.type);
+
+  console.log('----------------------------------Stripe Event -----------------------------------------------');
+  // Do something with event_json
+
+  response.send(200);
+}
+
 function create(req, res, next) {
   const { stripeToken, planType } = req.body;
   const stripePlanId = getStripePlanId(planType);
@@ -110,4 +127,4 @@ function create(req, res, next) {
   });
 }
 
-export default { create, cancel };
+export default { create, cancel, subscriptionDeletedWebhook };
