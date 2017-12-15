@@ -66,8 +66,6 @@ const CommentSchema = new Schema({
   }
 });
 
-
-
 /*
   upVotes: {
     type: Number,

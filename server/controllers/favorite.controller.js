@@ -54,27 +54,6 @@ function get(req, res) {
   return res.json(req.favorite);
 }
 
-// TODO: Remove or use in route - necessary because of favorite/unfavorite?
-function create(req, res, next) {
-  const newFavorite = new Favorite({
-    active: req.body.active
-  });
-
-  newFavorite.save()
-    .then(savedFavorite => res.json(savedFavorite))
-    .catch(e => next(e));
-}
-
-// TODO: Remove or use in route - necessary because of favorite/unfavorite?
-function update(req, res, next) {
-  const updateFavorite = req.favorite;
-  updateFavorite.active = req.body.active;
-
-  updateFavorite.save()
-    .then(savedFavorite => res.json(savedFavorite))
-    .catch(e => next(e));
-}
-
 /**
  * @swagger
  * /favorites:
@@ -100,14 +79,6 @@ function list(req, res, next) {
   const { limit = 50, skip = 0 } = req.query;
   Favorite.list({ limit, skip }, req.user._id)
     .then(favorites => res.json(favorites))
-    .catch(e => next(e));
-}
-
-// TODO: Remove or use in route
-function remove(req, res, next) {
-  const existingVavorite = req.favorite;
-  existingVavorite.remove()
-    .then(deletedFavorite => res.json(deletedFavorite))
     .catch(e => next(e));
 }
 
@@ -225,4 +196,6 @@ function unfavorite(req, res, next) {
     });
 }
 
-export default { load, get, create, update, list, remove, favorite, unfavorite };
+export default {
+  load, get, list, favorite, unfavorite
+};

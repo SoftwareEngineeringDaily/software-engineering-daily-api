@@ -27,23 +27,85 @@ function cancel(req, res, next) {
   }
 }
 
+function getStripePlanId(planType) {
+  // TODO: make this nicer + validate + own function
+  var stripePlanId = 'sed_monthly_subscription';
+  if (planType === 'monthly'){
+    stripePlanId = 'sed_monthly_subscription';
+  }
+  else if (planType === 'yearly'){
+    stripePlanId = 'sed_yearly_subscription';
+  }
+  else {
+    throw 'Invalid plan type';
+  }
+  return stripePlanId
+}
+
+function subscriptionDeletedWebhook(request, response, next) {
+  // Retrieve the request's body and parse it as JSON
+  console.log('Request type---------', request.body.type);
+  if (request.body.type === 'customer.subscription.deleted') {
+
+    const subscriptionId = request.body.data.object.id;
+    const customerId = request.body.data.object.customer;
+    const objectType = request.body.data.object.object;
+    console.log('Request body.data.object.id---------', subscriptionId);
+    console.log('Request body.data.object.customer---------', customerId);
+    console.log('Request body.data.object.object---------', objectType);
+
+    Subscription.findOne({
+      'stripe.subscriptionId': subscriptionId,
+        /*'stripe.customerId' : customerId*/ // probably not needed?
+    })
+    .exec()
+    .then((subscription) => {
+      if(!subscription) {
+        console.log('subscription null', subcription);
+        throw 'Subscription not found';
+      }
+
+      subscription.active = false
+      return subscription.save()
+      .then(( subscriptionInactive)=> {
+        response.send(200);
+      })
+    })
+    .catch((error) => {
+      console.log('stripe subscription not found or error setting to inactive', error);
+      response.send(500);
+    });
+  } else {
+    // TODO: log this somewhere...
+    console.log('Stripe webhook  (not cancellation?)-----', request.body.data.object);
+    response.send(200);
+  }
+
+  // Do something with event_json
+
+}
+
 function create(req, res, next) {
-  const { stripeToken } = req.body;
+  const { stripeToken, planType } = req.body;
+  const stripePlanId = getStripePlanId(planType);
+
   const { user } = req;
   const stripeEmail = user.email;
 
+
+  // TODO: check first if stripe subscription already exists?
+  // but if we don't, then we have the advantage of records?
+  // but we probably don't need to create a new stripe customer though...
   stripe.customers.create({
     email: stripeEmail,
     card: stripeToken
   })
   .then(customer => {
-        // TODO: save customer in DB
-        // TODO: look up customer and see if it already exists?
         return stripe.subscriptions.create({
           customer: customer.id,
           items: [
             {
-              plan: "standard_subscription",
+              plan: stripePlanId,
             },
           ],
         })
@@ -59,6 +121,8 @@ function create(req, res, next) {
     const newSubscription = new Subscription();
     newSubscription.stripe.subscriptionId = subscription.id;
     newSubscription.stripe.customerId = customer.id;
+    newSubscription.stripe.planId = stripePlanId;
+    newSubscription.planFrequency = planType;
     newSubscription.stripe.email = stripeEmail;
     newSubscription.active = true;
     newSubscription.user = user._id;
@@ -69,6 +133,8 @@ function create(req, res, next) {
       });
     })
     .then(({_user, subscriptionCreated}) => {
+      // We actually save the current subscription into the user  .
+      // makes it easier when checking on the frontend
       _user.subscription = subscriptionCreated._id;
       return _user.save();
     })
@@ -84,4 +150,4 @@ function create(req, res, next) {
   });
 }
 
-export default { create, cancel };
+export default { create, cancel, subscriptionDeletedWebhook };
