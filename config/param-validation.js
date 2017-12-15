@@ -15,6 +15,28 @@ export default {
       userId: Joi.string().hex().required()
     }
   },
+
+  createSubscription: {
+    body: {
+      stripeToken: Joi.string().required(),
+      planType: Joi.string().required().allow(['yearly', 'monthly'])
+    }
+  },
+
+  regainPassword: {
+    body: {
+      resetUID: Joi.string().required(),
+      newPassword: Joi.string().required(),
+      secretKey: Joi.string().required()
+    }
+  },
+
+  requestPasswordReset: {
+    body: {
+      email: Joi.string().email().required()
+    }
+  },
+
     // POST /api/auth/loginWithEmail
   loginWithEmail: {
     body: {
@@ -55,5 +77,4 @@ export default {
       content: Joi.string().required()
     }
   }
-
 };
