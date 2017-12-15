@@ -96,14 +96,11 @@ function create(req, res, next) {
   // TODO: check first if stripe subscription already exists?
   // but if we don't, then we have the advantage of records?
   // but we probably don't need to create a new stripe customer though...
-
   stripe.customers.create({
     email: stripeEmail,
     card: stripeToken
   })
   .then(customer => {
-        // TODO: save customer in DB
-        // TODO: look up customer and see if it already exists?
         return stripe.subscriptions.create({
           customer: customer.id,
           items: [
@@ -129,7 +126,6 @@ function create(req, res, next) {
     newSubscription.stripe.email = stripeEmail;
     newSubscription.active = true;
     newSubscription.user = user._id;
-    // TODO: store which subcription type we need
     newSubscription.save()
     .then((subscriptionCreated) => {
       return User.get(user._id).then((_user) => {
@@ -138,6 +134,7 @@ function create(req, res, next) {
     })
     .then(({_user, subscriptionCreated}) => {
       // We actually save the current subscription into the user  .
+      // makes it easier when checking on the frontend
       _user.subscription = subscriptionCreated._id;
       return _user.save();
     })
