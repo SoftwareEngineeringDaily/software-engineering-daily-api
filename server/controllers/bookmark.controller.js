@@ -1,29 +1,31 @@
 import Bluebird from 'bluebird';
 
+// Keeping Bookmark naming for model for now to defer database migration issues
+// but all else will be renamed to bookmark for cross-project consistency
 import Favorite from '../models/favorite.model';
 
 /**
  * @swagger
  * tags:
- * - name: favorite
- *   description: Favoriting (aka staring/bookmarking) of Episodes
+ * - name: bookmark
+ *   description: Bookmarking Episodes and Other Items
  */
 
 /**
  * @swagger
  * parameters:
- *   favoriteId:
- *     name: favoriteId
+ *   bookmarkId:
+ *     name: bookmarkId
  *     in: path
- *     description: Mongo ObjectId of favorite
+ *     description: Mongo ObjectId of bookmark
  *     required: true
  *     type: string
  */
 
 function load(req, res, next, id) {
   Favorite.get(id, req.user._id)
-    .then((favoriteFound) => {
-      req.favorite = favoriteFound; // eslint-disable-line no-param-reassign
+    .then((bookmarkFound) => {
+      req.bookmark = bookmarkFound; // eslint-disable-line no-param-reassign
       return next();
     })
     .catch(e => next(e));
@@ -31,36 +33,55 @@ function load(req, res, next, id) {
 
 /**
  * @swagger
- *   /favorites/{favoriteId}:
- *     get:
- *       summary: Get specific favorite
- *       description: Get specific favorite picked by user
- *       tags: [favorite]
- *       security:
- *         - Token: []
- *       parameters:
- *         - $ref: '#/parameters/favoriteId'
- *       responses:
- *         '200':
- *           description: successful operation
- *           schema:
- *             $ref: '#/definitions/Favorite'
- *         '401':
- *           $ref: '#/responses/Unauthorized'
- *         '404':
- *           $ref: '#/responses/NotFound'
+ * /bookmarks/{bookmarkId}:
+ *   get:
+ *     summary: Get bookmark
+ *     description: Get specific bookmark by id
+ *     tags: [bookmark]
+ *     security:
+ *       - Token: []
+ *     parameters:
+ *       - $ref: '#/parameters/bookmarkId'
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           $ref: '#/definitions/Bookmark'
+ *       '401':
+ *         $ref: '#/responses/Unauthorized'
+ *       '404':
+ *         $ref: '#/responses/NotFound'
+ * /favorites/{bookmarkId}:
+ *   get:
+ *     summary: Get specific bookmark
+ *     description: Get specific bookmark picked by user
+ *     tags: [bookmark]
+ *     deprecated: true
+ *     security:
+ *       - Token: []
+ *     parameters:
+ *       - $ref: '#/parameters/bookmarkId'
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           $ref: '#/definitions/Bookmark'
+ *       '401':
+ *         $ref: '#/responses/Unauthorized'
+ *       '404':
+ *         $ref: '#/responses/NotFound'
  */
 function get(req, res) {
-  return res.json(req.favorite);
+  return res.json(req.bookmark);
 }
 
 /**
  * @swagger
- * /favorites:
+ * /bookmarks:
  *   get:
- *     summary: Get favorited episodes
- *     description: Get list of favorited episodes for current user.
- *     tags: [favorite]
+ *     summary: Get bookmarked items
+ *     description: Get list of bookmarks for current user.
+ *     tags: [bookmark]
  *     security:
  *       - Token: []
  *     parameters:
@@ -72,7 +93,25 @@ function get(req, res) {
  *         schema:
  *           type: array
  *           items:
- *             $ref: '#/definitions/Favorite'
+ *             $ref: '#/definitions/Bookmark'
+ * /favorites:
+ *   get:
+ *     summary: Get favorited episodes
+ *     description: Get list of favorited episodes for current user.
+ *     tags: [bookmark]
+ *     deprecated: true
+ *     security:
+ *       - Token: []
+ *     parameters:
+ *       - $ref: '#/parameters/limit'
+ *       - $ref: '#/parameters/skip'
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/Bookmark'
  */
 
 function list(req, res, next) {
@@ -84,12 +123,12 @@ function list(req, res, next) {
 
 /**
  * @swagger
- * /posts/{postId}/favorite:
+ * /posts/{postId}/bookmark:
  *   post:
- *     summary: Favorite episode
+ *     summary: Bookmark post
  *     description: |
- *       Favorite or star episode for current user.
- *     tags: [favorite]
+ *       Add bookmark to post for current user.
+ *     tags: [bookmark]
  *     security:
  *       - Token: []
  *     parameters:
@@ -98,13 +137,33 @@ function list(req, res, next) {
  *       '200':
  *         description: successful operation
  *         schema:
- *           $ref: '#/definitions/Favorite'
+ *           $ref: '#/definitions/Bookmark'
+ *       '401':
+ *         $ref: '#/responses/Unauthorized'
+ *       '404':
+ *         $ref: '#/responses/NotFound'
+ * /posts/{postId}/favorite:
+ *   post:
+ *     summary: Favorite episode
+ *     description: |
+ *       Favorite or star episode for current user.
+ *     deprecated: true
+ *     tags: [bookmark]
+ *     security:
+ *       - Token: []
+ *     parameters:
+ *       - $ref: '#/parameters/postId'
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           $ref: '#/definitions/Bookmark'
  *       '401':
  *         $ref: '#/responses/Unauthorized'
  *       '404':
  *         $ref: '#/responses/NotFound'
  */
-function favorite(req, res, next) {
+function bookmark(req, res, next) {
   const post = req.post;
   if (!post.totalFavorites) post.totalFavorites = 0;
 
@@ -140,12 +199,12 @@ function favorite(req, res, next) {
 
 /**
  * @swagger
- * /posts/{postId}/unfavorite:
+ * /posts/{postId}/unbookmark:
  *   post:
- *     summary: Unfavorite episode
+ *     summary: Unbookmark post
  *     description: |
- *       Unfavorite episode for current user.
- *     tags: [favorite]
+ *       Remove bookmark of post for current user.
+ *     tags: [bookmark]
  *     security:
  *       - Token: []
  *     parameters:
@@ -154,13 +213,33 @@ function favorite(req, res, next) {
  *       '200':
  *         description: successful operation
  *         schema:
- *           $ref: '#/definitions/Favorite'
+ *           $ref: '#/definitions/Bookmark'
+ *       '401':
+ *         $ref: '#/responses/Unauthorized'
+ *       '404':
+ *         $ref: '#/responses/NotFound'
+ * /posts/{postId}/unfavorite:
+ *   post:
+ *     summary: Unfavorite episode
+ *     description: |
+ *       Unfavorite episode for current user.
+ *     deprecated: true
+ *     tags: [bookmark]
+ *     security:
+ *       - Token: []
+ *     parameters:
+ *       - $ref: '#/parameters/postId'
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           $ref: '#/definitions/Bookmark'
  *       '401':
  *         $ref: '#/responses/Unauthorized'
  *       '404':
  *         $ref: '#/responses/NotFound'
  */
-function unfavorite(req, res, next) {
+function unbookmark(req, res, next) {
   const post = req.post;
   if (!post.totalFavorites) post.totalFavorites = 0;
 
@@ -197,5 +276,5 @@ function unfavorite(req, res, next) {
 }
 
 export default {
-  load, get, list, favorite, unfavorite
+  load, get, list, bookmark, unbookmark
 };
