@@ -20,4 +20,4 @@ The backend services and API for the Software Engineering Daily [Android](https:
 ## Using Docker
   - `cp .env.docker_example .env`
   - Run `docker-compose up`
-  - If dependencies are updated in package.json, run `docker-compose down` and then `docker-compose up --build`. This will remove the old container and rebuild the API image which installs the new dependencies
+  - If dependencies are updated in package.json, run `docker-compose down` and then `docker-compose up --build`. This will remove the old container and rebuild the API image which installs the new dependencies.
