@@ -177,8 +177,23 @@ function register(req, res, next) {
     return next(err);
   }
 
+  const email = req.body.email;
+  const queryIfEmail = { $or: [
+    {username},
+    {email}
+  ]};
+
+  const queryIfEmailMissing = { $or: [
+    {username},
+    {email: username}
+  ]};
+
+  // We do this so people can't share an email on either field, username or email:
+  // also so no-one can have the same email or same username.
+  const userQuery = email ?  queryIfEmail : queryIfEmailMissing;
+
   User
-    .findOne({ username }).exec()
+  .findOne(userQuery).exec()
     .then((user) => {
       if (user) {
         let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
