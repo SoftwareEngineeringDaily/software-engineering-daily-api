@@ -178,7 +178,10 @@ function register(req, res, next) {
   }
 
   User
-    .findOne({ username }).exec()
+  .findOne({ $or: [
+    {username},
+    {email: username}
+  ]}).exec()
     .then((user) => {
       if (user) {
         let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
