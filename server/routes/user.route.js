@@ -27,6 +27,12 @@ router.route('/:userId')
     , validate(paramValidation.updateUser), userCtrl.update
   );
 
+router.route('/userClickedLink')
+  .post(
+    expressJwt({ secret: config.jwtSecret }),
+    userCtrl.userClickedLink
+)
+
 router.route('/regain-password')
   .post(
     validate(paramValidation.regainPassword),
@@ -49,6 +55,7 @@ router.route('/me/bookmarked')
 router.route('/:userId/bookmarked')
 /** GET /api/users/:userId/bookmarked - Get bookmarked items for specified user */
   .get(userCtrl.listBookmarked);
+
 
 /** Load user when API with userId route parameter is hit */
 router.param('userId', userCtrl.load);

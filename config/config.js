@@ -11,7 +11,7 @@ const envVarsSchema = Joi.object({
   BASE_URL: Joi.string()
     // .allow(['https://www.softwaredaily.com', 'http://localhost:4040'])
     .default('https://www.softwaredaily.com'),
-  SEND_GRID_KEY: Joi.string().required(),
+  //SEND_GRID_KEY: Joi.string().required(),
   PORT: Joi.number()
     .default(4040),
   MONGOOSE_DEBUG: Joi.boolean()
@@ -22,8 +22,8 @@ const envVarsSchema = Joi.object({
     }),
   JWT_SECRET: Joi.string().required()
     .description('JWT Secret required to sign'),
-  AD_FREE_URL: Joi.string().required()
-    .description('URL for ad free podcasts'),
+  // AD_FREE_URL: Joi.string().required()
+  //   .description('URL for ad free podcasts'),
   MONGO_HOST: Joi.string().required()
     .description('Mongo DB host url'),
   MONGO_HOST_TEST: Joi.string()

@@ -246,6 +246,11 @@ function listBookmarked(req, res, next) {
     });
 }
 
+function userClickedLink(req, res, next) {
+  console.log("-----------------------------------------User clicked link!")
+  return
+}
+
 export default {
-  load, get, me, update, listBookmarked, requestPasswordReset, regainPassword
+  load, get, me, update, listBookmarked, requestPasswordReset, regainPassword, userClickedLink
 };
