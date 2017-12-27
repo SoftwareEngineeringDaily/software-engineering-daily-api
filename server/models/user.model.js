@@ -4,6 +4,15 @@ import httpStatus from 'http-status';
 import bcrypt from 'bcrypt-nodejs';
 import APIError from '../helpers/APIError';
 
+var LinkSchema = new Schema({
+  linkId: {
+    type: String
+  },
+  linkType: {
+    type: String
+  }
+});
+
 /**
  * User Schema
  */
@@ -57,8 +66,9 @@ const UserSchema = new mongoose.Schema({
     },
     name: {
       type: String
-    }
+    },
   },
+  linksClicked: [LinkSchema],
   // mobileNumber: {
   //   type: String,
   //   required: true,

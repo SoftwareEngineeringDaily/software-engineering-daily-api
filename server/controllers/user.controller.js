@@ -248,7 +248,33 @@ function listBookmarked(req, res, next) {
 
 function userClickedLink(req, res, next) {
   console.log("-----------------------------------------User clicked link!")
-  return
+  let {linkId, type} = req.body
+  let userId = req.user._id
+  console.log("LINKID AND TYPE")
+  console.log(linkId + " " + type)
+  let link = {"linkId": linkId, "linkType" : type}
+  User.findOne({ _id : userId })
+  .exec()
+  .then((_user) => {
+    if(!_user.linksClicked){
+      console.log("In the first if block")
+      _user.linksClicked = [link]
+      console.log("LINKS CLICKED?????" + _user.linksClicked)
+      console.log("USER IS++++++++++++++++++", _user)
+      console.log("LINKS CLICKED?????" + _user.linksClicked)
+
+    }
+    else{
+      console.log("In the second if block", link)
+      _user.linksClicked.push(link)
+      console.log("links clicked", _user.linksClicked)
+    }
+    return _user.save()
+  })
+  .catch(e => {
+    console.log('error saving user', e);
+    next(e)
+  });
 }
 
 export default {
