@@ -56,7 +56,7 @@ function subscriptionDeletedWebhook(request, response, next) {
 
     Subscription.findOne({
       'stripe.subscriptionId': subscriptionId,
-        /*'stripe.customerId' : customerId*/ // probably not needed?
+      /*'stripe.customerId' : customerId*/ // probably not needed?
     })
     .exec()
     .then((subscription) => {
@@ -87,7 +87,14 @@ function subscriptionDeletedWebhook(request, response, next) {
 
 function create(req, res, next) {
   const { stripeToken, planType } = req.body;
-  const stripePlanId = getStripePlanId(planType);
+
+  var stripePlanId;
+  try {
+    stripePlanId = getStripePlanId(planType);
+  } catch(error) {
+    let err = new APIError('Please choose a plan type.', httpStatus.BAD_REQUEST, true); //eslint-disable-line
+    return next(err);
+  }
 
   const { user } = req;
   const stripeEmail = user.email;
@@ -96,26 +103,23 @@ function create(req, res, next) {
   // TODO: check first if stripe subscription already exists?
   // but if we don't, then we have the advantage of records?
   // but we probably don't need to create a new stripe customer though...
+
   stripe.customers.create({
     email: stripeEmail,
     card: stripeToken
   })
   .then(customer => {
-        return stripe.subscriptions.create({
-          customer: customer.id,
-          items: [
-            {
-              plan: stripePlanId,
-            },
-          ],
-        })
-        .then((subscription) => {
-          return {subscription, customer}
-        })
+    return stripe.subscriptions.create({
+      customer: customer.id,
+      items: [
+        {
+          plan: stripePlanId,
+        },
+      ],
+    })
   })
-  .catch(err => {
-    console.log("Error:", err);
-    next(err);
+  .then((subscription) => {
+    return {subscription, customer}
   })
   .then(({subscription, customer}) => {
     const newSubscription = new Subscription();
@@ -126,27 +130,27 @@ function create(req, res, next) {
     newSubscription.stripe.email = stripeEmail;
     newSubscription.active = true;
     newSubscription.user = user._id;
-    newSubscription.save()
-    .then((subscriptionCreated) => {
-      return User.get(user._id).then((_user) => {
-        return {_user, subscriptionCreated};
-      });
-    })
-    .then(({_user, subscriptionCreated}) => {
-      // We actually save the current subscription into the user  .
-      // makes it easier when checking on the frontend
-      _user.subscription = subscriptionCreated._id;
-      return _user.save();
-    })
-    .then((_user) => {
-      return res.json({'succes': 'sucess'});
-    })
-    .catch((error) => {
-      console.log('error', error);
-      let err = new APIError('An error ocurred when creating your subscription.', httpStatus.INTERNAL_SERVER_ERROR, true); //eslint-disable-line
-      return next(err);
-    });
-
+    return newSubscription.save()
+  })
+  .then((subscriptionCreated) => {
+    return User.get(user._id)
+  })
+  .then((_user) => {
+    return {_user, subscriptionCreated};
+  })
+  .then(({_user, subscriptionCreated}) => {
+    // We actually save the current subscription into the user  .
+    // makes it easier when checking on the frontend
+    _user.subscription = subscriptionCreated._id;
+    return _user.save();
+  })
+  .then((_user) => {
+    return res.json({'succes': 'sucess'});
+  })
+  .catch((error) => {
+    console.log('Error-------', error);
+    let err = new APIError('An error ocurred when creating your subscription.', httpStatus.BAD_REQUEST, true); //eslint-disable-line
+    return next(err);
   });
 }
 
