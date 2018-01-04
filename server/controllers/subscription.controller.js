@@ -87,15 +87,24 @@ function subscriptionDeletedWebhook(request, response, next) {
 
 function create(req, res, next) {
   const { stripeToken, planType } = req.body;
-  const stripePlanId = getStripePlanId(planType);
+
+  var stripePlanId;
+  try {
+    stripePlanId = getStripePlanId(planType);
+  } catch(error) {
+      let err = new APIError('Please choose a plan type.', httpStatus.BAD_REQUEST, true); //eslint-disable-line
+      return next(err);
+  }
 
   const { user } = req;
   const stripeEmail = user.email;
 
+  // TODO: this is a bit of a mess, need to trickel down to one catch:
 
   // TODO: check first if stripe subscription already exists?
   // but if we don't, then we have the advantage of records?
   // but we probably don't need to create a new stripe customer though...
+
   stripe.customers.create({
     email: stripeEmail,
     card: stripeToken
@@ -112,12 +121,13 @@ function create(req, res, next) {
         .then((subscription) => {
           return {subscription, customer}
         })
-  })
-  .catch(err => {
-    console.log("Error:", err);
-    next(err);
+        .catch((error) => {
+          console.log('error----------------------');
+          next(err);
+        })
   })
   .then(({subscription, customer}) => {
+
     const newSubscription = new Subscription();
     newSubscription.stripe.subscriptionId = subscription.id;
     newSubscription.stripe.customerId = customer.id;
@@ -126,11 +136,15 @@ function create(req, res, next) {
     newSubscription.stripe.email = stripeEmail;
     newSubscription.active = true;
     newSubscription.user = user._id;
-    newSubscription.save()
+    return newSubscription.save()
     .then((subscriptionCreated) => {
       return User.get(user._id).then((_user) => {
         return {_user, subscriptionCreated};
       });
+    })
+    .catch(err => {
+      console.log("------Error:", err);
+      next(err);
     })
     .then(({_user, subscriptionCreated}) => {
       // We actually save the current subscription into the user  .
@@ -142,12 +156,15 @@ function create(req, res, next) {
       return res.json({'succes': 'sucess'});
     })
     .catch((error) => {
-      console.log('error', error);
-      let err = new APIError('An error ocurred when creating your subscription.', httpStatus.INTERNAL_SERVER_ERROR, true); //eslint-disable-line
+      let err = new APIError('An error ocurred when creating your subscription.', httpStatus.BAD_REQUEST, true); //eslint-disable-line
       return next(err);
     });
-
+  })
+  .catch((error) => {
+    let err = new APIError('An error ocurred when creating your subscription.', httpStatus.BAD_REQUEST, true); //eslint-disable-line
+    return next(err);
   });
+
 }
 
 export default { create, cancel, subscriptionDeletedWebhook };
