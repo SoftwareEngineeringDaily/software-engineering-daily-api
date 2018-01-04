@@ -117,9 +117,9 @@ function create(req, res, next) {
         },
       ],
     })
-  })
-  .then((subscription) => {
-    return {subscription, customer}
+    .then((subscription) => {
+      return {subscription, customer}
+    })
   })
   .then(({subscription, customer}) => {
     const newSubscription = new Subscription();
@@ -134,9 +134,9 @@ function create(req, res, next) {
   })
   .then((subscriptionCreated) => {
     return User.get(user._id)
-  })
-  .then((_user) => {
-    return {_user, subscriptionCreated};
+    .then((_user) => {
+      return {_user, subscriptionCreated};
+    })
   })
   .then(({_user, subscriptionCreated}) => {
     // We actually save the current subscription into the user  .
