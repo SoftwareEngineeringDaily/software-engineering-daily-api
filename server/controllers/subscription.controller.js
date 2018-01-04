@@ -137,7 +137,7 @@ function create(req, res, next) {
   })
   .then((_user) => {
     return {_user, subscriptionCreated};
-  });
+  })
   .then(({_user, subscriptionCreated}) => {
     // We actually save the current subscription into the user  .
     // makes it easier when checking on the frontend
