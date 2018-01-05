@@ -148,9 +148,13 @@ function create(req, res, next) {
     return res.json({'succes': 'sucess'});
   })
   .catch((error) => {
-    console.log('Error-------', error);
-    let err = new APIError('An error ocurred when creating your subscription.', httpStatus.BAD_REQUEST, true); //eslint-disable-line
-    return next(err);
+    try {
+      let err = new APIError(error.message, httpStatus.BAD_REQUEST, true); //eslint-disable-line
+      return next(err);
+    } catch(_error) {
+      let err2 = new APIError('An error ocurred when creating your subscription.', httpStatus.BAD_REQUEST, true); //eslint-disable-line
+      return next(err2);
+    }
   });
 }
 
