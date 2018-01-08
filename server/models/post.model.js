@@ -181,7 +181,7 @@ PostSchema.statics = {
       select: 'active',
       match: { userId: user._id }
     })
-      .lean() // returns as plain object
+      // .lean() // returns as plain object, but this will remove deafault values which is bad
       .exec()
       .then((postsFound) => {
       // add bookmarked
@@ -190,7 +190,7 @@ PostSchema.statics = {
           const { bookmarkedByUser } = _post;
           const bookmarked = bookmarkedByUser ? bookmarkedByUser.active : false;
           delete _post.bookmarkedByUser;
-          return Object.assign({}, post, { bookmarked });
+          return Object.assign({}, post.toObject(), { bookmarked });
         });
         // add vote info
         return this.addVotesForUserToPosts(postsWithBookmarked, user._id);
