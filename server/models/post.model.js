@@ -75,8 +75,7 @@ const PostSchema = new mongoose.Schema({
  * - virtuals
  */
 
-// TODO: decide - refactor as bookmark for consistency w clients
-PostSchema.virtual('favoritedByUser', {
+PostSchema.virtual('bookmarkedByUser', {
   ref: 'Favorite',
   localField: '_id',
   foreignField: 'postId',
@@ -178,19 +177,19 @@ PostSchema.statics = {
     }
 
     return queryPromise.populate({
-      path: 'favoritedByUser',
+      path: 'bookmarkedByUser',
       select: 'active',
       match: { userId: user._id }
     })
       // .lean() // returns as plain object, but this will remove deafault values which is bad
       .exec()
       .then((postsFound) => {
-      // add bookmarked/favorited info
+      // add bookmarked
         const postsWithBookmarked = postsFound.map((post) => {
           const _post = post;
-          const { favoritedByUser } = _post;
-          const bookmarked = favoritedByUser ? favoritedByUser.active : false;
-          delete _post.favoritedByUser;
+          const { bookmarkedByUser } = _post;
+          const bookmarked = bookmarkedByUser ? bookmarkedByUser.active : false;
+          delete _post.bookmarkedByUser;
           return Object.assign({}, post.toObject(), { bookmarked });
         });
         // add vote info

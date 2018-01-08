@@ -5,9 +5,13 @@ import APIError from '../helpers/APIError';
 import Post from './post.model';
 
 /**
+ * todo: once clients migrated "bookmark" - do final refactor of code and db migration
+ */
+
+/**
  * @swagger
  * definitions:
- *   Favorite:
+ *   Bookmark:
  *     type: object
  *     properties:
  *       _id:
@@ -20,7 +24,7 @@ import Post from './post.model';
  *         $ref: '#/definitions/ObjectId'
  *       active:
  *         type: boolean
- *         description: Active state of favorite
+ *         description: Active state of bookmark
  *
  */
 
@@ -59,7 +63,7 @@ FavoriteSchema.statics = {
         if (favorite) {
           return favorite;
         }
-        const err = new APIError('No such favorite exists!', httpStatus.NOT_FOUND);
+        const err = new APIError('No such bookmark exists!', httpStatus.NOT_FOUND);
         return Promise.reject(err);
       });
   },

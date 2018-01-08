@@ -7,7 +7,7 @@ import voteCtrl from '../controllers/vote.controller';
 import transferField from '../middleware/transferField';
 import commentCtrl from '../controllers/comment.controller';
 import relatedLinkCtrl from '../controllers/relatedLink.controller';
-import favoriteCtrl from '../controllers/favorite.controller';
+import bookmarkCtrl from '../controllers/bookmark.controller';
 import listenedCtrl from '../controllers/listened.controller';
 import config from '../../config/config';
 import loadFullUser from '../middleware/loadFullUser.middleware';
@@ -18,65 +18,85 @@ router.route('/')
   .get(
     expressJwt({ secret: config.jwtSecret, credentialsRequired: false })
     , loadFullUser
-    , postCtrl.list);
+    , postCtrl.list
+  );
 
 router.route('/recommendations')
-  .get(expressJwt({ secret: config.jwtSecret })
-  , loadFullUser
-  , postCtrl.recommendations);
+  .get(
+    expressJwt({ secret: config.jwtSecret })
+    , loadFullUser
+    , postCtrl.recommendations
+  );
 
 router.route('/:postId')
   .get(
     expressJwt({ secret: config.jwtSecret, credentialsRequired: false })
     , loadFullUser
-    , postCtrl.get);
+    , postCtrl.get
+  );
 
 router.route('/:postId/comments')
-  .get(expressJwt({ secret: config.jwtSecret
-    , credentialsRequired: false }), commentCtrl.list);
+  .get(expressJwt({
+    secret: config.jwtSecret,
+    credentialsRequired: false
+  }), commentCtrl.list);
 
 // Create a comment:
 router.route('/:postId/comment')
   .post(
     expressJwt({ secret: config.jwtSecret })
     , validate(paramValidation.comment)
-    , commentCtrl.create);
+    , commentCtrl.create
+  );
 
 // Get related links associated with postId
 router.route('/:postId/related-links')
-  .get(expressJwt({ secret: config.jwtSecret, credentialsRequired: false })
-    , relatedLinkCtrl.list);
+  .get(
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false })
+    , relatedLinkCtrl.list
+  );
 
 // Add a related-link to postId:
 router.route('/:postId/related-link')
   .post(
     expressJwt({ secret: config.jwtSecret })
     , validate(paramValidation.relatedLinkCreate)
-    , relatedLinkCtrl.create);
+    , relatedLinkCtrl.create
+  );
 
 router.route('/:postId/upvote')
-  .post(expressJwt({ secret: config.jwtSecret })
-  , transferField({source: 'post', target: 'entity'})
-  , voteCtrl.findVote
-  , voteCtrl.upvote
-  , postCtrl.upvote
-  , voteCtrl.finish
-);
+  .post(
+    expressJwt({ secret: config.jwtSecret })
+    , transferField({ source: 'post', target: 'entity' })
+    , voteCtrl.findVote
+    , voteCtrl.upvote
+    , postCtrl.upvote
+    , voteCtrl.finish
+  );
 
 router.route('/:postId/downvote')
-  .post(expressJwt({ secret: config.jwtSecret })
-  , transferField({source: 'post', target: 'entity'})
-  , voteCtrl.findVote
-  , voteCtrl.downvote
-  , postCtrl.downvote
-  , voteCtrl.finish
-);
+  .post(
+    expressJwt({ secret: config.jwtSecret })
+    , transferField({ source: 'post', target: 'entity' })
+    , voteCtrl.findVote
+    , voteCtrl.downvote
+    , postCtrl.downvote
+    , voteCtrl.finish
+  );
 
+router.route('/:postId/bookmark')
+  .post(expressJwt({ secret: config.jwtSecret }), bookmarkCtrl.bookmark);
+
+// todo: deprecate once all clients use bookmark
 router.route('/:postId/favorite')
-  .post(expressJwt({ secret: config.jwtSecret }), favoriteCtrl.favorite);
+  .post(expressJwt({ secret: config.jwtSecret }), bookmarkCtrl.bookmark);
 
+router.route('/:postId/unbookmark')
+  .post(expressJwt({ secret: config.jwtSecret }), bookmarkCtrl.unbookmark);
+
+// todo: deprecate once all clients use unbookmark
 router.route('/:postId/unfavorite')
-  .post(expressJwt({ secret: config.jwtSecret }), favoriteCtrl.unfavorite);
+  .post(expressJwt({ secret: config.jwtSecret }), bookmarkCtrl.unbookmark);
 
 router.route('/:postId/listened')
   .post(expressJwt({ secret: config.jwtSecret }), listenedCtrl.create);
