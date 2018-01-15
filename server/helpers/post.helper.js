@@ -9,8 +9,8 @@ function replaceWithAdFree(post, next) {
       post.mp3 = config.adFreeURL + newFileName;
     }
   } catch(e) {
-    console.log('error', e);
-    next(e);
+    console.log('Error, could not get mp3', post, e);
+    // next(e); // We don't want to do this since it could still return posts.
   }
   return post;
 }
