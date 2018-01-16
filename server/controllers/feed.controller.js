@@ -14,9 +14,9 @@ function list(req, res, next) {
   .exec()
 
   .then((feed) => {
-    // If user is new and doesn't have a feed, use Jeff's feed
-    if (!feed) {
-      Feed.findOne({user: '597a06d7f0dc67003db0c4c0'})
+    // If user is new and doesn't have a feed, use any feed:
+    if (feed == null) {
+      Feed.findOne()
       .exec()
       .then((jeffsFeed) => {
         if(jeffsFeed) {
