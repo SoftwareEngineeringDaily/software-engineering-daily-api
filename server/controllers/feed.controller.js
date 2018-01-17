@@ -7,20 +7,21 @@ import RelatedLink from '../models/relatedLink.model'
 
 function list(req, res, next) {
 
-  // If user is logged out, use Jeff's feed TODO cleaner solution
-  let userId = req.user ? req.user._id : '597a06d7f0dc67003db0c4c0'
+  // If user is logged out, use a random feed
 
-  Feed.findOne({user: userId})
+  let query = req.user ? {user: req.user._id} : {};
+
+  console.log('--------query', query);
+  Feed.findOne(query)
   .exec()
-
   .then((feed) => {
-    // If user is new and doesn't have a feed, use Jeff's feed
-    if (!feed) {
-      Feed.findOne({user: '597a06d7f0dc67003db0c4c0'})
+    // If user is new and doesn't have a feed, use any feed:
+    if (feed == null) {
+      Feed.findOne()
       .exec()
-      .then((jeffsFeed) => {
-        if(jeffsFeed) {
-          res.json(jeffsFeed.feedItems)
+      .then((randomFeed) => {
+        if(randomFeed) {
+          res.json(randomFeed.feedItems)
         }
         else{
           res.json([])
