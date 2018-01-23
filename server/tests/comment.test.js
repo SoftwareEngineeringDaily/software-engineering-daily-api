@@ -27,7 +27,9 @@ describe('## Comment APIs', () => {
   };
 
   let userToken;
-  let postId;
+  let postId
+  let commentId;
+  let replyId;
 
   before((done) => {
     request(app)
@@ -81,6 +83,8 @@ describe('## Comment APIs', () => {
           expect(comment.content).to.eql(`${content}`);
           expect(comment.author).to.exist; //eslint-disable-line
           expect(comment.dateCreated).to.exist; //eslint-disable-line
+
+          commentId = comment._id
           done();
         })
         .catch(done);
@@ -97,5 +101,64 @@ describe('## Comment APIs', () => {
         })
         .catch(done);
       });
+
+      it('should reply a comment', (done) => {
+        const content = 'Hello reply content!';
+        request(app)
+          .post(`/api/posts/${postId}/comment`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({
+            content,
+            parentCommentId: commentId,
+          })
+          .expect(httpStatus.CREATED)
+          .then((res) => {
+            expect(res.body).to.exist;
+            const reply = res.body.result;
+            expect(reply.post).to.eql(`${postId}`);
+            expect(reply.content).to.eql(`${content}`);
+            expect(reply.parentComment).to.eql(`${commentId}`);
+            expect(reply.author).to.exist; //eslint-disable-line
+            expect(reply.dateCreated).to.exist; //eslint-disable-line
+
+            replyId = reply._id
+            done();
+          })
+          .catch(done);
+      })
+
+      it('should like/upvote comments', (done) => {
+        request(app)
+          .post(`/api/comments/${commentId}/upvote`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({})
+          .expect(httpStatus.OK)
+          .then((res) => {
+            expect(res.body).to.exist;
+            const vote = res.body
+            expect(vote.direction).to.exist
+            expect(vote.userId).to.exist
+            expect(vote.entityId).to.exist
+            done();
+          })
+          .catch(done);
+      })
+
+      it('should like/upvote replies', (done) => {
+        request(app)
+          .post(`/api/comments/${replyId}/upvote`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({})
+          .expect(httpStatus.OK)
+          .then((res) => {
+            expect(res.body).to.exist;
+            const vote = res.body
+            expect(vote.direction).to.exist
+            expect(vote.userId).to.exist
+            expect(vote.entityId).to.exist
+            done();
+          })
+          .catch(done);
+      })
     });
 });
