@@ -6,6 +6,9 @@ import passport from 'passport';
 import FacebookTokenStrategy from 'passport-facebook-token';
 import User from '../models/user.model';
 import _ from 'lodash';
+
+require('dotenv').config();
+
 import aws from 'aws-sdk';
 
 
@@ -16,49 +19,47 @@ import aws from 'aws-sdk';
  *   description: User Registration, Login & Authentication
  */
 
-passport.serializeUser(function(user, done){
+passport.serializeUser((user, done) => {
   done(null, user._id);
 });
 
-passport.deserializeUser(function(id, done){
-  User.findOne(id, function(err, user){
+passport.deserializeUser((id, done) => {
+  User.findOne(id, (err, user) => {
     done(err, user);
   });
 });
 
 // TODO: add swagger doc
 
-passport.use(new FacebookTokenStrategy({
+passport.use(new FacebookTokenStrategy(
+  {
     clientID: config.facebook.clientID,
     clientSecret: config.facebook.clientSecret
   },
-  function(accessToken, refreshToken, profile, done) {
-    let username = profile.emails[0].value || profile.id;
+  ((accessToken, refreshToken, profile, done) => {
+    const username = profile.emails[0].value || profile.id;
     User
-    .findOne({ username: username }).exec()
-    .then((user) => {
-      if (!user) {
-        const newUser = new User();
-        newUser.username = username;
-        newUser.facebook = {
-          'email': profile.emails[0].value,
-          'name': profile.name.givenName + ' ' + profile.name.familyName,
-          'id': profile.id,
-          'token': accessToken
-        };
-        return newUser.save()
-          .then(userSaved => {
-            return done(null, userSaved);
-          })
-      } else {
+      .findOne({ username }).exec()
+      .then((user) => {
+        if (!user) {
+          const newUser = new User();
+          newUser.username = username;
+          newUser.facebook = {
+            email: profile.emails[0].value,
+            name: `${profile.name.givenName} ${profile.name.familyName}`,
+            id: profile.id,
+            token: accessToken
+          };
+          return newUser.save()
+            .then(userSaved => done(null, userSaved));
+        }
         return done(null, user);
-      }
-    })
-    .catch((err) => {
+      })
+      .catch((err) => {
       err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
-      return done(err);
-    });
-  }
+        return done(err);
+      });
+  })
 ));
 
 /**
@@ -86,11 +87,13 @@ function login(req, res, next) {
   const password = req.body.password;
 
   User
-  .findOne({ $or: [
-    {username},
-    {email: username}
-  ]}).exec()
-  .then((user) => {
+    .findOne({
+      $or: [
+        { username },
+        { email: username }
+      ]
+    }).exec()
+    .then((user) => {
       if (!user) return res.status(404).json({ message: 'User not found.' });
 
       if (!user.validPassword(password)) return res.status(401).json({ message: 'Password is incorrect.' });
@@ -178,22 +181,26 @@ function register(req, res, next) {
   }
 
   const email = req.body.email;
-  const queryIfEmail = { $or: [
-    {username},
-    {email}
-  ]};
+  const queryIfEmail = {
+    $or: [
+      { username },
+      { email }
+    ]
+  };
 
-  const queryIfEmailMissing = { $or: [
-    {username},
-    {email: username}
-  ]};
+  const queryIfEmailMissing = {
+    $or: [
+      { username },
+      { email: username }
+    ]
+  };
 
   // We do this so people can't share an email on either field, username or email:
   // also so no-one can have the same email or same username.
-  const userQuery = email ?  queryIfEmail : queryIfEmailMissing;
+  const userQuery = email ? queryIfEmail : queryIfEmailMissing;
 
   User
-  .findOne(userQuery).exec()
+    .findOne(userQuery).exec()
     .then((user) => {
       if (user) {
         let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
@@ -247,14 +254,13 @@ function getS3Config(S3_BUCKET, fileType, fileName) {
   const s3Params = {
     Bucket: S3_BUCKET,
     Key: fileName,
-    Expires: 600, // in seconds
+    Expires: 60, // in seconds
     ContentType: fileType,
     ACL: 'public-read'
   };
   return s3Params;
 }
 
-require('dotenv').config();
 // This should be a helper library and perhaps part of user.controller isntead:
 function signS3(req, res, next) {
   const S3_BUCKET = 'sd-profile-pictures';
@@ -263,18 +269,22 @@ function signS3(req, res, next) {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
   });
-  const fileType = req.fileType;
-  const fileName = req.user._id;
-  const s3Params = getS3Config(S3_BUCKET, fileType, fileName);
+  const fileType = req.body.fileType;
+  // const fileName = req.body.fileName; // Unused:
+  const newFileName = req.user._id;
+  console.log('fileType:::', fileType);
+  // console.log('FileName::::::', fileName);
+  console.log('newFileName::::::', newFileName);
+  const s3Params = getS3Config(S3_BUCKET, fileType, newFileName);
 
   s3.getSignedUrl('putObject', s3Params, (err, data) => {
-    if(err){
+    if (err) {
       console.log(err);
       return res.end();
     }
     const returnData = {
       signedRequest: data, // <-- the useful one
-      url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`
+      url: `https://${S3_BUCKET}.s3.amazonaws.com/${newFileName}`
     };
     res.write(JSON.stringify(returnData));
     res.end();
@@ -296,4 +306,6 @@ function getRandomNumber(req, res) {
   });
 }
 
-export default { login, loginWithEmail, getRandomNumber, register, socialAuth, signS3 };
+export default {
+  login, loginWithEmail, getRandomNumber, register, socialAuth, signS3
+};
