@@ -6,6 +6,9 @@ import passport from 'passport';
 import FacebookTokenStrategy from 'passport-facebook-token';
 import User from '../models/user.model';
 import _ from 'lodash';
+
+require('dotenv').config();
+
 import aws from 'aws-sdk';
 
 
@@ -258,7 +261,6 @@ function getS3Config(S3_BUCKET, fileType, fileName) {
   return s3Params;
 }
 
-require('dotenv').config();
 // This should be a helper library and perhaps part of user.controller isntead:
 function signS3(req, res, next) {
   const S3_BUCKET = 'sd-profile-pictures';
@@ -268,21 +270,11 @@ function signS3(req, res, next) {
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
   });
   const fileType = req.body.fileType;
-  // const fileName = req.fileName;
-
-  // const fileNameParts = fileName.split(".");
-  // TODO: if no split on period, then return error.
-  // const nameRoot =  "" + fileName
-  // const newFileName = nameRoot.replace(".", "") + "." +  fileNameParts[fileNameParts.length -1]
-  // const fileName = req.user.
-  const fileName = req.body.fileName; // Unused:
+  // const fileName = req.body.fileName; // Unused:
   const newFileName = req.user._id;
-
   console.log('fileType:::', fileType);
-  console.log('FileName::::::', fileName);
+  // console.log('FileName::::::', fileName);
   console.log('newFileName::::::', newFileName);
-
-  console.log('newFileName', newFileName);
   const s3Params = getS3Config(S3_BUCKET, fileType, newFileName);
 
   s3.getSignedUrl('putObject', s3Params, (err, data) => {
