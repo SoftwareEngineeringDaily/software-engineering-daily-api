@@ -24,7 +24,10 @@
     "report-coverage": "coveralls < ./coverage/lcov.info"
   },
   "lint-staged": {
-    "*.js": [ "eslint --fix", "git add" ]
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ]
   },
   "repository": {
     "type": "git",
@@ -124,6 +127,8 @@
     "husky": "^0.14.3",
     "lint-staged": "^6.0.0",
     "minimist": "^1.2.0",
+    "sinon": "^4.2.2",
+    "sinon-mongoose": "^2.0.2",
     "swagger-node-express": "^2.1.3"
   }
 }
