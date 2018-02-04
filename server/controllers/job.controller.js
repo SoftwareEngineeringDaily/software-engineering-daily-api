@@ -4,10 +4,13 @@ import APIError from '../helpers/APIError';
 
 export default {
   list(req, res, next) {
-    return Job
-      .find({
-        isDeleted: false
-      })
+    const today = new Date().getDate();
+
+    const query = Job
+      .where('isDeleted').equals(false)
+      .or([{ expirationDate: { $gt: today } }, { expirationDate: null }]);
+
+    return query
       .then(jobs => res.json(jobs))
       .catch(e => next(e));
   },

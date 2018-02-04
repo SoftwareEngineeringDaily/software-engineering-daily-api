@@ -26,12 +26,12 @@ after((done) => {
 
 describe('## Jobs APIs', () => {
   const validAuthorCredentials = {
-    username: 'react',
+    username: 'author',
     password: 'express'
   };
 
   const validReaderCredentials = {
-    username: 'react',
+    username: 'reader',
     password: 'express'
   };
 
@@ -40,7 +40,7 @@ describe('## Jobs APIs', () => {
 
   let readerToken;
 
-  before((done) => {
+  before(() => {
     const register1 = request(app)
       .post('/api/auth/register')
       .send(validAuthorCredentials)
@@ -63,10 +63,8 @@ describe('## Jobs APIs', () => {
         readerToken = res.body.token;
       });
 
-    Promise
-      .all([register1, register2])
-      .then(() => done())
-      .catch(err => done(err));
+    return Promise
+      .all([register1, register2]);
   });
 
   after(() => User.remove({}));
@@ -115,6 +113,45 @@ describe('## Jobs APIs', () => {
         employmentType: 'Permanent',
         postedUser: author,
         isDeleted: true
+      });
+
+      return Promise.all([
+        job1.save(),
+        job2.save()
+      ])
+        .then(() =>
+          request(app)
+            .get('/api/jobs/')
+            .expect(httpStatus.OK)
+            .then((res) => {
+              expect(res.body).to.be.an('array');
+              expect(res.body.length).to.equal(1);
+              expect(res.body[0].location).to.equal('Alaska');
+            }));
+    });
+
+    it('should not return expired jobs', () => {
+      const job1 = new Job({
+        companyName: 'BarFoo Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Alaska',
+        title: 'Senior Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        postedUser: author
+      });
+
+      const yesterday = new Date().getDate() - 1;
+
+      const job2 = new Job({
+        companyName: 'FooBar Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Bermuda',
+        title: 'Senior Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        postedUser: author,
+        expirationDate: yesterday
       });
 
       return Promise.all([
