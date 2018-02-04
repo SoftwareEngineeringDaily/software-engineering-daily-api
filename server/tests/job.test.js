@@ -66,157 +66,112 @@ describe('## Jobs APIs', () => {
     Promise
       .all([register1, register2])
       .then(() => done())
-      .catch(() => done());
+      .catch(err => done(err));
   });
 
-  after((done) => {
-    User.remove({}).exec()
-      .then(() => done());
-  });
+  after(() => User.remove({}));
+  beforeEach(() => Job.remove({}));
 
-  beforeEach((done) => {
-    Job.remove({}).exec()
-      .then(() => done());
-  });
+  const createJob = (isDeleted = false) => {
+    const job = new Job({
+      companyName: 'FooBar Inc',
+      applicationEmailAddress: 'foo@bar.com',
+      location: 'Bermuda',
+      title: 'Senior Developer',
+      description: 'Coding wizard required',
+      employmentType: 'Permanent',
+      postedUser: author,
+      isDeleted
+    });
+
+    return job.save();
+  };
 
   describe('# GET /api/jobs', () => {
-    it('should get all jobs', (done) => {
-      const job = new Job({
-        companyName: 'FooBar Inc',
+    it('should get all jobs', () =>
+      createJob()
+        .then(() =>
+          request(app)
+            .get('/api/jobs/')
+            .expect(httpStatus.OK)));
+
+    it('should not return deleted jobs', () => {
+      const job1 = new Job({
+        companyName: 'BarFoo Inc',
         applicationEmailAddress: 'foo@bar.com',
-        location: 'Bermuda',
+        location: 'Alaska',
         title: 'Senior Developer',
         description: 'Coding wizard required',
         employmentType: 'Permanent',
         postedUser: author
       });
 
-      job.save()
-        .then(newJob =>
+      const job2 = new Job({
+        companyName: 'FooBar Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Bermuda',
+        title: 'Senior Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        postedUser: author,
+        isDeleted: true
+      });
+
+      return Promise.all([
+        job1.save(),
+        job2.save()
+      ])
+        .then(() =>
           request(app)
             .get('/api/jobs/')
             .expect(httpStatus.OK)
-            .then(() => {
-              newJob.remove();
-              done();
-            })
-            .catch(() => done()));
+            .then((res) => {
+              expect(res.body).to.be.an('array');
+              expect(res.body.length).to.equal(1);
+              expect(res.body[0].location).to.equal('Alaska');
+            }));
     });
   });
 
   describe('# GET /api/jobs/:jobId', () => {
-    it('should get a single job', (done) => {
-      const job = new Job({
-        companyName: 'FooBar Inc',
-        applicationEmailAddress: 'foo@bar.com',
-        location: 'Bermuda',
-        title: 'Senior Developer',
-        description: 'Coding wizard required',
-        employmentType: 'Permanent',
-        postedUser: author
-      });
-
-      job.save()
+    it('should get a single job', () =>
+      createJob()
         .then(newJob =>
           request(app)
             .get(`/api/jobs/${newJob._id}`)
-            .expect(httpStatus.OK)
-            .then((res) => {
-              expect(res.body).to.be.an('object');
-              newJob.remove();
-              done();
-            })
-            .catch(() => done()));
-    });
+            .expect(httpStatus.OK)));
 
-    it('should return a deleted job for author', (done) => {
-      const job = new Job({
-        companyName: 'FooBar Inc',
-        applicationEmailAddress: 'foo@bar.com',
-        location: 'Bermuda',
-        title: 'Senior Developer',
-        description: 'Coding wizard required',
-        employmentType: 'Permanent',
-        postedUser: author,
-        isDeleted: true
-      });
-
-      job.save()
+    it('should return a deleted job for author', () =>
+      createJob(true)
         .then(newJob =>
           request(app)
             .get(`/api/jobs/${newJob._id}`)
             .set('Authorization', `Bearer ${authorToken}`)
-            .expect(httpStatus.OK)
-            .then((res) => {
-              expect(res.body).to.be.an('object');
-              newJob.remove();
-              done();
-            })
-            .catch(() => done()));
-    });
+            .expect(httpStatus.OK)));
 
-    it('should not return a deleted job for unauthenticated user', (done) => {
-      const job = new Job({
-        companyName: 'FooBar Inc',
-        applicationEmailAddress: 'foo@bar.com',
-        location: 'Bermuda',
-        title: 'Senior Developer',
-        description: 'Coding wizard required',
-        employmentType: 'Permanent',
-        postedUser: author,
-        isDeleted: true
-      });
-
-      job.save()
+    it('should not return a deleted job for unauthenticated user', () =>
+      createJob(true)
         .then(newJob =>
           request(app)
             .get(`/api/jobs/${newJob._id}`)
-            .expect(httpStatus.NOT_FOUND)
-            .then((res) => {
-              expect(res.body).to.be.an('object');
-              newJob.remove();
-              done();
-            })
-            .catch(() => done()));
-    });
+            .expect(httpStatus.NOT_FOUND)));
 
-    it('should not return a deleted job for reader', (done) => {
-      const job = new Job({
-        companyName: 'FooBar Inc',
-        applicationEmailAddress: 'foo@bar.com',
-        location: 'Bermuda',
-        title: 'Senior Developer',
-        description: 'Coding wizard required',
-        employmentType: 'Permanent',
-        postedUser: author,
-        isDeleted: true
-      });
-
-      job.save()
+    it('should not return a deleted job for reader', () =>
+      createJob(true)
         .then(newJob =>
           request(app)
             .get(`/api/jobs/${newJob._id}`)
             .set('Authorization', `Bearer ${readerToken}`)
-            .expect(httpStatus.NOT_FOUND)
-            .then((res) => {
-              expect(res.body).to.be.an('object');
-              newJob.remove();
-              done();
-            })
-            .catch(() => done()));
-    });
+            .expect(httpStatus.NOT_FOUND)));
 
-    it('should not return a job that does not exist', (done) => {
+    it('should not return a job that does not exist', () =>
       request(app)
         .get(`/api/jobs/${fakeJobId}`)
-        .expect(httpStatus.NOT_FOUND)
-        .then(() => done())
-        .catch(() => done());
-    });
+        .expect(httpStatus.NOT_FOUND));
   });
 
   describe('# POST /api/jobs/:jobId', () => {
-    it('should fail creating a job when not authenticated', (done) => {
+    it('should fail creating a job when not authenticated', () => {
       const job = new Job({
         companyName: 'FooBar Inc',
         applicationEmailAddress: 'foo@bar.com',
@@ -227,15 +182,13 @@ describe('## Jobs APIs', () => {
         postedUser: author
       });
 
-      request(app)
+      return request(app)
         .post('/api/jobs')
         .send(job)
-        .expect(httpStatus.UNAUTHORIZED)
-        .then(() => done())
-        .catch(() => done());
+        .expect(httpStatus.UNAUTHORIZED);
     });
 
-    it('should create a job', (done) => {
+    it('should create a job', () => {
       const job = new Job({
         companyName: 'FooBar Inc',
         applicationEmailAddress: 'foo@bar.com',
@@ -246,23 +199,14 @@ describe('## Jobs APIs', () => {
         postedUser: author
       });
 
-      request(app)
+      return request(app)
         .post('/api/jobs')
         .set('Authorization', `Bearer ${authorToken}`)
         .send(job)
-        .expect(httpStatus.CREATED)
-        .then((res) => {
-          expect(res.body).to.exist;
-          expect(res.body._id).to.exist;
-
-          Job.findByIdAndRemove(res.body._id).exec();
-
-          done();
-        })
-        .catch(() => done());
+        .expect(httpStatus.CREATED);
     });
 
-    it('should fail creating an invalid job', (done) => {
+    it('should fail creating an invalid job', () => {
       const job = new Job({
         companyName: 'FooBar Inc',
         applicationEmailAddress: 'foo@bar.com',
@@ -273,168 +217,91 @@ describe('## Jobs APIs', () => {
         postedUser: author
       });
 
-      request(app)
+      return request(app)
         .post('/api/jobs')
         .set('Authorization', `Bearer ${authorToken}`)
         .send(job)
-        .expect(httpStatus.SERVICE_UNAVAILABLE)
-        .then(() => done())
-        .catch(() => done());
+        .expect(httpStatus.INTERNAL_SERVER_ERROR);
     });
   });
 
   describe('# PUT /api/jobs/:jobId', () => {
-    it('should update a job', (done) => {
-      const job = new Job({
-        companyName: 'FooBar Inc',
-        applicationEmailAddress: 'foo@bar.com',
-        location: 'Bermuda',
-        title: 'Senior Developer',
-        description: 'Coding wizard required',
-        employmentType: 'Permanent',
-        postedUser: author
-      });
+    it('should update a job', () =>
+      createJob()
+        .then(newJob =>
+          request(app)
+            .put(`/api/jobs/${newJob._id}`)
+            .set('Authorization', `Bearer ${authorToken}`)
+            .send({
+              location: 'Alaska'
+            })
+            .expect(httpStatus.OK)
+            .then((res) => {
+              expect(res.body).to.exist;
 
-      job.save().then(newJob =>
-        request(app)
-          .put(`/api/jobs/${newJob._id}`)
-          .set('Authorization', `Bearer ${authorToken}`)
-          .send({
-            location: 'Alaska'
-          })
-          .expect(httpStatus.OK)
-          .then((res) => {
-            expect(res.body).to.exist;
+              return Job.findById(newJob._id).then((updatedJob) => {
+                expect(updatedJob.location).to.equal('Alaska');
+              });
+            })));
 
-            Job.findById(newJob._id).then((updatedJob) => {
-              expect(updatedJob.location).to.equal('Alaska');
-              updatedJob.remove();
-              done();
-            });
-          })
-          .catch(() => done()));
-    });
+    it('should fail updating a job not posted by current user', () =>
+      createJob()
+        .then(newJob =>
+          request(app)
+            .put(`/api/jobs/${newJob._id}`)
+            .set('Authorization', `Bearer ${readerToken}`)
+            .send({
+              location: 'Alaska'
+            })
+            .expect(httpStatus.UNAUTHORIZED)));
 
-    it('should fail updating a job not posted by current user', (done) => {
-      const job = new Job({
-        companyName: 'FooBar Inc',
-        applicationEmailAddress: 'foo@bar.com',
-        location: 'Bermuda',
-        title: 'Senior Developer',
-        description: 'Coding wizard required',
-        employmentType: 'Permanent',
-        postedUser: author
-      });
-
-      job.save().then(newJob =>
-        request(app)
-          .put(`/api/jobs/${newJob._id}`)
-          .set('Authorization', `Bearer ${readerToken}`)
-          .send({
-            location: 'Alaska'
-          })
-          .expect(httpStatus.UNAUTHORIZED)
-          .then(() => {
-            newJob.remove();
-            done();
-          })
-          .catch(() => done()));
-    });
-
-    it('returns 404 if job does not exist', (done) => {
+    it('returns 404 if job does not exist', () =>
       request(app)
         .put(`/api/jobs/${fakeJobId}`)
         .set('Authorization', `Bearer ${authorToken}`)
-        .expect(httpStatus.NOT_FOUND)
-        .then(() => done())
-        .catch(() => done());
-    });
+        .expect(httpStatus.NOT_FOUND));
 
-    it('cannot update a deleted job', (done) => {
-      const job = new Job({
-        companyName: 'FooBar Inc',
-        applicationEmailAddress: 'foo@bar.com',
-        location: 'Bermuda',
-        title: 'Senior Developer',
-        description: 'Coding wizard required',
-        employmentType: 'Permanent',
-        isDeleted: true,
-        postedUser: author
-      });
-
-      job.save().then(newJob =>
-        request(app)
-          .put(`/api/jobs/${newJob._id}`)
-          .set('Authorization', `Bearer ${authorToken}`)
-          .send({
-            location: 'Alaska'
-          })
-          .expect(httpStatus.FORBIDDEN)
-          .then(() => {
-            newJob.remove();
-            done();
-          })
-          .catch(() => done()));
-    });
+    it('cannot update a deleted job', () =>
+      createJob(true)
+        .then(newJob =>
+          request(app)
+            .put(`/api/jobs/${newJob._id}`)
+            .set('Authorization', `Bearer ${authorToken}`)
+            .send({
+              location: 'Alaska'
+            })
+            .expect(httpStatus.FORBIDDEN)));
   });
 
   describe('# DELETE /api/jobs/:jobId', () => {
-    it('should delete a job', (done) => {
-      const job = new Job({
-        companyName: 'FooBar Inc',
-        applicationEmailAddress: 'foo@bar.com',
-        location: 'Bermuda',
-        title: 'Senior Developer',
-        description: 'Coding wizard required',
-        employmentType: 'Permanent',
-        postedUser: author
-      });
+    it('should delete a job', () =>
+      createJob()
+        .then(newJob =>
+          request(app)
+            .delete(`/api/jobs/${newJob._id}`)
+            .set('Authorization', `Bearer ${authorToken}`)
+            .expect(httpStatus.OK)
+            .then((res) => {
+              expect(res.body).to.exist;
 
-      job.save().then(newJob =>
-        request(app)
-          .delete(`/api/jobs/${newJob._id}`)
-          .set('Authorization', `Bearer ${authorToken}`)
-          .expect(httpStatus.OK)
-          .then((res) => {
-            expect(res.body).to.exist;
+              return Job.findById(newJob._id).then((deletedJob) => {
+                expect(deletedJob.isDeleted).to.equal(true);
+              });
+            })));
 
-            Job.findById(newJob._id).then((deletedJob) => {
-              expect(deletedJob.isDeleted).to.equal(true);
-              deletedJob.remove();
-              done();
-            });
-          })
-          .catch(() => done()));
-    });
-
-    it('returns 404 if job does not exist', (done) => {
+    it('returns 404 if job does not exist', () =>
       request(app)
         .delete(`/api/jobs/${fakeJobId}`)
         .set('Authorization', `Bearer ${authorToken}`)
-        .expect(httpStatus.NOT_FOUND)
-        .then(() => done())
-        .catch(() => done());
-    });
+        .expect(httpStatus.NOT_FOUND));
 
-    it('cannot delete a job not posted by logged in user', (done) => {
-      const job = new Job({
-        companyName: 'FooBar Inc',
-        applicationEmailAddress: 'foo@bar.com',
-        location: 'Bermuda',
-        title: 'Senior Developer',
-        description: 'Coding wizard required',
-        employmentType: 'Permanent',
-        postedUser: author
-      });
-
-      job.save().then(newJob =>
-        request(app)
-          .delete(`/api/jobs/${newJob._id}`)
-          .set('Authorization', `Bearer ${readerToken}`)
-          .expect(httpStatus.UNAUTHORIZED)
-          .then(() => done())
-          .catch(() => done()));
-    });
+    it('cannot delete a job not posted by logged in user', () =>
+      createJob()
+        .then(newJob =>
+          request(app)
+            .delete(`/api/jobs/${newJob._id}`)
+            .set('Authorization', `Bearer ${readerToken}`)
+            .expect(httpStatus.UNAUTHORIZED)));
   });
 
   describe('returns errors when findById fails', () => {
@@ -450,30 +317,21 @@ describe('## Jobs APIs', () => {
       sandbox.restore();
     });
 
-    it('raises an error on getting job', (done) => {
+    it('raises an error on getting job', () =>
       request(app)
         .get(`/api/jobs/${fakeJobId}`)
-        .expect(httpStatus.SERVICE_UNAVAILABLE)
-        .then(() => done())
-        .catch(() => done());
-    });
+        .expect(httpStatus.INTERNAL_SERVER_ERROR));
 
-    it('raises an error on deleting job', (done) => {
+    it('raises an error on deleting job', () =>
       request(app)
         .delete(`/api/jobs/${fakeJobId}`)
         .set('Authorization', `Bearer ${authorToken}`)
-        .expect(httpStatus.SERVICE_UNAVAILABLE)
-        .then(() => done())
-        .catch(() => done());
-    });
+        .expect(httpStatus.INTERNAL_SERVER_ERROR));
 
-    it('raises an error on updating a job', (done) => {
+    it('raises an error on updating a job', () =>
       request(app)
         .put(`/api/jobs/${fakeJobId}`)
         .set('Authorization', `Bearer ${authorToken}`)
-        .expect(httpStatus.SERVICE_UNAVAILABLE)
-        .then(() => done())
-        .catch(() => done());
-    });
+        .expect(httpStatus.INTERNAL_SERVER_ERROR));
   });
 });
