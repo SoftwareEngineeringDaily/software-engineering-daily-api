@@ -3,6 +3,8 @@ import Job from '../models/job.model';
 import APIError from '../helpers/APIError';
 import sgMail from '../helpers/mail';
 
+require('babel-polyfill');
+
 export default {
   list: async (req, res, next) => {
     try {

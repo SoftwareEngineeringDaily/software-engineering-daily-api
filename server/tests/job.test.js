@@ -263,6 +263,38 @@ describe('## Jobs APIs', () => {
       expect(response.body.length).to.equal(2);
     });
 
+    it('should apply companyName filter', async () => {
+      await new Job({
+        companyName: 'BarFoo Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Alaska',
+        title: 'Senior Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        tags: [3, 5],
+        postedUser: author
+      }).save();
+
+      await new Job({
+        companyName: 'FooBar Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Bermuda',
+        title: 'Web Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        tags: [1, 9],
+        postedUser: author
+      }).save();
+
+      const response = await request(app)
+        .get('/api/jobs/')
+        .query({ companyName: 'foo' });
+
+      expect(response.statusCode).to.equal(httpStatus.OK);
+      expect(response.body).to.be.an('array');
+      expect(response.body.length).to.equal(2);
+    });
+
     it('should return no matches with non-applicable tags', async () => {
       await new Job({
         companyName: 'BarFoo Inc',
