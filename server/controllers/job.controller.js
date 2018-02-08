@@ -6,15 +6,35 @@ import sgMail from '../helpers/mail';
 export default {
   list: async (req, res, next) => {
     try {
+      const {
+        title,
+        location,
+        tags
+      } = req.query;
+
       const today = new Date().getDate();
 
-      const jobs = await Job
+      const query = Job
         .where('isDeleted').equals(false)
         .or([{ expirationDate: { $gt: today } }, { expirationDate: null }]);
 
+      if (title) {
+        query.where('title').regex(new RegExp(title, 'i'));
+      }
+
+      if (location) {
+        query.where('location').regex(new RegExp(location, 'i'));
+      }
+
+      if (tags) {
+        const tagsAsNumbers = tags.split(',').map(tag => parseInt(tag, 10));
+        query.where({ tags: { $in: tagsAsNumbers } });
+      }
+
+      const jobs = await query.exec();
+
       return res.json(jobs);
-    }
-    catch (err) {
+    } catch (err) {
       return next(err);
     }
   },
@@ -26,8 +46,7 @@ export default {
 
       await newJob.save();
       return res.status(httpStatus.CREATED).json(newJob);
-    }
-    catch (err) {
+    } catch (err) {
       return next(err);
     }
   },
@@ -49,8 +68,7 @@ export default {
       await updatedJob.save();
 
       return res.status(httpStatus.OK).json(updatedJob);
-    }
-    catch (err) {
+    } catch (err) {
       return next(err);
     }
   },
@@ -78,8 +96,7 @@ export default {
       await updated.save();
 
       return res.status(httpStatus.OK).json(updated);
-    }
-    catch (err) {
+    } catch (err) {
       return next(err);
     }
   },
@@ -126,8 +143,7 @@ export default {
       }
 
       return res.json(job);
-    }
-    catch (err) {
+    } catch (err) {
       return next(err);
     }
   },
@@ -175,8 +191,7 @@ export default {
 
       await sgMail.send(msg);
       return res.sendStatus(httpStatus.OK);
-    }
-    catch (err) {
+    } catch (err) {
       next(err);
     }
   }

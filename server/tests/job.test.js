@@ -8,7 +8,6 @@ import chai, { expect } from 'chai';
 import Job from '../models/job.model';
 import app from '../../index';
 import User from '../models/user.model';
-import sgMail from '../helpers/mail';
 
 chai.config.includeStack = true;
 
@@ -41,7 +40,7 @@ describe('## Jobs APIs', () => {
 
   let readerToken;
 
-  before(async function () {
+  before(async () => {
     const response1 = await request(app)
       .post('/api/auth/register')
       .send(validAuthorCredentials);
@@ -59,13 +58,13 @@ describe('## Jobs APIs', () => {
     expect(response2.statusCode).to.equal(httpStatus.CREATED);
     expect(response2.body).to.have.property('token');
 
-    readerToken  = response2.body.token;
+    readerToken = response2.body.token;
   });
 
   after(() => User.remove({}));
   beforeEach(() => Job.remove({}));
 
-  const createJob = async function (isDeleted = false) {
+  const createJob = async (isDeleted = false) => {
     const job = new Job({
       companyName: 'FooBar Inc',
       applicationEmailAddress: 'foo@bar.com',
@@ -77,10 +76,10 @@ describe('## Jobs APIs', () => {
       isDeleted
     });
 
-    return await job.save();
+    return job.save();
   };
 
-  const createExpiredJob = async function () {
+  const createExpiredJob = async () => {
     const yesterday = new Date().getDate() - 1;
 
     const job = new Job({
@@ -94,11 +93,11 @@ describe('## Jobs APIs', () => {
       postedUser: author
     });
 
-    return await job.save();
-  }
+    return job.save();
+  };
 
   describe('# GET /api/jobs', () => {
-    it('should get all jobs', async function () {
+    it('should get all jobs', async () => {
       await createJob();
       const response = await request(app)
         .get('/api/jobs/');
@@ -106,8 +105,8 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.OK);
     });
 
-    it('should not return deleted jobs', async function () {
-      const job1 = await new Job({
+    it('should not return deleted jobs', async () => {
+      await new Job({
         companyName: 'BarFoo Inc',
         applicationEmailAddress: 'foo@bar.com',
         location: 'Alaska',
@@ -117,7 +116,7 @@ describe('## Jobs APIs', () => {
         postedUser: author
       }).save();
 
-      const job2 = await new Job({
+      await new Job({
         companyName: 'FooBar Inc',
         applicationEmailAddress: 'foo@bar.com',
         location: 'Bermuda',
@@ -137,8 +136,197 @@ describe('## Jobs APIs', () => {
       expect(response.body[0].location).to.equal('Alaska');
     });
 
-    it('should not return expired jobs', async function () {
-      const job1 = await new Job({
+    it('should apply title filter', async () => {
+      await new Job({
+        companyName: 'BarFoo Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Alaska',
+        title: 'Senior Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        postedUser: author
+      }).save();
+
+      await new Job({
+        companyName: 'FooBar Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Bermuda',
+        title: 'Web Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        postedUser: author
+      }).save();
+
+      const response = await request(app)
+        .get('/api/jobs/')
+        .query({ title: 'web' });
+
+      expect(response.statusCode).to.equal(httpStatus.OK);
+      expect(response.body).to.be.an('array');
+      expect(response.body.length).to.equal(1);
+      expect(response.body[0].title).to.equal('Web Developer');
+    });
+
+    it('should apply location filter', async () => {
+      await new Job({
+        companyName: 'BarFoo Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Alaska',
+        title: 'Senior Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        postedUser: author
+      }).save();
+
+      await new Job({
+        companyName: 'FooBar Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Bermuda',
+        title: 'Web Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        postedUser: author
+      }).save();
+
+      const response = await request(app)
+        .get('/api/jobs/')
+        .query({ location: 'Ber' });
+
+      expect(response.statusCode).to.equal(httpStatus.OK);
+      expect(response.body).to.be.an('array');
+      expect(response.body.length).to.equal(1);
+      expect(response.body[0].location).to.equal('Bermuda');
+    });
+
+    it('should apply tags filter', async () => {
+      await new Job({
+        companyName: 'BarFoo Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Alaska',
+        title: 'Senior Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        tags: [3, 5],
+        postedUser: author
+      }).save();
+
+      await new Job({
+        companyName: 'FooBar Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Bermuda',
+        title: 'Web Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        tags: [1, 9],
+        postedUser: author
+      }).save();
+
+      const response = await request(app)
+        .get('/api/jobs/')
+        .query({ tags: '1' });
+
+      expect(response.statusCode).to.equal(httpStatus.OK);
+      expect(response.body).to.be.an('array');
+      expect(response.body.length).to.equal(1);
+      expect(response.body[0].location).to.equal('Bermuda');
+    });
+
+    it('should apply multiple tag filter', async () => {
+      await new Job({
+        companyName: 'BarFoo Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Alaska',
+        title: 'Senior Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        tags: [3, 5],
+        postedUser: author
+      }).save();
+
+      await new Job({
+        companyName: 'FooBar Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Bermuda',
+        title: 'Web Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        tags: [1, 9],
+        postedUser: author
+      }).save();
+
+      const response = await request(app)
+        .get('/api/jobs/')
+        .query({ tags: '1,5' });
+
+      expect(response.statusCode).to.equal(httpStatus.OK);
+      expect(response.body).to.be.an('array');
+      expect(response.body.length).to.equal(2);
+    });
+
+    it('should return no matches with non-applicable tags', async () => {
+      await new Job({
+        companyName: 'BarFoo Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Alaska',
+        title: 'Senior Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        tags: [3, 5],
+        postedUser: author
+      }).save();
+
+      await new Job({
+        companyName: 'FooBar Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Bermuda',
+        title: 'Web Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        tags: [1, 9],
+        postedUser: author
+      }).save();
+
+      const response = await request(app)
+        .get('/api/jobs/')
+        .query({ tags: '6,7' });
+
+      expect(response.statusCode).to.equal(httpStatus.OK);
+      expect(response.body).to.be.an('array');
+      expect(response.body.length).to.equal(0);
+    });
+
+    it('should apply multiple filters', async () => {
+      await new Job({
+        companyName: 'BarFoo Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Alaska',
+        title: 'Senior Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        postedUser: author
+      }).save();
+
+      await new Job({
+        companyName: 'FooBar Inc',
+        applicationEmailAddress: 'foo@bar.com',
+        location: 'Bermuda',
+        title: 'Web Developer',
+        description: 'Coding wizard required',
+        employmentType: 'Permanent',
+        postedUser: author
+      }).save();
+
+      const response = await request(app)
+        .get('/api/jobs/')
+        .query({ location: 'Bermuda', title: 'Senior' });
+
+      expect(response.statusCode).to.equal(httpStatus.OK);
+      expect(response.body).to.be.an('array');
+      expect(response.body.length).to.equal(0);
+    });
+
+    it('should not return expired jobs', async () => {
+      await new Job({
         companyName: 'BarFoo Inc',
         applicationEmailAddress: 'foo@bar.com',
         location: 'Alaska',
@@ -150,7 +338,7 @@ describe('## Jobs APIs', () => {
 
       const yesterday = new Date().getDate() - 1;
 
-      const job2 = await new Job({
+      await new Job({
         companyName: 'FooBar Inc',
         applicationEmailAddress: 'foo@bar.com',
         location: 'Bermuda',
@@ -172,7 +360,7 @@ describe('## Jobs APIs', () => {
   });
 
   describe('# GET /api/jobs/:jobId', () => {
-    it('should get a single job', async function () {
+    it('should get a single job', async () => {
       const newJob = await createJob();
       const response = await request(app)
         .get(`/api/jobs/${newJob._id}`);
@@ -180,7 +368,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.OK);
     });
 
-    it('should return a deleted job for author', async function () {
+    it('should return a deleted job for author', async () => {
       const newJob = await createJob(true);
       const response = await request(app)
         .get(`/api/jobs/${newJob._id}`)
@@ -189,7 +377,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.OK);
     });
 
-    it('should not return a deleted job for unauthenticated user', async function () {
+    it('should not return a deleted job for unauthenticated user', async () => {
       const newJob = await createJob(true);
       const response = await request(app)
         .get(`/api/jobs/${newJob._id}`);
@@ -197,7 +385,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
     });
 
-    it('should not return a deleted job for reader', async function () {
+    it('should not return a deleted job for reader', async () => {
       const newJob = await createJob(true);
       const response = await request(app)
         .get(`/api/jobs/${newJob._id}`)
@@ -206,7 +394,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
     });
 
-    it('should not return an expired job for reader', async function () {
+    it('should not return an expired job for reader', async () => {
       const newJob = await createExpiredJob();
       const response = await request(app)
         .get(`/api/jobs/${newJob._id}`)
@@ -215,7 +403,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
     });
 
-    it('should not return an expired job for unauthorized user', async function () {
+    it('should not return an expired job for unauthorized user', async () => {
       const newJob = await createExpiredJob();
       const response = await request(app)
         .get(`/api/jobs/${newJob._id}`);
@@ -223,7 +411,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
     });
 
-    it('should return an expired job for author', async function () {
+    it('should return an expired job for author', async () => {
       const newJob = await createExpiredJob();
       const response = await request(app)
         .get(`/api/jobs/${newJob._id}`)
@@ -232,7 +420,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.OK);
     });
 
-    it('should not return a job that does not exist', async function () {
+    it('should not return a job that does not exist', async () => {
       const response = await request(app)
         .get(`/api/jobs/${fakeJobId}`);
 
@@ -241,7 +429,7 @@ describe('## Jobs APIs', () => {
   });
 
   describe('# POST /api/jobs/:jobId', () => {
-    it('should fail creating a job when not authenticated', async function () {
+    it('should fail creating a job when not authenticated', async () => {
       const job = new Job({
         companyName: 'FooBar Inc',
         applicationEmailAddress: 'foo@bar.com',
@@ -259,7 +447,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.UNAUTHORIZED);
     });
 
-    it('should create a job', async function () {
+    it('should create a job', async () => {
       const job = new Job({
         companyName: 'FooBar Inc',
         applicationEmailAddress: 'foo@bar.com',
@@ -278,7 +466,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.CREATED);
     });
 
-    it('should fail creating an invalid job', async function () {
+    it('should fail creating an invalid job', async () => {
       const job = new Job({
         companyName: 'FooBar Inc',
         applicationEmailAddress: 'foo@bar.com',
@@ -299,7 +487,7 @@ describe('## Jobs APIs', () => {
   });
 
   describe('# PUT /api/jobs/:jobId', () => {
-    it('should update a job', async function () {
+    it('should update a job', async () => {
       const newJob = await createJob();
       const response = await request(app)
         .put(`/api/jobs/${newJob._id}`)
@@ -314,7 +502,7 @@ describe('## Jobs APIs', () => {
       expect(updatedJob.location).to.equal('Alaska');
     });
 
-    it('should fail updating a job not posted by current user', async function () {
+    it('should fail updating a job not posted by current user', async () => {
       const newJob = await createJob();
       const response = await request(app)
         .put(`/api/jobs/${newJob._id}`)
@@ -326,8 +514,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.UNAUTHORIZED);
     });
 
-    it('returns 404 if job does not exist', async function () {
-      const newJob = await createJob();
+    it('returns 404 if job does not exist', async () => {
       const response = await request(app)
         .put(`/api/jobs/${fakeJobId}`)
         .set('Authorization', `Bearer ${authorToken}`)
@@ -338,7 +525,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
     });
 
-    it('cannot update a deleted job', async function () {
+    it('cannot update a deleted job', async () => {
       const newJob = await createJob(true);
       const response = await request(app)
         .put(`/api/jobs/${newJob._id}`)
@@ -350,7 +537,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.FORBIDDEN);
     });
 
-    it('cannot update an expired job', async function () {
+    it('cannot update an expired job', async () => {
       const newJob = await createExpiredJob();
       const response = await request(app)
         .put(`/api/jobs/${newJob._id}`)
@@ -364,7 +551,7 @@ describe('## Jobs APIs', () => {
   });
 
   describe('# DELETE /api/jobs/:jobId', () => {
-    it('should delete a job', async function () {
+    it('should delete a job', async () => {
       const newJob = await createJob();
       const response = await request(app)
         .delete(`/api/jobs/${newJob._id}`)
@@ -377,8 +564,7 @@ describe('## Jobs APIs', () => {
       expect(deletedJob.isDeleted).to.equal(true);
     });
 
-    it('returns 404 if job does not exist', async function () {
-      const newJob = await createJob();
+    it('returns 404 if job does not exist', async () => {
       const response = await request(app)
         .delete(`/api/jobs/${fakeJobId}`)
         .set('Authorization', `Bearer ${authorToken}`);
@@ -386,7 +572,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
     });
 
-    it('cannot delete a job not posted by logged in user', async function () {
+    it('cannot delete a job not posted by logged in user', async () => {
       const newJob = await createJob();
       const response = await request(app)
         .delete(`/api/jobs/${newJob._id}`)
@@ -397,7 +583,7 @@ describe('## Jobs APIs', () => {
   });
 
   describe('# POST /api/jobs/:jobId/apply', () => {
-    it('should fail applying for a job that does not exist', async function () {
+    it('should fail applying for a job that does not exist', async () => {
       const response = await request(app)
         .post(`/api/jobs/${fakeJobId}/apply`)
         .set('Authorization', `Bearer ${readerToken}`);
@@ -405,36 +591,36 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
     });
 
-    it('should fail applying for a job when not logged in', async function () {
+    it('should fail applying for a job when not logged in', async () => {
       const response = await request(app)
         .post(`/api/jobs/${fakeJobId}/apply`);
 
       expect(response.statusCode).to.equal(httpStatus.UNAUTHORIZED);
     });
 
-    it('should fail applying for a deleted job', async function () {
+    it('should fail applying for a deleted job', async () => {
       const newJob = await createJob(true);
 
       const response = await request(app)
-        .post(`/api/jobs/${fakeJobId}/apply`)
+        .post(`/api/jobs/${newJob._id}/apply`)
         .set('Authorization', `Bearer ${readerToken}`)
         .send();
 
       expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
     });
 
-    it('should fail applying for an expired job', async function () {
+    it('should fail applying for an expired job', async () => {
       const newJob = await createExpiredJob();
 
       const response = await request(app)
-        .post(`/api/jobs/${fakeJobId}/apply`)
+        .post(`/api/jobs/${newJob._id}/apply`)
         .set('Authorization', `Bearer ${readerToken}`)
         .send();
 
       expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
     });
 
-    it('should fail applying for a job posted by same user', async function () {
+    it('should fail applying for a job posted by same user', async () => {
       const newJob = await createJob();
 
       const response = await request(app)
@@ -445,7 +631,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.FORBIDDEN);
     });
 
-    it('should fail applying for a job when covering letter not supplied', async function () {
+    it('should fail applying for a job when covering letter not supplied', async () => {
       const newJob = await createJob();
 
       const response = await request(app)
@@ -456,7 +642,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.BAD_REQUEST);
     });
 
-    it('should fail applying for a job when resume not supplied', async function () {
+    it('should fail applying for a job when resume not supplied', async () => {
       const newJob = await createJob();
 
       const response = await request(app)
@@ -483,13 +669,13 @@ describe('## Jobs APIs', () => {
       sandbox.restore();
     });
 
-    it('raises an error on getting job', async function () {
+    it('raises an error on getting job', async () => {
       const response = await request(app)
         .get(`/api/jobs/${fakeJobId}`);
       expect(response.statusCode).to.equal(httpStatus.INTERNAL_SERVER_ERROR);
     });
 
-    it('raises an error on deleting a job', async function () {
+    it('raises an error on deleting a job', async () => {
       const response = await request(app)
         .delete(`/api/jobs/${fakeJobId}`)
         .set('Authorization', `Bearer ${authorToken}`);
@@ -497,7 +683,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.INTERNAL_SERVER_ERROR);
     });
 
-    it('raises an error on applying for a job', async function () {
+    it('raises an error on applying for a job', async () => {
       const response = await request(app)
         .post(`/api/jobs/${fakeJobId}/apply`)
         .set('Authorization', `Bearer ${readerToken}`);
@@ -505,7 +691,7 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.INTERNAL_SERVER_ERROR);
     });
 
-    it('raises an error on updating a job', async function () {
+    it('raises an error on updating a job', async () => {
       const response = await request(app)
         .put(`/api/jobs/${fakeJobId}`)
         .set('Authorization', `Bearer ${authorToken}`);
