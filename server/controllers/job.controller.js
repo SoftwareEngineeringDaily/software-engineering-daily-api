@@ -9,6 +9,7 @@ export default {
       const {
         title,
         location,
+        companyName,
         tags
       } = req.query;
 
@@ -20,6 +21,10 @@ export default {
 
       if (title) {
         query.where('title').regex(new RegExp(title, 'i'));
+      }
+
+      if (companyName) {
+        query.where('companyName').regex(new RegExp(companyName, 'i'));
       }
 
       if (location) {
