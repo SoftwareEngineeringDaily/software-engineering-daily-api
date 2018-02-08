@@ -8,6 +8,7 @@ import chai, { expect } from 'chai';
 import Job from '../models/job.model';
 import app from '../../index';
 import User from '../models/user.model';
+import sgMail from '../helpers/mail';
 
 chai.config.includeStack = true;
 
@@ -40,37 +41,31 @@ describe('## Jobs APIs', () => {
 
   let readerToken;
 
-  before(() => {
-    const register1 = request(app)
+  before(async function () {
+    const response1 = await request(app)
       .post('/api/auth/register')
-      .send(validAuthorCredentials)
-      .expect(httpStatus.CREATED)
-      .then((res) => {
-        expect(res.body).to.have.property('token');
-        authorToken = res.body.token;
+      .send(validAuthorCredentials);
 
-        return User.findOne({ username: validAuthorCredentials.username }, (err, found) => {
-          author = found;
-        });
-      });
+    expect(response1.statusCode).to.equal(httpStatus.CREATED);
+    expect(response1.body).to.have.property('token');
 
-    const register2 = request(app)
+    authorToken = response1.body.token;
+    author = await User.findOne({ username: validAuthorCredentials.username });
+
+    const response2 = await request(app)
       .post('/api/auth/register')
-      .send(validReaderCredentials)
-      .expect(httpStatus.CREATED)
-      .then((res) => {
-        expect(res.body).to.have.property('token');
-        readerToken = res.body.token;
-      });
+      .send(validReaderCredentials);
 
-    return Promise
-      .all([register1, register2]);
+    expect(response2.statusCode).to.equal(httpStatus.CREATED);
+    expect(response2.body).to.have.property('token');
+
+    readerToken  = response2.body.token;
   });
 
   after(() => User.remove({}));
   beforeEach(() => Job.remove({}));
 
-  const createJob = (isDeleted = false) => {
+  const createJob = async function (isDeleted = false) {
     const job = new Job({
       companyName: 'FooBar Inc',
       applicationEmailAddress: 'foo@bar.com',
@@ -82,19 +77,37 @@ describe('## Jobs APIs', () => {
       isDeleted
     });
 
-    return job.save();
+    return await job.save();
   };
 
-  describe('# GET /api/jobs', () => {
-    it('should get all jobs', () =>
-      createJob()
-        .then(() =>
-          request(app)
-            .get('/api/jobs/')
-            .expect(httpStatus.OK)));
+  const createExpiredJob = async function () {
+    const yesterday = new Date().getDate() - 1;
 
-    it('should not return deleted jobs', () => {
-      const job1 = new Job({
+    const job = new Job({
+      companyName: 'BarFoo Inc',
+      applicationEmailAddress: 'foo@bar.com',
+      location: 'Alaska',
+      title: 'Senior Developer',
+      description: 'Coding wizard required',
+      employmentType: 'Permanent',
+      expirationDate: yesterday,
+      postedUser: author
+    });
+
+    return await job.save();
+  }
+
+  describe('# GET /api/jobs', () => {
+    it('should get all jobs', async function () {
+      await createJob();
+      const response = await request(app)
+        .get('/api/jobs/');
+
+      expect(response.statusCode).to.equal(httpStatus.OK);
+    });
+
+    it('should not return deleted jobs', async function () {
+      const job1 = await new Job({
         companyName: 'BarFoo Inc',
         applicationEmailAddress: 'foo@bar.com',
         location: 'Alaska',
@@ -102,9 +115,9 @@ describe('## Jobs APIs', () => {
         description: 'Coding wizard required',
         employmentType: 'Permanent',
         postedUser: author
-      });
+      }).save();
 
-      const job2 = new Job({
+      const job2 = await new Job({
         companyName: 'FooBar Inc',
         applicationEmailAddress: 'foo@bar.com',
         location: 'Bermuda',
@@ -113,25 +126,19 @@ describe('## Jobs APIs', () => {
         employmentType: 'Permanent',
         postedUser: author,
         isDeleted: true
-      });
+      }).save();
 
-      return Promise.all([
-        job1.save(),
-        job2.save()
-      ])
-        .then(() =>
-          request(app)
-            .get('/api/jobs/')
-            .expect(httpStatus.OK)
-            .then((res) => {
-              expect(res.body).to.be.an('array');
-              expect(res.body.length).to.equal(1);
-              expect(res.body[0].location).to.equal('Alaska');
-            }));
+      const response = await request(app)
+        .get('/api/jobs/');
+
+      expect(response.statusCode).to.equal(httpStatus.OK);
+      expect(response.body).to.be.an('array');
+      expect(response.body.length).to.equal(1);
+      expect(response.body[0].location).to.equal('Alaska');
     });
 
-    it('should not return expired jobs', () => {
-      const job1 = new Job({
+    it('should not return expired jobs', async function () {
+      const job1 = await new Job({
         companyName: 'BarFoo Inc',
         applicationEmailAddress: 'foo@bar.com',
         location: 'Alaska',
@@ -139,11 +146,11 @@ describe('## Jobs APIs', () => {
         description: 'Coding wizard required',
         employmentType: 'Permanent',
         postedUser: author
-      });
+      }).save();
 
       const yesterday = new Date().getDate() - 1;
 
-      const job2 = new Job({
+      const job2 = await new Job({
         companyName: 'FooBar Inc',
         applicationEmailAddress: 'foo@bar.com',
         location: 'Bermuda',
@@ -152,63 +159,89 @@ describe('## Jobs APIs', () => {
         employmentType: 'Permanent',
         postedUser: author,
         expirationDate: yesterday
-      });
+      }).save();
 
-      return Promise.all([
-        job1.save(),
-        job2.save()
-      ])
-        .then(() =>
-          request(app)
-            .get('/api/jobs/')
-            .expect(httpStatus.OK)
-            .then((res) => {
-              expect(res.body).to.be.an('array');
-              expect(res.body.length).to.equal(1);
-              expect(res.body[0].location).to.equal('Alaska');
-            }));
+      const response = await request(app)
+        .get('/api/jobs/');
+
+      expect(response.statusCode).to.equal(httpStatus.OK);
+      expect(response.body).to.be.an('array');
+      expect(response.body.length).to.equal(1);
+      expect(response.body[0].location).to.equal('Alaska');
     });
   });
 
   describe('# GET /api/jobs/:jobId', () => {
-    it('should get a single job', () =>
-      createJob()
-        .then(newJob =>
-          request(app)
-            .get(`/api/jobs/${newJob._id}`)
-            .expect(httpStatus.OK)));
+    it('should get a single job', async function () {
+      const newJob = await createJob();
+      const response = await request(app)
+        .get(`/api/jobs/${newJob._id}`);
 
-    it('should return a deleted job for author', () =>
-      createJob(true)
-        .then(newJob =>
-          request(app)
-            .get(`/api/jobs/${newJob._id}`)
-            .set('Authorization', `Bearer ${authorToken}`)
-            .expect(httpStatus.OK)));
+      expect(response.statusCode).to.equal(httpStatus.OK);
+    });
 
-    it('should not return a deleted job for unauthenticated user', () =>
-      createJob(true)
-        .then(newJob =>
-          request(app)
-            .get(`/api/jobs/${newJob._id}`)
-            .expect(httpStatus.NOT_FOUND)));
+    it('should return a deleted job for author', async function () {
+      const newJob = await createJob(true);
+      const response = await request(app)
+        .get(`/api/jobs/${newJob._id}`)
+        .set('Authorization', `Bearer ${authorToken}`);
 
-    it('should not return a deleted job for reader', () =>
-      createJob(true)
-        .then(newJob =>
-          request(app)
-            .get(`/api/jobs/${newJob._id}`)
-            .set('Authorization', `Bearer ${readerToken}`)
-            .expect(httpStatus.NOT_FOUND)));
+      expect(response.statusCode).to.equal(httpStatus.OK);
+    });
 
-    it('should not return a job that does not exist', () =>
-      request(app)
-        .get(`/api/jobs/${fakeJobId}`)
-        .expect(httpStatus.NOT_FOUND));
+    it('should not return a deleted job for unauthenticated user', async function () {
+      const newJob = await createJob(true);
+      const response = await request(app)
+        .get(`/api/jobs/${newJob._id}`);
+
+      expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
+    });
+
+    it('should not return a deleted job for reader', async function () {
+      const newJob = await createJob(true);
+      const response = await request(app)
+        .get(`/api/jobs/${newJob._id}`)
+        .set('Authorization', `Bearer ${readerToken}`);
+
+      expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
+    });
+
+    it('should not return an expired job for reader', async function () {
+      const newJob = await createExpiredJob();
+      const response = await request(app)
+        .get(`/api/jobs/${newJob._id}`)
+        .set('Authorization', `Bearer ${readerToken}`);
+
+      expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
+    });
+
+    it('should not return an expired job for unauthorized user', async function () {
+      const newJob = await createExpiredJob();
+      const response = await request(app)
+        .get(`/api/jobs/${newJob._id}`);
+
+      expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
+    });
+
+    it('should return an expired job for author', async function () {
+      const newJob = await createExpiredJob();
+      const response = await request(app)
+        .get(`/api/jobs/${newJob._id}`)
+        .set('Authorization', `Bearer ${authorToken}`);
+
+      expect(response.statusCode).to.equal(httpStatus.OK);
+    });
+
+    it('should not return a job that does not exist', async function () {
+      const response = await request(app)
+        .get(`/api/jobs/${fakeJobId}`);
+
+      expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
+    });
   });
 
   describe('# POST /api/jobs/:jobId', () => {
-    it('should fail creating a job when not authenticated', () => {
+    it('should fail creating a job when not authenticated', async function () {
       const job = new Job({
         companyName: 'FooBar Inc',
         applicationEmailAddress: 'foo@bar.com',
@@ -219,13 +252,14 @@ describe('## Jobs APIs', () => {
         postedUser: author
       });
 
-      return request(app)
+      const response = await request(app)
         .post('/api/jobs')
-        .send(job)
-        .expect(httpStatus.UNAUTHORIZED);
+        .send(job);
+
+      expect(response.statusCode).to.equal(httpStatus.UNAUTHORIZED);
     });
 
-    it('should create a job', () => {
+    it('should create a job', async function () {
       const job = new Job({
         companyName: 'FooBar Inc',
         applicationEmailAddress: 'foo@bar.com',
@@ -236,14 +270,15 @@ describe('## Jobs APIs', () => {
         postedUser: author
       });
 
-      return request(app)
+      const response = await request(app)
         .post('/api/jobs')
         .set('Authorization', `Bearer ${authorToken}`)
-        .send(job)
-        .expect(httpStatus.CREATED);
+        .send(job);
+
+      expect(response.statusCode).to.equal(httpStatus.CREATED);
     });
 
-    it('should fail creating an invalid job', () => {
+    it('should fail creating an invalid job', async function () {
       const job = new Job({
         companyName: 'FooBar Inc',
         applicationEmailAddress: 'foo@bar.com',
@@ -254,91 +289,185 @@ describe('## Jobs APIs', () => {
         postedUser: author
       });
 
-      return request(app)
+      const response = await request(app)
         .post('/api/jobs')
         .set('Authorization', `Bearer ${authorToken}`)
-        .send(job)
-        .expect(httpStatus.INTERNAL_SERVER_ERROR);
+        .send(job);
+
+      expect(response.statusCode).to.equal(httpStatus.INTERNAL_SERVER_ERROR);
     });
   });
 
   describe('# PUT /api/jobs/:jobId', () => {
-    it('should update a job', () =>
-      createJob()
-        .then(newJob =>
-          request(app)
-            .put(`/api/jobs/${newJob._id}`)
-            .set('Authorization', `Bearer ${authorToken}`)
-            .send({
-              location: 'Alaska'
-            })
-            .expect(httpStatus.OK)
-            .then((res) => {
-              expect(res.body).to.exist;
+    it('should update a job', async function () {
+      const newJob = await createJob();
+      const response = await request(app)
+        .put(`/api/jobs/${newJob._id}`)
+        .set('Authorization', `Bearer ${authorToken}`)
+        .send({
+          location: 'Alaska'
+        });
 
-              return Job.findById(newJob._id).then((updatedJob) => {
-                expect(updatedJob.location).to.equal('Alaska');
-              });
-            })));
+      expect(response.statusCode).to.equal(httpStatus.OK);
 
-    it('should fail updating a job not posted by current user', () =>
-      createJob()
-        .then(newJob =>
-          request(app)
-            .put(`/api/jobs/${newJob._id}`)
-            .set('Authorization', `Bearer ${readerToken}`)
-            .send({
-              location: 'Alaska'
-            })
-            .expect(httpStatus.UNAUTHORIZED)));
+      const updatedJob = await Job.findById(newJob._id);
+      expect(updatedJob.location).to.equal('Alaska');
+    });
 
-    it('returns 404 if job does not exist', () =>
-      request(app)
+    it('should fail updating a job not posted by current user', async function () {
+      const newJob = await createJob();
+      const response = await request(app)
+        .put(`/api/jobs/${newJob._id}`)
+        .set('Authorization', `Bearer ${readerToken}`)
+        .send({
+          location: 'Alaska'
+        });
+
+      expect(response.statusCode).to.equal(httpStatus.UNAUTHORIZED);
+    });
+
+    it('returns 404 if job does not exist', async function () {
+      const newJob = await createJob();
+      const response = await request(app)
         .put(`/api/jobs/${fakeJobId}`)
         .set('Authorization', `Bearer ${authorToken}`)
-        .expect(httpStatus.NOT_FOUND));
+        .send({
+          location: 'Alaska'
+        });
 
-    it('cannot update a deleted job', () =>
-      createJob(true)
-        .then(newJob =>
-          request(app)
-            .put(`/api/jobs/${newJob._id}`)
-            .set('Authorization', `Bearer ${authorToken}`)
-            .send({
-              location: 'Alaska'
-            })
-            .expect(httpStatus.FORBIDDEN)));
+      expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
+    });
+
+    it('cannot update a deleted job', async function () {
+      const newJob = await createJob(true);
+      const response = await request(app)
+        .put(`/api/jobs/${newJob._id}`)
+        .set('Authorization', `Bearer ${authorToken}`)
+        .send({
+          location: 'Alaska'
+        });
+
+      expect(response.statusCode).to.equal(httpStatus.FORBIDDEN);
+    });
+
+    it('cannot update an expired job', async function () {
+      const newJob = await createExpiredJob();
+      const response = await request(app)
+        .put(`/api/jobs/${newJob._id}`)
+        .set('Authorization', `Bearer ${authorToken}`)
+        .send({
+          location: 'Alaska'
+        });
+
+      expect(response.statusCode).to.equal(httpStatus.FORBIDDEN);
+    });
   });
 
   describe('# DELETE /api/jobs/:jobId', () => {
-    it('should delete a job', () =>
-      createJob()
-        .then(newJob =>
-          request(app)
-            .delete(`/api/jobs/${newJob._id}`)
-            .set('Authorization', `Bearer ${authorToken}`)
-            .expect(httpStatus.OK)
-            .then((res) => {
-              expect(res.body).to.exist;
+    it('should delete a job', async function () {
+      const newJob = await createJob();
+      const response = await request(app)
+        .delete(`/api/jobs/${newJob._id}`)
+        .set('Authorization', `Bearer ${authorToken}`);
 
-              return Job.findById(newJob._id).then((deletedJob) => {
-                expect(deletedJob.isDeleted).to.equal(true);
-              });
-            })));
+      expect(response.statusCode).to.equal(httpStatus.OK);
+      expect(response.body).to.exist;
 
-    it('returns 404 if job does not exist', () =>
-      request(app)
+      const deletedJob = await Job.findById(newJob._id);
+      expect(deletedJob.isDeleted).to.equal(true);
+    });
+
+    it('returns 404 if job does not exist', async function () {
+      const newJob = await createJob();
+      const response = await request(app)
         .delete(`/api/jobs/${fakeJobId}`)
-        .set('Authorization', `Bearer ${authorToken}`)
-        .expect(httpStatus.NOT_FOUND));
+        .set('Authorization', `Bearer ${authorToken}`);
 
-    it('cannot delete a job not posted by logged in user', () =>
-      createJob()
-        .then(newJob =>
-          request(app)
-            .delete(`/api/jobs/${newJob._id}`)
-            .set('Authorization', `Bearer ${readerToken}`)
-            .expect(httpStatus.UNAUTHORIZED)));
+      expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
+    });
+
+    it('cannot delete a job not posted by logged in user', async function () {
+      const newJob = await createJob();
+      const response = await request(app)
+        .delete(`/api/jobs/${newJob._id}`)
+        .set('Authorization', `Bearer ${readerToken}`);
+
+      expect(response.statusCode).to.equal(httpStatus.UNAUTHORIZED);
+    });
+  });
+
+  describe('# POST /api/jobs/:jobId/apply', () => {
+    it('should fail applying for a job that does not exist', async function () {
+      const response = await request(app)
+        .post(`/api/jobs/${fakeJobId}/apply`)
+        .set('Authorization', `Bearer ${readerToken}`);
+
+      expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
+    });
+
+    it('should fail applying for a job when not logged in', async function () {
+      const response = await request(app)
+        .post(`/api/jobs/${fakeJobId}/apply`);
+
+      expect(response.statusCode).to.equal(httpStatus.UNAUTHORIZED);
+    });
+
+    it('should fail applying for a deleted job', async function () {
+      const newJob = await createJob(true);
+
+      const response = await request(app)
+        .post(`/api/jobs/${fakeJobId}/apply`)
+        .set('Authorization', `Bearer ${readerToken}`)
+        .send();
+
+      expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
+    });
+
+    it('should fail applying for an expired job', async function () {
+      const newJob = await createExpiredJob();
+
+      const response = await request(app)
+        .post(`/api/jobs/${fakeJobId}/apply`)
+        .set('Authorization', `Bearer ${readerToken}`)
+        .send();
+
+      expect(response.statusCode).to.equal(httpStatus.NOT_FOUND);
+    });
+
+    it('should fail applying for a job posted by same user', async function () {
+      const newJob = await createJob();
+
+      const response = await request(app)
+        .post(`/api/jobs/${newJob._id}/apply`)
+        .set('Authorization', `Bearer ${authorToken}`)
+        .send();
+
+      expect(response.statusCode).to.equal(httpStatus.FORBIDDEN);
+    });
+
+    it('should fail applying for a job when covering letter not supplied', async function () {
+      const newJob = await createJob();
+
+      const response = await request(app)
+        .post(`/api/jobs/${newJob._id}/apply`)
+        .set('Authorization', `Bearer ${readerToken}`)
+        .attach('resume', 'server/tests/attachments/sample.pdf');
+
+      expect(response.statusCode).to.equal(httpStatus.BAD_REQUEST);
+    });
+
+    it('should fail applying for a job when resume not supplied', async function () {
+      const newJob = await createJob();
+
+      const response = await request(app)
+        .post(`/api/jobs/${newJob._id}/apply`)
+        .set('Authorization', `Bearer ${readerToken}`)
+        .send({
+          coveringLetter: 'bar'
+        });
+
+      expect(response.statusCode).to.equal(httpStatus.BAD_REQUEST);
+    });
   });
 
   describe('returns errors when findById fails', () => {
@@ -354,21 +483,34 @@ describe('## Jobs APIs', () => {
       sandbox.restore();
     });
 
-    it('raises an error on getting job', () =>
-      request(app)
-        .get(`/api/jobs/${fakeJobId}`)
-        .expect(httpStatus.INTERNAL_SERVER_ERROR));
+    it('raises an error on getting job', async function () {
+      const response = await request(app)
+        .get(`/api/jobs/${fakeJobId}`);
+      expect(response.statusCode).to.equal(httpStatus.INTERNAL_SERVER_ERROR);
+    });
 
-    it('raises an error on deleting job', () =>
-      request(app)
+    it('raises an error on deleting a job', async function () {
+      const response = await request(app)
         .delete(`/api/jobs/${fakeJobId}`)
-        .set('Authorization', `Bearer ${authorToken}`)
-        .expect(httpStatus.INTERNAL_SERVER_ERROR));
+        .set('Authorization', `Bearer ${authorToken}`);
 
-    it('raises an error on updating a job', () =>
-      request(app)
+      expect(response.statusCode).to.equal(httpStatus.INTERNAL_SERVER_ERROR);
+    });
+
+    it('raises an error on applying for a job', async function () {
+      const response = await request(app)
+        .post(`/api/jobs/${fakeJobId}/apply`)
+        .set('Authorization', `Bearer ${readerToken}`);
+
+      expect(response.statusCode).to.equal(httpStatus.INTERNAL_SERVER_ERROR);
+    });
+
+    it('raises an error on updating a job', async function () {
+      const response = await request(app)
         .put(`/api/jobs/${fakeJobId}`)
-        .set('Authorization', `Bearer ${authorToken}`)
-        .expect(httpStatus.INTERNAL_SERVER_ERROR));
+        .set('Authorization', `Bearer ${authorToken}`);
+
+      expect(response.statusCode).to.equal(httpStatus.INTERNAL_SERVER_ERROR);
+    });
   });
 });
