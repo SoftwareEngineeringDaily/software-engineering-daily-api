@@ -160,6 +160,34 @@ export default {
     }
   },
 
+  /**
+  * @swagger
+  *  /jobs/{jobId}/apply:
+  *   get:
+  *     summary: Applies for a job
+  *     description: Submit a job application to the company who posted the job.
+  *       Should be accompanied by a covering note and a resume.
+  *     tags: [job]
+  *     security: Token: []
+  *     parameters:
+  *       - $ref: '#/parameters/jobId'
+  *     requestBody:
+  *       description: A JSON object containing the application details
+  *       content:
+  *         coveringLetter: A short note from the applicant to the employer.
+  *         resume: File containing the applicant's resume to be forwarded to the employer.
+  *     responses:
+  *       '200':
+  *         description: successful operation
+  *         schema:
+  *           $ref: '#/definitions/Job'
+  *       '400':
+  *         description: validation error when required parameters are missing
+  *         $ref: '#/response/BadRequest'
+  *       '404':
+  *         description: The job being applied for does not exist, has been deleted or has expired
+  *         $ref: '#/responses/NotFound'
+  */
   apply: async (req, res, next) => {
     try {
       const job = await Job

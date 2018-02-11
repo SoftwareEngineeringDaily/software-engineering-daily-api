@@ -30,18 +30,39 @@ import mongoose, { Schema } from 'mongoose';
  *       description:
  *         type: string
  *         description: The full description of the job, roles, responsibilities etc.
- *       downvote:
+ *       tags:
+ *         type: array
+ *         description: Array of tag id's related to the type of job being posted.
+ *       employmentType:
+ *         type: string
+ *         description: Enumerated value indicating the type of employment offered
+ *         example: Permanent
+ *       remoteWorkingConsidered:
  *         type: boolean
- *         description: if authenticated, returns if user downvoted episode
- *       bookmarked:
- *         type: boolean
- *         description: if authenticated, returns if user bookmarked the episode
+ *         description: Whether the employer would consider a remote worker for the
+ *            position advertised.
+ *       postedUser:
+ *          type: string
+ *          description:An object identifier of the user making the job posting
+ *       postedDate:
+ *          type: date
+ *          description: The date the job was posted
+ *       expirationDate
+ *          type: date
+ *          description: The date the job posting should expire.
+ *             After this date the job should no longer be returned in searches.
+ *       isDeleted
+ *          type: boolean
+ *          description: Set by the posted user when the job posting is no longer available.
+ *              When true this job will no longer appear in search results.
  *     required:
  *       - _id
+ *       - companyName
+ *       - applicationEmailAddress
+ *       - location
  *       - title
- *       - content
- *       - date
- *       - score
+ *       - description
+ *       - employmentType
  */
 const JobSchema = new mongoose.Schema({
   companyName: {
