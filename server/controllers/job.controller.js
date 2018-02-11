@@ -1,11 +1,14 @@
 import httpStatus from 'http-status';
+import { map } from 'lodash';
 import Job from '../models/job.model';
 import APIError from '../helpers/APIError';
 import sgMail from '../helpers/mail';
+import transform from '../helpers/job.helper';
 
 require('babel-polyfill');
 
 export default {
+
   list: async (req, res, next) => {
     try {
       const {
@@ -38,9 +41,10 @@ export default {
         query.where({ tags: { $in: tagsAsNumbers } });
       }
 
-      const jobs = await query.exec();
+      const jobs = await query.sort('-postedDate').exec();
+      const transformedJobs = map(jobs, job => transform(job, false));
 
-      return res.json(jobs);
+      return res.json(transformedJobs);
     } catch (err) {
       return next(err);
     }
@@ -52,7 +56,7 @@ export default {
       newJob.postedUser = req.user;
 
       await newJob.save();
-      return res.status(httpStatus.CREATED).json(newJob);
+      return res.status(httpStatus.CREATED).json(transform(newJob, true));
     } catch (err) {
       return next(err);
     }
@@ -74,7 +78,7 @@ export default {
       const updatedJob = Object.assign(job, { isDeleted: true });
       await updatedJob.save();
 
-      return res.status(httpStatus.OK).json(updatedJob);
+      return res.status(httpStatus.OK).json(transform(updatedJob, true));
     } catch (err) {
       return next(err);
     }
@@ -102,7 +106,7 @@ export default {
       const updated = Object.assign(job, req.body);
       await updated.save();
 
-      return res.status(httpStatus.OK).json(updated);
+      return res.status(httpStatus.OK).json(transform(updated, true));
     } catch (err) {
       return next(err);
     }
@@ -138,18 +142,19 @@ export default {
       // If the job posting has been logically deleted or expired then it should only
       // be visible to the user who created it initially
       const today = new Date().getDate();
+      const isJobAuthor = req.user && (job.postedUser.toString() === req.user._id.toString());
 
       if (job.isDeleted || (job.expirationDate && job.expirationDate < today)) {
         if (!req.user) {
           return next(new APIError('Job not found', httpStatus.NOT_FOUND));
         }
 
-        if (job.postedUser.toString() !== req.user._id.toString()) {
+        if (!isJobAuthor) {
           return next(new APIError('Job not found', httpStatus.NOT_FOUND));
         }
       }
 
-      return res.json(job);
+      return res.json(transform(job, isJobAuthor));
     } catch (err) {
       return next(err);
     }

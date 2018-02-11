@@ -83,6 +83,7 @@ const JobSchema = new mongoose.Schema({
   },
   postedDate: {
     type: Date,
+    required: true,
     default: Date.now
   },
   expirationDate: Date,

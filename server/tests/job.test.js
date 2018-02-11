@@ -409,6 +409,34 @@ describe('## Jobs APIs', () => {
       expect(response.statusCode).to.equal(httpStatus.OK);
     });
 
+    it('should not return excluded fields for reader', async () => {
+      const newJob = await createJob();
+      const response = await request(app)
+        .get(`/api/jobs/${newJob._id}`)
+        .set('Authorization', `Bearer ${readerToken}`);
+
+      expect(response.statusCode).to.equal(httpStatus.OK);
+
+      const returnedJob = response.body;
+
+      expect(returnedJob).to.not.have.property('__v');
+      expect(returnedJob).to.not.have.property('applicationEmailAddress');
+    });
+
+    it('should not return excluded fields for author', async () => {
+      const newJob = await createJob();
+      const response = await request(app)
+        .get(`/api/jobs/${newJob._id}`)
+        .set('Authorization', `Bearer ${authorToken}`);
+
+      expect(response.statusCode).to.equal(httpStatus.OK);
+
+      const returnedJob = response.body;
+
+      expect(returnedJob).to.not.have.property('__v');
+      expect(returnedJob).to.have.property('applicationEmailAddress');
+    });
+
     it('should not return a deleted job for unauthenticated user', async () => {
       const newJob = await createJob(true);
       const response = await request(app)
