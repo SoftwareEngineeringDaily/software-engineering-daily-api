@@ -168,7 +168,8 @@ export default {
   *     description: Submit a job application to the company who posted the job.
   *       Should be accompanied by a covering note and a resume.
   *     tags: [job]
-  *     security: Token: []
+  *     security:
+  *       Token: []
   *     parameters:
   *       - $ref: '#/parameters/jobId'
   *     requestBody:

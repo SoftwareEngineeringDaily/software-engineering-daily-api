@@ -39,22 +39,22 @@ import mongoose, { Schema } from 'mongoose';
  *         example: Permanent
  *       remoteWorkingConsidered:
  *         type: boolean
- *         description: Whether the employer would consider a remote worker for the
- *            position advertised.
+ *         description: Whether the employer would consider a |
+ *            remote worker for the position advertised.
  *       postedUser:
- *          type: string
- *          description:An object identifier of the user making the job posting
+ *         type: string
+ *         description: An object identifier of the user making the job posting
  *       postedDate:
- *          type: date
- *          description: The date the job was posted
- *       expirationDate
- *          type: date
- *          description: The date the job posting should expire.
- *             After this date the job should no longer be returned in searches.
- *       isDeleted
- *          type: boolean
- *          description: Set by the posted user when the job posting is no longer available.
- *              When true this job will no longer appear in search results.
+ *         type: date
+ *         description: The date the job was posted
+ *       expirationDate:
+ *         type: date
+ *         description: The date the job posting should expire. |
+ *            After this date the job should no longer be returned in searches.
+ *       isDeleted:
+ *         type: boolean
+ *         description: Set by the posted user when the job posting is no longer available. |
+ *            When true this job will no longer appear in search results.
  *     required:
  *       - _id
  *       - companyName
