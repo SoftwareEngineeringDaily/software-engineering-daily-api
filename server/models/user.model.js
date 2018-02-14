@@ -42,6 +42,10 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
   email: {
     type: String
   },
@@ -127,10 +131,10 @@ UserSchema.statics = {
       .exec();
   },
 
-  isValidHash: function validPassword({original, hash}) {
+  isValidHash: function validPassword({ original, hash }) {
     return bcrypt.compareSync(original, hash);
   },
-  updatableFields: ['username','website','bio', 'name','email']
+  updatableFields: ['username', 'website', 'bio', 'name', 'email']
 };
 
 /**
