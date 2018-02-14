@@ -32,7 +32,8 @@ sgMail.setApiKey(config.sendGridKey);
 function load(req, res, next, id) {
   User.get(id)
     .then((user) => {
-      delete user.password;
+      delete user.password; // We probably should't do this, also don't think
+      // it has any effect until we do toObject();
       req.userLoaded = user; // eslint-disable-line no-param-reassign
       return next();
     })
@@ -201,6 +202,45 @@ function requestPasswordReset(req, res, next) {
   });
 }
 
+async function list(req, res, next) {
+  try {
+    const loggedInUser = req.userLoaded.toObject();
+    // We might want to allow anyone to search users eventually.
+    if(!loggedInUser.isAdmin) {
+      let err = new APIError('Must be an admin to do that', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+      return next(err);
+    }
+    const {
+      username,
+      email,
+      name
+    } = req.query
+
+    const query = User.find();
+    if (username) {
+      query.where('username').regex(new RegExp(username, 'i'));
+    }
+
+    if (email) {
+      query.where('email').regex(new RegExp(email, 'i'));
+    }
+
+    if (name) {
+      query.where('name').regex(new RegExp(name, 'i'));
+    }
+
+    const users = await query
+    .limit(100)
+    .select('-password')
+    .exec();
+
+    return res.json(users);
+  } catch(err) {
+    return next(err);
+  }
+
+}
+
 /**
  * @swagger
  * /users/me/bookmarked:
@@ -247,5 +287,5 @@ function listBookmarked(req, res, next) {
 }
 
 export default {
-  load, get, me, update, listBookmarked, requestPasswordReset, regainPassword
+  load, get, me, list, update, listBookmarked, requestPasswordReset, regainPassword
 };
