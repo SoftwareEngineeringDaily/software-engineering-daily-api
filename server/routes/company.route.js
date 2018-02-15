@@ -29,13 +29,4 @@ router.route('/:companyId')
   , companyController.delete
 );
 
-router.route('/search')
-.get(
-  expressJwt({ secret: config.jwtSecret })
-  , loadFullUser
-  , ensureIsAdmin
-  , companyController.list
-);
-
-
 export default router;

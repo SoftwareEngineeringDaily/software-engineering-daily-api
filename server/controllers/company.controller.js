@@ -4,7 +4,7 @@ import APIError from '../helpers/APIError';
 
 export default {
 
-  list: async (req, res, next) => {
+  get: async (req, res, next) => {
   },
 
   create: async (req, res, next) => {
