@@ -12,4 +12,5 @@ async function ensureIsAdmin(req, res, next) {
     return next(err);
   }
   req.isAdmin = true
+  next();
 }
