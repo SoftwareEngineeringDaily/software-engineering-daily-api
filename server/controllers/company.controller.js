@@ -28,7 +28,7 @@ export default {
       }
 
       // Just a failsafe:
-      if(!req.fullUser.isAdmin) {
+      if (!req.fullUser.isAdmin) {
         return next(new APIError('Not allowed to delete a company', httpStatus.UNAUTHORIZED));
       }
 
@@ -45,6 +45,5 @@ export default {
     } catch (err) {
       return next(err);
     }
-  },
-
-}
+  }
+};
