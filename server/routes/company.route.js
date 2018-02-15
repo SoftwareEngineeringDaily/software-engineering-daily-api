@@ -21,6 +21,12 @@ router.route('/:companyId')
 .get(
   expressJwt({ secret: config.jwtSecret })
   , companyController.get
+)
+.put(
+  expressJwt({ secret: config.jwtSecret})
+  , loadFullUser
+  , ensureIsAdmin
+  , companyController.update
 );
 
 router.route('/search')
