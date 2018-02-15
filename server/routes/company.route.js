@@ -22,11 +22,11 @@ router.route('/:companyId')
   expressJwt({ secret: config.jwtSecret })
   , companyController.get
 )
-.put(
+.delete(
   expressJwt({ secret: config.jwtSecret})
   , loadFullUser
   , ensureIsAdmin
-  , companyController.update
+  , companyController.delete
 );
 
 router.route('/search')

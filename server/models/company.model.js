@@ -26,6 +26,17 @@ const CompanySchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  // The user who created the company
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  dateCreated: {
+    type: Date,
+    required: true,
+    default: Date.now
+  },
   isDeleted: {
     type: Boolean,
     default: false
