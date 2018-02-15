@@ -205,12 +205,6 @@ function requestPasswordReset(req, res, next) {
 
 async function list(req, res, next) {
   try {
-    const loggedInUser = req.fullUser.toObject();
-    // We might want to allow anyone to search users eventually.
-    if (!loggedInUser.isAdmin) {
-      let err = new APIError('Must be an admin to do that', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
-      return next(err);
-    }
     const {
       username,
       email,
