@@ -4,6 +4,17 @@ import APIError from '../helpers/APIError';
 
 export default {
 
+  list: async (req, res, next) => {
+    try {
+      const query = Company.where('isDeleted').equals(false)
+      const companies = await query.sort('-dateCreated').exec();
+      return res.json(companies);
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+
   get: async (req, res, next) => {
   },
 
@@ -12,7 +23,8 @@ export default {
       const newCompany = new Company(req.body);
       newCompany.author = req.user;
       await newCompany.save();
-      return res.status(httpStatus.CREATED).json(newCompany.toObject(), true);
+
+      return res.status(httpStatus.CREATED).json({status: 'success'});
     } catch (err) {
       return next(err);
     }

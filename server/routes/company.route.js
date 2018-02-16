@@ -9,6 +9,12 @@ import config from '../../config/config';
 const router = express.Router(); // eslint-disable-line new-cap
 
 router.route('/')
+  .get(
+  expressJwt({ secret: config.jwtSecret })
+  , loadFullUser
+  , ensureIsAdmin
+  , companyController.list
+  )
   .post(
   expressJwt({ secret: config.jwtSecret })
   , loadFullUser
