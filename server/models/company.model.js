@@ -5,6 +5,7 @@ const CompanySchema = new mongoose.Schema({
   companyName: {
     type: String,
     required: true
+    // , unique: true
   },
   description: {
     type: String,
@@ -18,9 +19,11 @@ const CompanySchema = new mongoose.Schema({
     type: String,
     required: false
   },
+  // This is what people will define our url: softwaredaily.com/{localUrl}
   localUrl: {
     type: String,
     required: true
+    // , unique: true
   },
   isPublic: {
     type: Boolean,
