@@ -18,10 +18,15 @@ router.route('/')
   .post(
   expressJwt({ secret: config.jwtSecret })
   , loadFullUser
-  , ensureIsAdmin
+  , ensureIsAdmin // TODO: refactor to "loadAdmin"
   , companyController.create
   );
 
+router.route('/findByLocalUrl/:localUrl')
+  .get(
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false })
+  , companyController.findByLocalUrl
+);
 router.route('/:companyId')
 /** GET /api/company/:companyId - Get company */
 .get(
