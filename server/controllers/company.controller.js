@@ -15,11 +15,15 @@ export default {
   },
 
   findByLocalUrl: async (req, res, next) => {
-    const company = await Company.findOne({localUrl: req.params.localUrl});
-    if (!company) {
-      return next(new APIError('Company not found', httpStatus.NOT_FOUND));
+    try {
+      const company = await Company.findOne({localUrl: req.params.localUrl});
+      if (!company) {
+        return next(new APIError('Company not found', httpStatus.NOT_FOUND));
+      }
+      return res.json(company.toObject());
+    } catch (err) {
+      return next(err);
     }
-    return res.json(company.toObject());
   },
 
   get: async (req, res, next) => {
