@@ -1,14 +1,11 @@
 import axios from 'axios';
 import config from '../../config/config';
 
-export default function sendEvent({ userName, eventType, eventData }) {
-  console.log(eventData);
-
-  return axios.post(`${config.eventStreamUrl}`, {
+export default function sendError({ userName, eventData }) {
+  return axios.post(`${config.eventStreamUrl}error`, {
     clientId: userName,
     deviceType: 'API',
-    eventTime: new Date().getTime(),
-    eventType,
+    errorTime: new Date().getTime(),
     eventData
   })
     .then(response => response)
