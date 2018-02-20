@@ -1,12 +1,12 @@
 import httpStatus from 'http-status';
-import Company from '../models/Company.model';
+import Company from '../models/company.model';
 import APIError from '../helpers/APIError';
 
 export default {
 
   list: async (req, res, next) => {
     try {
-      const query = Company.where('isDeleted').equals(false)
+      const query = Company.where('isDeleted').equals(false);
       const companies = await query.sort('-dateCreated').exec();
       return res.json(companies);
     } catch (err) {
@@ -16,7 +16,7 @@ export default {
 
   findByLocalUrl: async (req, res, next) => {
     try {
-      const company = await Company.findOne({localUrl: req.params.localUrl});
+      const company = await Company.findOne({ localUrl: req.params.localUrl });
       if (!company) {
         return next(new APIError('Company not found', httpStatus.NOT_FOUND));
       }
@@ -44,7 +44,7 @@ export default {
       newCompany.author = req.user;
       await newCompany.save();
 
-      return res.status(httpStatus.CREATED).json({status: 'success'});
+      return res.status(httpStatus.CREATED).json({ status: 'success' });
     } catch (err) {
       return next(err);
     }
