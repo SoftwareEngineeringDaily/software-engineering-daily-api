@@ -27,7 +27,7 @@ const CompanySchema = new mongoose.Schema({
   },
   isPublic: {
     type: Boolean,
-    default: false
+    default: true
   },
   // The user who created the company
   author: {
