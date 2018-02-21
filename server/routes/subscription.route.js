@@ -1,4 +1,3 @@
-
 import express from 'express';
 import expressJwt from 'express-jwt';
 import validate from 'express-validation';

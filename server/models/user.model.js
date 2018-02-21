@@ -24,7 +24,6 @@ const UserSchema = new mongoose.Schema({
   /* TODO
   save StripeCustomer ID?
   */
-
   name: {
     type: String
     // , required: true // Should be requied but need to update all clients
@@ -39,6 +38,10 @@ const UserSchema = new mongoose.Schema({
     type: String
   },
   verified: {
+    type: Boolean,
+    default: false
+  },
+  isAdmin: {
     type: Boolean,
     default: false
   },
@@ -127,10 +130,10 @@ UserSchema.statics = {
       .exec();
   },
 
-  isValidHash: function validPassword({original, hash}) {
+  isValidHash: function validPassword({ original, hash }) {
     return bcrypt.compareSync(original, hash);
   },
-  updatableFields: ['username','website','bio', 'name','email']
+  updatableFields: ['username', 'website', 'bio', 'name', 'email']
 };
 
 /**

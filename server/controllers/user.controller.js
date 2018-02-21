@@ -1,15 +1,16 @@
 import APIError from '../helpers/APIError';
 import httpStatus from 'http-status';
 
-import randomstring from "randomstring";
+import randomstring from 'randomstring';
 // TODO: validate this key and pull from config:
 import Favorite from '../models/favorite.model';
 import _ from 'lodash';
 import User from '../models/user.model';
 import PasswordReset from '../models/passwordReset.model';
 import config from '../../config/config';
+
 const sgMail = require('@sendgrid/mail');
-//TODO: move this out of here, probably in it's own file:
+// TODO: move this out of here, probably in it's own file:
 sgMail.setApiKey(config.sendGridKey);
 
 /**
@@ -32,7 +33,8 @@ sgMail.setApiKey(config.sendGridKey);
 function load(req, res, next, id) {
   User.get(id)
     .then((user) => {
-      delete user.password;
+      delete user.password; // We probably should't do this, also don't think
+      // it has any effect until we do toObject();
       req.userLoaded = user; // eslint-disable-line no-param-reassign
       return next();
     })
@@ -84,121 +86,153 @@ function update(req, res, next) {
 
   // Next we are making sure the username doens't already exist:
   User.findOne({ username })
-  .exec()
-  .then((_user) => {
-    if (_user && _user.id != user.id) {
+    .exec()
+    .then((_user) => {
+      if (_user && _user.id != user.id) {
       let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
-      return next(err);
-    }
-    // Using _.pick to only get a few properties:
-    // otherwise user can set themselves to verified, etc :)
-    const newValues = _.pick(req.body, User.updatableFields);
-    Object.assign(user, newValues);
-    if (avatarWasSet) {
+        return next(err);
+      }
+      // Using _.pick to only get a few properties:
+      // otherwise user can set themselves to verified, etc :)
+      const newValues = _.pick(req.body, User.updatableFields);
+      Object.assign(user, newValues);
+      if (avatarWasSet) {
       // This should be pulled from utils:
-      const S3_BUCKET = 'sd-profile-pictures';
-      user.avatarUrl = `https://${S3_BUCKET}.s3.amazonaws.com/${user._id}`
-    }
-    return user.save().then((newUser) => {
-      const userMinusPassword = Object.assign({}, newUser, {password: null});
-      res.json(userMinusPassword);
+        const S3_BUCKET = 'sd-profile-pictures';
+        user.avatarUrl = `https://${S3_BUCKET}.s3.amazonaws.com/${user._id}`;
+      }
+      return user.save().then((newUser) => {
+        const userMinusPassword = Object.assign({}, newUser, { password: null });
+        res.json(userMinusPassword);
+      });
     })
-  })
-  .catch(e => {
-    console.log('error saving user', e);
-    next(e)
-  });
+    .catch((e) => {
+      console.log('error saving user', e);
+      next(e);
+    });
 }
 
 function regainPassword(req, res, next) {
   const { secretKey, newPassword, resetUID } = req.body;
   const hash = User.generateHash(secretKey);
-  PasswordReset.findOne(
-    {_id: resetUID, deleted: false}
-  )
-  .exec()
-  .then( (passwordReset) => {
-    if (!passwordReset) {
-      console.log('Invalid passwordReset', passwordReset);
-      throw 'Invalid reset password.';
-    }
-
-    if (!User.isValidHash({hash, original: secretKey})){
-      console.log('---------Invalid hash-----------');
-      throw 'Invalid reset password.';
-    }
-
-    // Check that dateCreated is within a certain time period:
-    const date1 = new Date(passwordReset.dateCreated);
-    const date2 = new Date(); // today
-    const timeDiff = Math.abs(date2.getTime() - date1.getTime());
-    const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-    if(diffDays > 2){
-      console.log('Password reset link has expired!------');
-      throw 'Invalid reset password, has expired.';
-    }
-   // This is a little ugly and nested:
-    return User.findOne({_id: passwordReset.userId})
+  PasswordReset.findOne({ _id: resetUID, deleted: false })
     .exec()
-    .then((existingUser) => {
-      if (!existingUser) {
+    .then((passwordReset) => {
+      if (!passwordReset) {
+        console.log('Invalid passwordReset', passwordReset);
         throw 'Invalid reset password.';
       }
-      existingUser.password = User.generateHash(newPassword);
-      return existingUser.save()
-      .then(() => {
-        passwordReset.deleted = true;
-        return passwordReset.save()
-        .then(()=> {
-          // TODO: return jwt:
-          res.json({success: true});
-        })
-      })
+
+      if (!User.isValidHash({ hash, original: secretKey })) {
+        console.log('---------Invalid hash-----------');
+        throw 'Invalid reset password.';
+      }
+
+      // Check that dateCreated is within a certain time period:
+      const date1 = new Date(passwordReset.dateCreated);
+      const date2 = new Date(); // today
+      const timeDiff = Math.abs(date2.getTime() - date1.getTime());
+      const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      if (diffDays > 2) {
+        console.log('Password reset link has expired!------');
+        throw 'Invalid reset password, has expired.';
+      }
+      // This is a little ugly and nested:
+      return User.findOne({ _id: passwordReset.userId })
+        .exec()
+        .then((existingUser) => {
+          if (!existingUser) {
+            throw 'Invalid reset password.';
+          }
+          existingUser.password = User.generateHash(newPassword);
+          return existingUser.save()
+            .then(() => {
+              passwordReset.deleted = true;
+              return passwordReset.save()
+                .then(() => {
+                  // TODO: return jwt:
+                  res.json({ success: true });
+                });
+            });
+        });
     })
-  })
-  .catch((error) => {
-    next(error);
-  });
+    .catch((error) => {
+      next(error);
+    });
 }
 
 function requestPasswordReset(req, res, next) {
-  const { email }  = req.body;
-  User.findOne({ $or: [
-    {username: email},
-    {email}
-  ]}).exec()
-  .then( (user) => {
-    if (!user) return res.status(404).json({ message: 'User not found.' });
-    // This is the key we send out:
-    const secretKey = randomstring.generate({
-      charset: 'alphanumeric'
-    });
-    const hash = User.generateHash(secretKey);
-    // This is what we store in the db:
-    const newPasswordReset = new PasswordReset();
-    newPasswordReset.userId = user._id;
-    newPasswordReset.hash = hash;
-    newPasswordReset.email = email;
+  const { email } = req.body;
+  User.findOne({
+    $or: [
+      { username: email },
+      { email }
+    ]
+  }).exec()
+    .then((user) => {
+      if (!user) return res.status(404).json({ message: 'User not found.' });
+      // This is the key we send out:
+      const secretKey = randomstring.generate({
+        charset: 'alphanumeric'
+      });
+      const hash = User.generateHash(secretKey);
+      // This is what we store in the db:
+      const newPasswordReset = new PasswordReset();
+      newPasswordReset.userId = user._id;
+      newPasswordReset.hash = hash;
+      newPasswordReset.email = email;
 
-    return newPasswordReset.save()
-    .then((resetPass) => {
-      // TODO: throttle how many emails we send to same email per time.
-      const msg = {
-        to: email,
-        from: 'no-reply@softwaredaily.com',
-        subject: 'Password reset email',
-        text: `Reset your password here ${config.baseUrl}/#/regain-account/${secretKey}/${resetPass._id}`,
-        html: `<strong> <a href="${config.baseUrl}/#/regain-account/${secretKey}/${resetPass._id}"> Click here </a> to reset your password. `,
-      };
-      // TODO: is this async?
-      sgMail.send(msg);
-      res.json({});
+      return newPasswordReset.save()
+        .then((resetPass) => {
+          // TODO: throttle how many emails we send to same email per time.
+          const msg = {
+            to: email,
+            from: 'no-reply@softwaredaily.com',
+            subject: 'Password reset email',
+            text: `Reset your password here ${config.baseUrl}/#/regain-account/${secretKey}/${resetPass._id}`,
+            html: `<strong> <a href="${config.baseUrl}/#/regain-account/${secretKey}/${resetPass._id}"> Click here </a> to reset your password. `,
+          };
+          // TODO: is this async?
+          sgMail.send(msg);
+          res.json({});
+        });
     })
-  })
-  .catch((err) => {
+    .catch((err) => {
     err = new APIError('User not found error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+      return next(err);
+    });
+}
+
+async function list(req, res, next) {
+  try {
+    const {
+      username,
+      email,
+      name
+    } = req.query;
+
+    const query = User.find();
+    if (username) {
+      query.where('username').regex(new RegExp(username, 'i'));
+    }
+
+    if (email) {
+      query.where('email').regex(new RegExp(email, 'i'));
+    }
+
+    if (name) {
+      query.where('name').regex(new RegExp(name, 'i'));
+    }
+
+    const users = await query
+      .limit(100)
+      .select('-password')
+      .exec();
+
+    return res.json(users);
+  } catch (err) {
     return next(err);
-  });
+  }
 }
 
 /**
@@ -247,5 +281,5 @@ function listBookmarked(req, res, next) {
 }
 
 export default {
-  load, get, me, update, listBookmarked, requestPasswordReset, regainPassword
+  load, get, me, list, update, listBookmarked, requestPasswordReset, regainPassword
 };

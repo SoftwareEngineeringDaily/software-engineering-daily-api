@@ -3,7 +3,9 @@ import expressJwt from 'express-jwt';
 import validate from 'express-validation';
 import paramValidation from '../../config/param-validation';
 import userCtrl from '../controllers/user.controller';
+import loadFullUser from '../middleware/loadFullUser.middleware';
 import config from '../../config/config';
+import ensureIsAdmin from '../middleware/ensureIsAdmin.middleware';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
@@ -12,6 +14,14 @@ router.route('/me')
   .get(
     expressJwt({ secret: config.jwtSecret })
     , userCtrl.me
+  );
+
+router.route('/search')
+  .get(
+    expressJwt({ secret: config.jwtSecret })
+    , loadFullUser
+    , ensureIsAdmin
+    , userCtrl.list
   );
 
 router.route('/:userId')
@@ -31,13 +41,13 @@ router.route('/regain-password')
   .post(
     validate(paramValidation.regainPassword),
     userCtrl.regainPassword
-  )
+  );
 
 router.route('/request-password-reset')
   .post(
     validate(paramValidation.requestPasswordReset),
     userCtrl.requestPasswordReset
-  )
+  );
 
 router.route('/me/bookmarked')
 /** GET /api/users/me/bookmarked - Get bookmarked items for current user */
