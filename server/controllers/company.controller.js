@@ -37,6 +37,35 @@ export default {
       return next(err);
     }
   },
+  update: async (req, res, next) => {
+    try {
+      const company = await Company
+        .findById(req.params.companyId);
+
+      if (!company) {
+        return next(new APIError('Company not found', httpStatus.NOT_FOUND));
+      }
+
+      // Just a failsafe:
+      if (!req.fullUser.isAdmin) {
+        return next(new APIError('Not allowed to update company', httpStatus.UNAUTHORIZED));
+      }
+
+      const today = new Date().getDate();
+
+      if (company.isDeleted) {
+        return next(new APIError('Not allowed to update this company as it has been deleted', httpStatus.FORBIDDEN));
+      }
+
+      const updated = Object.assign(company, req.body);
+      await updated.save();
+
+      return res.status(httpStatus.OK).json(transform(updated, true));
+    } catch (err) {
+      return next(err);
+    }
+  },
+
 
   create: async (req, res, next) => {
     try {
