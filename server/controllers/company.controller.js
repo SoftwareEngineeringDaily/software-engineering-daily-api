@@ -60,7 +60,7 @@ export default {
       const updated = Object.assign(company, req.body);
       await updated.save();
 
-      return res.status(httpStatus.OK).json(transform(updated, true));
+      return res.status(httpStatus.OK).json(updated);
     } catch (err) {
       return next(err);
     }
