@@ -239,6 +239,7 @@ function register(req, res, next) {
 function signS3AvatarUpload(req, res, next) {
   const fileType = req.body.fileType;
   const newFileName = req.user._id;
+
   const cbSuccess = (result) => {
     res.write(JSON.stringify(result));
     res.end();
@@ -251,7 +252,7 @@ function signS3AvatarUpload(req, res, next) {
       return next(error);
     }
   };
-  signS3('sd-profile-pictures', fileType, newFileName, cbSucces, cbError);
+  signS3('sd-profile-pictures', fileType, newFileName, cbSuccess, cbError);
 }
 
 /**
