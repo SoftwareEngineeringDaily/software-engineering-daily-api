@@ -10,7 +10,6 @@ import _ from 'lodash';
 
 require('dotenv').config();
 
-import aws from 'aws-sdk';
 
 
 /**

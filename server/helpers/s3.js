@@ -18,7 +18,7 @@ function getS3Config(S3_BUCKET, fileType, fileName) {
   return s3Params;
 }
 
-function signS3(S3_BUCKET, fileType, newFileName, cbSucces, cbError) {
+function signS3(S3_BUCKET, fileType, newFileName, cbSuccess, cbError) {
   // Probably only need to do this once:
   const s3 = new aws.S3({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
