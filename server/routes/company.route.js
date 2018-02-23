@@ -24,8 +24,8 @@ router.route('/')
 router.route('/upload-image')
   .post(
       expressJwt({ secret: config.jwtSecret })
-    // , loadFullUser
-    // , ensureIsAdmin
+    , loadFullUser
+    , ensureIsAdmin
     , companyController.signS3CompanyLogoUpload
   )
 router.route('/findByLocalUrl/:localUrl')
