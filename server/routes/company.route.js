@@ -21,7 +21,13 @@ router.route('/')
     , ensureIsAdmin // TODO: refactor to "loadAdmin"
     , companyController.create
   );
-
+router.route('/upload-image')
+  .post(
+      expressJwt({ secret: config.jwtSecret })
+    // , loadFullUser
+    // , ensureIsAdmin
+    , companyController.signS3CompanyLogoUpload
+  )
 router.route('/findByLocalUrl/:localUrl')
   .get(
     expressJwt({ secret: config.jwtSecret, credentialsRequired: false })

@@ -1,6 +1,7 @@
 import httpStatus from 'http-status';
 import Company from '../models/company.model';
 import APIError from '../helpers/APIError';
+import { signS3 } from '../helpers/s3';
 
 export default {
 
@@ -36,6 +37,26 @@ export default {
     } catch (err) {
       return next(err);
     }
+  },
+
+  signS3CompanyLogoUpload: (req, res, next) => {
+    const fileType = req.body.fileType;
+    const randomNumberString = Math.random() + "";
+    const newFileName = 'company_images/' + randomNumberString.replace(".", "_");
+
+    const cbSuccess = (result) => {
+      res.write(JSON.stringify(result));
+      res.end();
+    };
+
+    const cbError = () => {
+      if (err) {
+        console.log(err);
+        const error = new APIError('There was a problem getting a signed url', httpStatus.SERVICE_UNAVAILABLE, true);
+        return next(error);
+      }
+    };
+    signS3('sd-profile-pictures', fileType, newFileName, cbSuccess, cbError);
   },
   update: async (req, res, next) => {
     try {

@@ -24,6 +24,7 @@ function signS3(S3_BUCKET, fileType, newFileName, cbSuccess, cbError) {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
   });
+
   const s3Params = getS3Config(S3_BUCKET, fileType, newFileName);
   s3.getSignedUrl('putObject', s3Params, (err, data) => {
     if (err) {
@@ -35,6 +36,7 @@ function signS3(S3_BUCKET, fileType, newFileName, cbSuccess, cbError) {
     };
     cbSuccess(returnData);
   });
+
 }
 
 export default {
