@@ -2,6 +2,7 @@ import express from 'express';
 import expressJwt from 'express-jwt';
 import config from '../../config/config';
 import threadController from '../controllers/thread.controller';
+import commentController from '../controllers/comment.controller';
 
 const router = express.Router();
 
@@ -23,6 +24,13 @@ router
   .delete(
     expressJwt({ secret: config.jwtSecret, credentialsRequired: true }),
     threadController.delete
+  );
+
+router
+  .route('/:entityId/comment')
+  .post(
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: true }),
+    commentController.create
   );
 
 export default router;

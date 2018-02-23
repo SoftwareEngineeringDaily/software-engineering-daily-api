@@ -1,9 +1,9 @@
 import Promise from 'bluebird';
-import mongoose, {Schema} from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Vote from './vote.model';
-import each from 'lodash/each';
+
 /**
  * @swagger
  * definitions:
@@ -34,7 +34,6 @@ const CommentSchema = new Schema({
     type: String,
     required: true
   },
-  score: { type: Number, default: 0 },
   dateCreated: {
     type: Date,
     default: Date.now
@@ -56,9 +55,8 @@ const CommentSchema = new Schema({
     // , ref: 'Post' | 'AMA'
   },
   */
-  post: {
-    type: Schema.Types.ObjectId,
-    ref: 'Post'
+  entity: {
+    type: Schema.Types.ObjectId
   },
   author: {
     type: Schema.Types.ObjectId,
@@ -90,16 +88,64 @@ const CommentSchema = new Schema({
   // locked?
 */
 
-
-
 /**
  * Add your
  * - pre-save hooks
  * - validations
  * - virtuals
  */
-
-
+/**
+ * Methods
+ */
+CommentSchema.methods = {
+  /**
+   * Return isUpVote bool if user is logined
+   * @param {User} - The authorized user
+   * @returns isUpVote bool
+   */
+  isUpVote(authUser) {
+    if (!authUser) return false;
+    return Vote.findOne({
+      entity: this._id,
+      author: authUser._id,
+      direction: 'upvote',
+      active: true
+    }).then((err, vote) => {
+      if (!err && vote) return true;
+      return false;
+    });
+  },
+  /**
+   * Return isDownVote bool if user is logined
+   * @param {User} - The authorized user
+   * @returns isDownVote bool
+   */
+  isDownVote(authUser) {
+    if (!authUser) return false;
+    return Vote.findOne({
+      entity: this._id,
+      author: authUser._id,
+      direction: 'downvote',
+      active: true
+    }).then((err, vote) => {
+      if (!err && vote) return true;
+      return false;
+    });
+  },
+  /**
+   * Return score of comment (count of upvote)
+   * @returns {int} score - The score of comment
+   */
+  score() {
+    return Vote.find({
+      entityId: this._id,
+      active: true,
+      direction: 'upvote'
+    })
+      .then(votes => votes.length)
+      .catch(() => 0);
+  }
+};
 /**
  * Statics
  */
@@ -110,111 +156,88 @@ CommentSchema.statics = {
    * @param {ObjectId} id - The objectId of the comment.
    * @returns {Promise<Comment, APIError>}
    */
-  get(id) {
+  get(id, authUser = null) {
     return this.findById(id)
       .populate('author', '-password')
       .populate('post')
       .exec()
       .then((comment) => {
         if (comment) {
-          return comment;
+          const recursive = [
+            comment.score().then(score => score),
+            comment.isUpVote(authUser).then(isUpVote => isUpVote),
+            comment.isDownVote(authUser).then(isDownVote => isDownVote)
+          ];
+          return Promise.all(recursive).then(data => ({
+            ...comment.toObject(),
+            score: data[0],
+            isUpVote: data[1],
+            isDownVote: data[2]
+          }));
         }
         const err = new APIError('No such comment exists!', httpStatus.NOT_FOUND);
         return Promise.reject(err);
       });
   },
 
-  updateVoteInfo(comment, vote) {
-    comment.upvoted = false;
-    comment.downvoted = false;
-    if (!vote) {
-      return comment;
-    }
-
-    if (vote.direction === 'upvote' && vote.active) {
-      comment.upvoted = true;
-    }
-
-    if (vote.direction === 'downvote' && vote.active) {
-      comment.downvoted = true;
-    }
-    return comment;
-  },
-  // Take all comments, including their children/replies
-  // and fill in the vote information.
-  // NOTE: this requires parentComments to not be a mongoose objects
-  // but rather normal objects.j
-  populateVoteInfo(parentComments, user) {
-    const commentIds = this.getAllIds(parentComments);
-    return Vote.find( {
-      userId: user._id,
-      entityId: {$in: commentIds},
-    }).exec()
-    .then((votes) => {
-        const voteMap = {};
-        // Create a map of votes by entityId
-        for (let index in votes) { // eslint-disable-line
-          const vote = votes[index];
-          const voteKey = vote.entityId;
-          voteMap[voteKey] = vote;
-        }
-        // Fill up the actual parent comments to contain
-        // vote info.
-        for (let index in parentComments) {
-          let parentComment = parentComments[index];
-          this.updateVoteInfo(parentComment, voteMap[parentComment._id]);
-          // Now fill in the child comments / replies:
-          const replies = parentComment.replies;
-          for (let index in replies) {
-            let comment = replies[index];
-            this.updateVoteInfo(comment, voteMap[comment._id]);
-          }
-        }
-        return parentComments;
-    });
-  },
-  // Gets all comment ids, for both children and parents:
-  getAllIds(parentComments) {
-    var commentIds = parentComments.map((comment) => { return comment._id });
-    // now the children:
-    each(parentComments, (parent) => {
-      commentIds = commentIds.concat(
-        parent.replies.map((comment) => { return comment._id })
-      );
-    });
-    return commentIds;
+  getTopLevelComments(entityId, authUser = null) {
+    return this.find(
+      {
+        entity: entityId,
+        parentComment: null
+      },
+      '-__v'
+    )
+      .sort({ dateCreated: -1 })
+      .populate('author', '-password -__v -email')
+      .then(comments =>
+        Promise.all(comments.map((comment) => {
+          const recursive = [
+            comment.score().then(score => score),
+            comment.isUpVote(authUser).then(isUpVote => isUpVote),
+            comment.isDownVote(authUser).then(isDownVote => isDownVote)
+          ];
+          return Promise.all(recursive).then(data => ({
+            ...comment.toObject(),
+            score: data[0],
+            isUpVote: data[1],
+            isDownVote: data[2]
+          }));
+        })));
   },
 
-  getTopLevelCommentsForItem(postId) {
-    return this.find({post: postId, parentComment: null })
-      .sort({dateCreated: -1})
-      .populate('author', '-password')
+  getReplies(commentId, authUser = null) {
+    return this.find(
+      {
+        parentComment: commentId
+      },
+      '-__v'
+    )
+      .populate('author', '-password -__v -email')
+      .then(replies =>
+        Promise.all(replies.map((reply) => {
+          const recursive = [
+            reply.score().then(score => score),
+            reply.isUpVote(authUser).then(isUpVote => isUpVote),
+            reply.isDownVote(authUser).then(isDownVote => isDownVote)
+          ];
+          return Promise.all(recursive).then(data => ({
+            ...reply.toObject(),
+            score: data[0],
+            isUpVote: data[1],
+            isDownVote: data[2]
+          }));
+        })));
   },
 
-  // Gets children comments for parentComment and adds them as a
-  // field called replies
-  fillNestedComments(parentComment) {
-    return this.getNestedComments(parentComment._id)
-    .then( (replies) => {
-      let comment = parentComment.toJSON();
-      comment.replies = replies;
-      return comment
-    });
-  },
-
- /**
-  * Fetches children comments (one level deep) for the provided parentComment id
-  * @param  {String}   parentComment the id of the parentComment
-  * @return {Promise}
-  */
-  getNestedComments(parentCommentId) {
-    return this.find({parentComment: parentCommentId})
-    .populate('author', '-password')
-    .lean() // so not Mongoose objects
+  getFullList(entityId, authUser = null) {
+    return this.getTopLevelComments(entityId, authUser).then(comments =>
+      Promise.all(comments.map(comment =>
+        this.getReplies(comment._id, authUser).then(replies => ({ ...comment, replies })))));
   }
 };
 
 // Indexes
-CommentSchema.index({ 'content': 'text' });
+CommentSchema.index({ content: 'text' });
 
 export default mongoose.model('Comment', CommentSchema);

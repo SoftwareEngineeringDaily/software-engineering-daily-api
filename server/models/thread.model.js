@@ -103,12 +103,7 @@ ThreadSchema.statics = {
             thread.score().then(score => score),
             thread.isUpVote(authUser).then(isUpVote => isUpVote),
             thread.isDownVote(authUser).then(isDownVote => isDownVote),
-            Comment.find({
-              entity: thread._id
-            })
-              .populate('author', '-email -password -__v -verified')
-              .exec()
-              .then(comments => comments)
+            Comment.getFullList(id, authUser).then(comments => comments)
           ];
           return Promise.all(recursive).then(data => ({
             ...thread.toObject(),
