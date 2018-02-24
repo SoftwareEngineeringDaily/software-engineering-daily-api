@@ -33,4 +33,11 @@ router
     commentController.create
   );
 
+router
+  .route('/:entityId/comments')
+  .get(
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
+    commentController.list
+  );
+
 export default router;

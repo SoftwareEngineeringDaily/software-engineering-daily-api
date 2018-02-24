@@ -168,13 +168,15 @@ ThreadSchema.statics = {
         const recursive = [
           thread.score().then(score => score),
           thread.isUpVote(authUser).then(isUpVote => isUpVote),
-          thread.isDownVote(authUser).then(isDownVote => isDownVote)
+          thread.isDownVote(authUser).then(isDownVote => isDownVote),
+          Comment.getFullList(thread._id, authUser).then(comments => comments)
         ];
         return Promise.all(recursive).then(data => ({
           ...thread.toObject(),
           score: data[0],
           isUpVote: data[1],
-          isDownVote: data[2]
+          isDownVote: data[2],
+          comments: data[3]
         }));
       })));
 

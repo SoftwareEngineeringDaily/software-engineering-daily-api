@@ -100,7 +100,11 @@ function create(req, res, next) {
 
   const comment = new Comment();
   comment.content = content;
-  comment.entity = entityId;
+  if (entityId) {
+    comment.entity = entityId;
+  } else {
+    comment.entity = req.body.entity;
+  }
   // If this is a child comment we need to assign it's parent
   if (parentCommentId) {
     comment.parentComment = parentCommentId;

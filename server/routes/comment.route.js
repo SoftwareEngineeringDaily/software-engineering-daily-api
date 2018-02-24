@@ -17,6 +17,10 @@ router.route('/:commentId/upvote').post(
   voteCtrl.finish // IF we add a model.unlike we don't really need this..
 );
 
+router
+  .route('/create')
+  .post(expressJwt({ secret: config.jwtSecret, credentialsRequired: true }), commentCtrl.create);
+
 router.route('/:commentId').delete(expressJwt({ secret: config.jwtSecret }), commentCtrl.remove);
 
 /*
