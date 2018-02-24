@@ -4,6 +4,7 @@ import Job from '../models/job.model';
 import APIError from '../helpers/APIError';
 import sgMail from '../helpers/mail';
 import transform from '../helpers/job.helper';
+import sendError from '../helpers/events.helper';
 
 require('babel-polyfill');
 
@@ -233,7 +234,14 @@ export default {
       await sgMail.send(msg);
       return res.sendStatus(httpStatus.OK);
     } catch (err) {
-      next(err);
+      sendError({
+        userName: req.user._id,
+        eventData: {
+          message: err.message
+        }
+      });
+
+      return next(err);
     }
   }
 };
