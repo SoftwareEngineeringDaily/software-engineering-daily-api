@@ -34,6 +34,10 @@ const CommentSchema = new Schema({
     type: String,
     required: true
   },
+  score: {
+    type: Number,
+    default: 0
+  },
   dateCreated: {
     type: Date,
     default: Date.now
@@ -55,6 +59,10 @@ const CommentSchema = new Schema({
     // , ref: 'Post' | 'AMA'
   },
   */
+  post: {
+    type: Schema.Types.ObjectId,
+    ref: 'Post'
+  },
   entity: {
     type: Schema.Types.ObjectId
   },
@@ -104,16 +112,15 @@ CommentSchema.methods = {
    * @returns isUpVote bool
    */
   isUpVote(authUser) {
-    if (!authUser) return false;
+    if (!authUser) return Promise.all(() => false);
     return Vote.findOne({
-      entity: this._id,
-      author: authUser._id,
+      entityId: this._id,
+      userId: authUser._id,
       direction: 'upvote',
       active: true
-    }).then((err, vote) => {
-      if (!err && vote) return true;
-      return false;
-    });
+    })
+      .then(vote => !!vote)
+      .catch(() => false);
   },
   /**
    * Return isDownVote bool if user is logined
@@ -121,30 +128,29 @@ CommentSchema.methods = {
    * @returns isDownVote bool
    */
   isDownVote(authUser) {
-    if (!authUser) return false;
+    if (!authUser) return Promise.all(() => false);
     return Vote.findOne({
-      entity: this._id,
-      author: authUser._id,
+      entityId: this._id,
+      userId: authUser._id,
       direction: 'downvote',
       active: true
-    }).then((err, vote) => {
-      if (!err && vote) return true;
-      return false;
-    });
-  },
+    })
+      .then(vote => !!vote)
+      .catch(() => false);
+  }
   /**
    * Return score of comment (count of upvote)
    * @returns {int} score - The score of comment
    */
-  score() {
-    return Vote.find({
-      entityId: this._id,
-      active: true,
-      direction: 'upvote'
-    })
-      .then(votes => votes.length)
-      .catch(() => 0);
-  }
+  // score() {
+  //   return Vote.find({
+  //     entityId: this._id,
+  //     active: true,
+  //     direction: 'upvote'
+  //   })
+  //     .then(votes => votes.length)
+  //     .catch(() => 0);
+  // }
 };
 /**
  * Statics
@@ -159,21 +165,20 @@ CommentSchema.statics = {
   get(id, authUser = null) {
     return this.findById(id)
       .populate('author', '-password')
-      .populate('post')
       .exec()
       .then((comment) => {
         if (comment) {
           const recursive = [
-            comment.score().then(score => score),
             comment.isUpVote(authUser).then(isUpVote => isUpVote),
             comment.isDownVote(authUser).then(isDownVote => isDownVote)
           ];
-          return Promise.all(recursive).then(data => ({
-            ...comment.toObject(),
-            score: data[0],
-            isUpVote: data[1],
-            isDownVote: data[2]
-          }));
+          return Promise.all(recursive)
+            .then(data => ({
+              ...comment.toObject(),
+              isUpVote: data[0],
+              isDownVote: data[1]
+            }))
+            .catch(() => comment);
         }
         const err = new APIError('No such comment exists!', httpStatus.NOT_FOUND);
         return Promise.reject(err);
@@ -193,15 +198,13 @@ CommentSchema.statics = {
       .then(comments =>
         Promise.all(comments.map((comment) => {
           const recursive = [
-            comment.score().then(score => score),
             comment.isUpVote(authUser).then(isUpVote => isUpVote),
             comment.isDownVote(authUser).then(isDownVote => isDownVote)
           ];
           return Promise.all(recursive).then(data => ({
             ...comment.toObject(),
-            score: data[0],
-            isUpVote: data[1],
-            isDownVote: data[2]
+            isUpVote: data[0],
+            isDownVote: data[1]
           }));
         })));
   },
@@ -217,15 +220,13 @@ CommentSchema.statics = {
       .then(replies =>
         Promise.all(replies.map((reply) => {
           const recursive = [
-            reply.score().then(score => score),
             reply.isUpVote(authUser).then(isUpVote => isUpVote),
             reply.isDownVote(authUser).then(isDownVote => isDownVote)
           ];
           return Promise.all(recursive).then(data => ({
             ...reply.toObject(),
-            score: data[0],
-            isUpVote: data[1],
-            isDownVote: data[2]
+            isUpVote: data[0],
+            isDownVote: data[1]
           }));
         })));
   },

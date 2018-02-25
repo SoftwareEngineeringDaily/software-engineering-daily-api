@@ -95,15 +95,17 @@ function remove(req, res, next) {
 function create(req, res, next) {
   const { entityId } = req.params;
   const { parentCommentId } = req.body;
-  const { content } = req.body;
+  const { content, entity } = req.body;
   const { user } = req;
 
   const comment = new Comment();
   comment.content = content;
   if (entityId) {
     comment.entity = entityId;
+    comment.post = entityId;
   } else {
-    comment.entity = req.body.entity;
+    comment.entity = entity;
+    comment.post = entity;
   }
   // If this is a child comment we need to assign it's parent
   if (parentCommentId) {

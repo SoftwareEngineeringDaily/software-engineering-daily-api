@@ -34,7 +34,7 @@ router
     postCtrl.get
   );
 
-router.route('/:entityId/comments').get(
+router.route('/:postId/comments').get(
   expressJwt({
     secret: config.jwtSecret,
     credentialsRequired: false
