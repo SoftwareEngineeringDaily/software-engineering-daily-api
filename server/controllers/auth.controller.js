@@ -201,6 +201,7 @@ function register(req, res, next) {
   const userQuery = email ? queryIfEmail : queryIfEmailMissing;
 
   // Sign up user for mailchimp list (if checked)
+  console.log(`newsletter status:${newsletterSignup}`);
   if (newsletterSignup) {
     const postData = JSON.stringify({ staus: 'subscribed', email });
     // Build route because it varies based on API key
@@ -216,16 +217,19 @@ function register(req, res, next) {
         'Content-Length': Buffer.byteLength(postData)
       }
     };
-    var req = http.request(options, (res) => {
-      res.setEncoding('utf8');
+    const mailchimpReq = http.request(options, (mailchimpRes) => {
+      mailchimpRes.setEncoding('utf8');
+      mailchimpRes.on('data', (body) => {
+        console.log(`Body: ${body}`);
+      });
     });
-    req.on('error', (e) => {
-      console.log(e);
+    mailchimpReq.on('error', (e) => {
+      console.log(`mailchump error: ${e}`);
       const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
       return next(error);
     });
-    req.write(postData);
-    req.end();
+    mailchimpReq.write(postData);
+    mailchimpReq.end();
   }
 
   User
