@@ -7,6 +7,7 @@ import aws from 'aws-sdk';
 import APIError from '../helpers/APIError';
 import config from '../../config/config';
 import User from '../models/user.model';
+import { signS3 } from '../helpers/s3';
 
 require('dotenv').config();
 
@@ -227,6 +228,25 @@ function register(req, res, next) {
   return null;
 }
 
+function signS3AvatarUpload(req, res, next) {
+  const fileType = req.body.fileType;
+  const newFileName = req.user._id;
+
+  const cbSuccess = (result) => {
+    res.write(JSON.stringify(result));
+    res.end();
+  };
+
+  const cbError = () => {
+    if (err) {
+      console.log(err);
+      const error = new APIError('There was a problem getting a signed url', httpStatus.SERVICE_UNAVAILABLE, true);
+      return next(error);
+    }
+  };
+  signS3('sd-profile-pictures', fileType, newFileName, cbSuccess, cbError);
+}
+
 /**
  *
  */
@@ -282,6 +302,7 @@ function signS3(req, res) {
   });
 }
 
+
 /**
  * TODO: add swagger doc
  * This is a protected route. Will return random number only if jwt token is provided in header.
@@ -303,5 +324,6 @@ export default {
   getRandomNumber,
   register,
   socialAuth,
-  signS3
+  signS3,
+  signS3AvatarUpload
 };

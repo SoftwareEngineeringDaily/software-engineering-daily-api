@@ -1,6 +1,7 @@
 import httpStatus from 'http-status';
 import Company from '../models/company.model';
 import APIError from '../helpers/APIError';
+import { signS3 } from '../helpers/s3';
 
 export default {
   list: async (req, res, next) => {
@@ -36,6 +37,55 @@ export default {
       return next(err);
     }
   },
+
+  signS3CompanyLogoUpload: (req, res, next) => {
+    const fileType = req.body.fileType;
+    const randomNumberString = Math.random() + "";
+    const newFileName = 'company_images/' + randomNumberString.replace(".", "_");
+
+    const cbSuccess = (result) => {
+      res.write(JSON.stringify(result));
+      res.end();
+    };
+
+    const cbError = () => {
+      if (err) {
+        console.log(err);
+        const error = new APIError('There was a problem getting a signed url', httpStatus.SERVICE_UNAVAILABLE, true);
+        return next(error);
+      }
+    };
+    signS3('sd-profile-pictures', fileType, newFileName, cbSuccess, cbError);
+  },
+  update: async (req, res, next) => {
+    try {
+      const company = await Company
+        .findById(req.params.companyId);
+
+      if (!company) {
+        return next(new APIError('Company not found', httpStatus.NOT_FOUND));
+      }
+
+      // Just a failsafe:
+      if (!req.fullUser.isAdmin) {
+        return next(new APIError('Not allowed to update company', httpStatus.UNAUTHORIZED));
+      }
+
+      const today = new Date().getDate();
+
+      if (company.isDeleted) {
+        return next(new APIError('Not allowed to update this company as it has been deleted', httpStatus.FORBIDDEN));
+      }
+
+      const updated = Object.assign(company, req.body);
+      await updated.save();
+
+      return res.status(httpStatus.OK).json(updated);
+    } catch (err) {
+      return next(err);
+    }
+  },
+
 
   create: async (req, res, next) => {
     try {
