@@ -3,6 +3,14 @@ import APIError from '../helpers/APIError';
 import Thread from '../models/thread.model';
 
 export default {
+  load: async (req, res, next, id) => {
+    Thread.get(id)
+      .then((thread) => {
+        req.thread = thread; // eslint-disable-line no-param-reassign
+        return next();
+      })
+      .catch(e => next(e));
+  },
   list: async (req, res, next) => {
     const {
       limit, createdAt, sort, search

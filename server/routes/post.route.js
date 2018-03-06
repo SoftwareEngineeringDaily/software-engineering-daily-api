@@ -39,6 +39,7 @@ router.route('/:postId/comments').get(
     secret: config.jwtSecret,
     credentialsRequired: false
   }),
+  transferField({ source: 'post', target: 'entity' }),
   commentCtrl.list
 );
 
@@ -48,6 +49,7 @@ router
   .post(
     expressJwt({ secret: config.jwtSecret }),
     validate(paramValidation.comment),
+    transferField({ source: 'post', target: 'entity' }),
     commentCtrl.create
   );
 
