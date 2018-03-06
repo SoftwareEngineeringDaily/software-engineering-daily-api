@@ -3,7 +3,6 @@ import Company from '../models/company.model';
 import APIError from '../helpers/APIError';
 
 export default {
-
   list: async (req, res, next) => {
     try {
       const query = Company.where('isDeleted').equals(false);
@@ -52,8 +51,7 @@ export default {
 
   delete: async (req, res, next) => {
     try {
-      const company = await Company
-        .findById(req.params.companyId);
+      const company = await Company.findById(req.params.companyId);
 
       if (!company) {
         return next(new APIError('Company not found', httpStatus.NOT_FOUND));
@@ -66,7 +64,8 @@ export default {
 
       /* Since we are checking for being an admin, it should be fine..
       if (company.author.toString() !== req.user._id.toString()) {
-        return next(new APIError('Not allowed to delete a company you did not create', httpStatus.UNAUTHORIZED));
+        return next(new APIError('Not allowed to delete a company you did not create',
+        httpStatus.UNAUTHORIZED));
       }
       */
 

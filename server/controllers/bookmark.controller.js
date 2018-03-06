@@ -164,12 +164,12 @@ function list(req, res, next) {
  *         $ref: '#/responses/NotFound'
  */
 function bookmark(req, res, next) {
-  const post = req.post;
+  const { post } = req;
   if (!post.totalFavorites) post.totalFavorites = 0;
 
   Favorite.findOne({
     postId: post._id,
-    userId: req.user._id,
+    userId: req.user._id
   })
     .then((favoriteFound) => {
       const favorite = favoriteFound;
@@ -189,7 +189,7 @@ function bookmark(req, res, next) {
       return Bluebird.all([newFavorite.save(), post.save()]);
     })
     .then((favorite) => {
-      req.favorite = favorite[0]; // eslint-disable-line no-param-reassign
+      req.favorite = favorite[0]; // eslint-disable-line
       return res.json(favorite[0]);
     })
     .catch((e) => {
@@ -240,12 +240,12 @@ function bookmark(req, res, next) {
  *         $ref: '#/responses/NotFound'
  */
 function unbookmark(req, res, next) {
-  const post = req.post;
+  const { post } = req;
   if (!post.totalFavorites) post.totalFavorites = 0;
 
   Favorite.findOne({
     postId: post._id,
-    userId: req.user._id,
+    userId: req.user._id
   })
     .then((favoriteFound) => {
       const favorite = favoriteFound;
@@ -267,7 +267,7 @@ function unbookmark(req, res, next) {
       return Bluebird.all([newFavorite.save()]);
     })
     .then((favorite) => {
-      req.favorite = favorite[0]; // eslint-disable-line no-param-reassign
+      req.favorite = favorite; // eslint-disable-line
       return res.json(favorite[0]);
     })
     .catch((e) => {
@@ -276,5 +276,9 @@ function unbookmark(req, res, next) {
 }
 
 export default {
-  load, get, list, bookmark, unbookmark
+  load,
+  get,
+  list,
+  bookmark,
+  unbookmark
 };

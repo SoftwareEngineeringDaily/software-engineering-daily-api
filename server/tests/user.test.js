@@ -3,7 +3,6 @@ import request from 'supertest-as-promised';
 import httpStatus from 'http-status';
 import chai, { expect } from 'chai';
 import app from '../../index';
-import User from '../models/user.model';
 
 chai.config.includeStack = true;
 
@@ -26,22 +25,21 @@ const validUserCredentials = {
 };
 
 describe('## User APIs', () => {
-
   let user;
   let userToken;
 
   before((done) => {
     request(app)
-    .post('/api/auth/register')
-    .send(validUserCredentials)
-    .expect(httpStatus.CREATED)
-    .then((res) => {
-      expect(res.body).to.have.property('token');
-      userToken = res.body.token;
-      user = res.body.user
-      done();
-    })
-    .catch(done);
+      .post('/api/auth/register')
+      .send(validUserCredentials)
+      .expect(httpStatus.CREATED)
+      .then((res) => {
+        expect(res.body).to.have.property('token');
+        userToken = res.body.token;
+        user = res.body.user; // eslint-disable-line
+        done();
+      })
+      .catch(done);
   });
 
   describe('# GET /api/users/:userId', () => {
@@ -83,17 +81,15 @@ describe('## User APIs', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .send(user)
         .expect(httpStatus.OK)
-        .then((res) => {
-          return request(app)
-          .get(`/api/users/${user._id}`)
-          .expect(httpStatus.OK)
-          .then((res) => {
-            expect(res.body.username).to.equal('RANDOM');
-            done();
-          })
-        })
+        .then(() =>
+          request(app)
+            .get(`/api/users/${user._id}`)
+            .expect(httpStatus.OK)
+            .then((res) => {
+              expect(res.body.username).to.equal('RANDOM');
+              done();
+            }))
         .catch(done);
     });
   });
-
 });

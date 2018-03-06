@@ -1,16 +1,14 @@
+import _ from 'lodash';
+import FacebookTokenStrategy from 'passport-facebook-token';
+import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import httpStatus from 'http-status';
+import aws from 'aws-sdk';
 import APIError from '../helpers/APIError';
 import config from '../../config/config';
-import passport from 'passport';
-import FacebookTokenStrategy from 'passport-facebook-token';
 import User from '../models/user.model';
-import _ from 'lodash';
 
 require('dotenv').config();
-
-import aws from 'aws-sdk';
-
 
 /**
  * @swagger
@@ -36,10 +34,10 @@ passport.use(new FacebookTokenStrategy(
     clientID: config.facebook.clientID,
     clientSecret: config.facebook.clientSecret
   },
-  ((accessToken, refreshToken, profile, done) => {
+  (accessToken, refreshToken, profile, done) => {
     const username = profile.emails[0].value || profile.id;
-    User
-      .findOne({ username }).exec()
+    User.findOne({ username })
+      .exec()
       .then((user) => {
         if (!user) {
           const newUser = new User();
@@ -50,16 +48,15 @@ passport.use(new FacebookTokenStrategy(
             id: profile.id,
             token: accessToken
           };
-          return newUser.save()
-            .then(userSaved => done(null, userSaved));
+          return newUser.save().then(userSaved => done(null, userSaved));
         }
         return done(null, user);
       })
       .catch((err) => {
-      err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+          err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
         return done(err);
       });
-  })
+  }
 ));
 
 /**
@@ -83,25 +80,24 @@ passport.use(new FacebookTokenStrategy(
  */
 
 function login(req, res, next) {
-  const username = req.body.username;
-  const password = req.body.password;
+  const { username } = req.body;
+  const { password } = req.body;
 
-  User
-    .findOne({
-      $or: [
-        { username },
-        { email: username }
-      ]
-    }).exec()
+  User.findOne({
+    $or: [{ username }, { email: username }]
+  })
+    .exec()
     .then((user) => {
       if (!user) return res.status(404).json({ message: 'User not found.' });
 
-      if (!user.validPassword(password)) return res.status(401).json({ message: 'Password is incorrect.' });
+      if (!user.validPassword(password)) {
+        return res.status(401).json({ message: 'Password is incorrect.' });
+      }
 
       const token = jwt.sign(user.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
 
       return res.status(200).json({
-        token,
+        token
       });
     })
     .catch((err) => {
@@ -111,20 +107,22 @@ function login(req, res, next) {
 }
 
 function loginWithEmail(req, res, next) {
-  const email = req.body.email;
-  const password = req.body.password;
+  const { email } = req.body;
+  const { password } = req.body;
 
-  User
-    .findOne({ email }).exec()
+  User.findOne({ email })
+    .exec()
     .then((user) => {
       if (!user) return res.status(404).json({ message: 'User not found.' });
 
-      if (!user.validPassword(password)) return res.status(401).json({ message: 'Password is incorrect.' });
+      if (!user.validPassword(password)) {
+        return res.status(401).json({ message: 'Password is incorrect.' });
+      }
 
       const token = jwt.sign(user.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
 
       return res.status(200).json({
-        token,
+        token
       });
     })
     .catch((err) => {
@@ -132,7 +130,6 @@ function loginWithEmail(req, res, next) {
       return next(err);
     });
 }
-
 
 /**
  * @swagger
@@ -167,8 +164,8 @@ function loginWithEmail(req, res, next) {
  */
 
 function register(req, res, next) {
-  const username = req.body.username;
-  const password = req.body.password;
+  const { username } = req.body;
+  const { password } = req.body;
 
   if (!username) {
     let err = new APIError('Username is required to register.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
@@ -180,27 +177,21 @@ function register(req, res, next) {
     return next(err);
   }
 
-  const email = req.body.email;
+  const { email } = req.body;
   const queryIfEmail = {
-    $or: [
-      { username },
-      { email }
-    ]
+    $or: [{ username }, { email }]
   };
 
   const queryIfEmailMissing = {
-    $or: [
-      { username },
-      { email: username }
-    ]
+    $or: [{ username }, { email: username }]
   };
 
   // We do this so people can't share an email on either field, username or email:
   // also so no-one can have the same email or same username.
   const userQuery = email ? queryIfEmail : queryIfEmailMissing;
 
-  User
-    .findOne(userQuery).exec()
+  User.findOne(userQuery)
+    .exec()
     .then((user) => {
       if (user) {
         let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
@@ -220,31 +211,31 @@ function register(req, res, next) {
 
       return res.status(201).json({
         user: userSaved,
-        token,
+        token
       });
     })
     .catch((err) => {
       if (err.message === 'User already exists.') {
         return res.status(401).json({
-          message: err.message,
+          message: err.message
         });
       }
       // return res.status(400).json({err: err});
       const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true);
       return next(error);
     });
+  return null;
 }
 
 /**
  *
  */
-function socialAuth(req, res, next) {
+function socialAuth(req, res) {
   const token = jwt.sign(req.user.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
   return res.status(200).json({
-    token,
+    token
   });
 }
-
 
 function getS3Config(S3_BUCKET, fileType, fileName) {
   // We should Make this options a helper method:
@@ -262,24 +253,24 @@ function getS3Config(S3_BUCKET, fileType, fileName) {
 }
 
 // This should be a helper library and perhaps part of user.controller isntead:
-function signS3(req, res, next) {
+function signS3(req, res) {
   const S3_BUCKET = 'sd-profile-pictures';
   // Probably only need to do this once:
   const s3 = new aws.S3({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
   });
-  const fileType = req.body.fileType;
+  const { fileType } = req.body;
   // const fileName = req.body.fileName; // Unused:
   const newFileName = req.user._id;
-  console.log('fileType:::', fileType);
+  console.log('fileType:::', fileType); // eslint-disable-line
   // console.log('FileName::::::', fileName);
-  console.log('newFileName::::::', newFileName);
+  console.log('newFileName::::::', newFileName); // eslint-disable-line
   const s3Params = getS3Config(S3_BUCKET, fileType, newFileName);
 
   s3.getSignedUrl('putObject', s3Params, (err, data) => {
     if (err) {
-      console.log(err);
+      console.log(err); // eslint-disable-line
       return res.end();
     }
     const returnData = {
@@ -287,7 +278,7 @@ function signS3(req, res, next) {
       url: `https://${S3_BUCKET}.s3.amazonaws.com/${newFileName}`
     };
     res.write(JSON.stringify(returnData));
-    res.end();
+    return res.end();
   });
 }
 
@@ -307,5 +298,10 @@ function getRandomNumber(req, res) {
 }
 
 export default {
-  login, loginWithEmail, getRandomNumber, register, socialAuth, signS3
+  login,
+  loginWithEmail,
+  getRandomNumber,
+  register,
+  socialAuth,
+  signS3
 };

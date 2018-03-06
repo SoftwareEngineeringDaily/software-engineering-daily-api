@@ -29,7 +29,7 @@ TagSchema.statics = {
    * @returns {Promise<Tag, APIError>}
    */
   get(id) {
-    return this.findOne({ id: id })
+    return this.findOne({ id })
       .exec()
       .then((tag) => {
         if (tag) {
@@ -46,9 +46,9 @@ TagSchema.statics = {
    * @param {number} limit - Limit number of tags to be returned.
    * @returns {Promise<Post[]>}
    */
-  list({skip = 0, limit = 50} = {}) {
+  list({ skip = 0, limit = 50 } = {}) {
     return this.find({})
-      .sort({id: -1})
+      .sort({ id: -1 })
       .skip(+skip)
       .limit(+limit)
       .exec();
