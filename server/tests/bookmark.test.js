@@ -55,7 +55,8 @@ describe('## Bookmark APIs', () => {
   });
 
   after((done) => {
-    User.remove({}).exec()
+    User.remove({})
+      .exec()
       .then(() => Post.remove({}).exec())
       .then(() => {
         done();
@@ -63,7 +64,8 @@ describe('## Bookmark APIs', () => {
   });
 
   afterEach((done) => {
-    Bookmark.remove().exec()
+    Bookmark.remove()
+      .exec()
       .then(() => {
         done();
       });
@@ -100,10 +102,11 @@ describe('## Bookmark APIs', () => {
         .post(`/api/posts/${postId}/bookmark`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.OK)
-        .then(res => request(app)
-          .post(`/api/posts/${postId}/bookmark`)
-          .set('Authorization', `Bearer ${userToken}`)
-          .expect(httpStatus.OK))
+        .then(() =>
+          request(app)
+            .post(`/api/posts/${postId}/bookmark`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK))
         .then((res) => {
           const bookmark = res.body;
           expect(bookmark.postId).to.eql(`${postId}`);
@@ -144,7 +147,7 @@ describe('## Bookmark APIs', () => {
             .set('Authorization', `Bearer ${userToken}`)
             .expect(httpStatus.OK);
         })
-        .then((res) => {  //eslint-disable-line
+        .then(() => {
           done();
         })
         .catch(done);
@@ -249,14 +252,16 @@ describe('## Bookmark APIs', () => {
         .post(`/api/posts/${postId}/bookmark`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.OK)
-        .then(() => request(app)
-          .post(`/api/posts/${postId}/unbookmark`)
-          .set('Authorization', `Bearer ${userToken}`)
-          .expect(httpStatus.OK))
-        .then(() => request(app)
-          .get('/api/posts')
-          .set('Authorization', `Bearer ${userToken}`)
-          .expect(httpStatus.OK))
+        .then(() =>
+          request(app)
+            .post(`/api/posts/${postId}/unbookmark`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK))
+        .then(() =>
+          request(app)
+            .get('/api/posts')
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK))
         .then((res) => {
           expect(res.body).to.be.an('array');
           expect(res.body[0].bookmarked).to.equal(false);
@@ -272,9 +277,10 @@ describe('## Bookmark APIs', () => {
         .post(`/api/posts/${postId}/bookmark`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.OK)
-        .then(() => request(app)
-          .get(`/api/users/${userId}/bookmarked`)
-          .expect(httpStatus.OK))
+        .then(() =>
+          request(app)
+            .get(`/api/users/${userId}/bookmarked`)
+            .expect(httpStatus.OK))
         .then((res) => {
           expect(res.body).to.be.an('array');
           expect(res.body[0]._id).to.equal(`${postId}`);
@@ -287,10 +293,11 @@ describe('## Bookmark APIs', () => {
         .post(`/api/posts/${postId}/bookmark`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.OK)
-        .then(() => request(app)
-          .get('/api/users/me/bookmarked')
-          .set('Authorization', `Bearer ${userToken}`)
-          .expect(httpStatus.OK))
+        .then(() =>
+          request(app)
+            .get('/api/users/me/bookmarked')
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK))
         .then((res) => {
           expect(res.body).to.be.an('array');
           expect(res.body[0]._id).to.equal(`${postId}`);
@@ -303,14 +310,16 @@ describe('## Bookmark APIs', () => {
         .post(`/api/posts/${postId}/bookmark`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.OK)
-        .then(() => request(app)
-          .post(`/api/posts/${postId}/unbookmark`)
-          .set('Authorization', `Bearer ${userToken}`)
-          .expect(httpStatus.OK))
-        .then(() => request(app)
-          .get('/api/users/me/bookmarked')
-          .set('Authorization', `Bearer ${userToken}`)
-          .expect(httpStatus.OK))
+        .then(() =>
+          request(app)
+            .post(`/api/posts/${postId}/unbookmark`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK))
+        .then(() =>
+          request(app)
+            .get('/api/users/me/bookmarked')
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK))
         .then((res) => {
           expect(res.body).to.be.an('array');
           expect(res.body).to.have.lengthOf(0);

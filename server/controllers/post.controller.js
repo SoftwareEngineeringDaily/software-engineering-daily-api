@@ -1,11 +1,11 @@
 import raccoon from 'raccoon';
-import Bluebird from 'bluebird';
 import mongoose from 'mongoose';
 
 import Post from '../models/post.model';
-import Vote from '../models/vote.model';
-import User from '../models/user.model';
-import { getAdFreeSinglePostIfSubscribed, getAdFreePostsIfSubscribed } from '../helpers/post.helper';
+import {
+  getAdFreeSinglePostIfSubscribed,
+  getAdFreePostsIfSubscribed
+} from '../helpers/post.helper';
 
 /**
  * @swagger
@@ -53,12 +53,10 @@ function load(req, res, next, id) {
  *         $ref: '#/responses/NotFound'
  */
 
- function get(req, res, next) {
-     // Load ad free version of podcast episode if subscrbied:
-     return res.json(
-       getAdFreeSinglePostIfSubscribed(req.post.toObject(), req.fullUser, next)
-     );
- }
+function get(req, res, next) {
+  // Load ad free version of podcast episode if subscrbied:
+  return res.json(getAdFreeSinglePostIfSubscribed(req.post.toObject(), req.fullUser, next));
+}
 
 /**
  * @swagger
@@ -123,7 +121,7 @@ function list(req, res, next) {
     search = null
   } = req.query;
 
-  const query = { };
+  const query = {};
   if (limit) query.limit = limit;
   if (createdAtBefore) query.createdAtBefore = createdAtBefore;
   if (createdAfter) query.createdAfter = createdAfter;
@@ -149,12 +147,10 @@ function list(req, res, next) {
     query.categories = newTags;
   }
 
-  console.log('get posts');
+  console.log('get posts'); // eslint-disable-line
   Post.list(query)
-  .then(posts => {
-      return res.json(getAdFreePostsIfSubscribed(posts, req.fullUser, next));
-  })
-  .catch(e => next(e));
+    .then(posts => res.json(getAdFreePostsIfSubscribed(posts, req.fullUser, next)))
+    .catch(e => next(e));
 }
 
 // @TODO: maybe this should be in a recommendation controller
@@ -183,19 +179,21 @@ function list(req, res, next) {
 
 function recommendations(req, res, next) {
   const numberOfRecommendations = 10;
-  raccoon.recommendFor(req.user._id.toString(), numberOfRecommendations)
-  .then((recommendationsFound) => {
-    const ids = recommendationsFound.map((rec) => {  //eslint-disable-line
-      return mongoose.Types.ObjectId(rec); //eslint-disable-line
+  raccoon
+    .recommendFor(req.user._id.toString(), numberOfRecommendations)
+    .then((recommendationsFound) => {
+      const ids = recommendationsFound.map(rec =>
+          //eslint-disable-line
+          mongoose.Types.ObjectId(rec) //eslint-disable-line
+      ); //eslint-disable-line
+      return Post.find({ _id: { $in: ids } }).lean();
+    })
+    .then(posts =>
+      //eslint-disable-line
+      res.json(getAdFreePostsIfSubscribed(posts, req.fullUser, next)))
+    .catch((e) => {
+      next(e);
     });
-    return Post.find({ _id: { $in: ids } }).lean();
-  })
-  .then((posts) => { //eslint-disable-line
-    return res.json(getAdFreePostsIfSubscribed(posts, req.fullUser, next));
-  })
-  .catch((e) => {
-    next(e);
-  });
 }
 
 function upvote(req, res, next) {
@@ -210,12 +208,19 @@ function upvote(req, res, next) {
 }
 
 function downvote(req, res, next) {
-  if(req.undisliked) {
+  if (req.undisliked) {
     raccoon.undisliked(req.user._id.toString(), req.post._id.toString());
-  } else if(req.disliked) {
+  } else if (req.disliked) {
     raccoon.disliked(req.user._id.toString(), req.post._id.toString());
   }
   next();
 }
 
-export default { load, get, list, recommendations, downvote, upvote };
+export default {
+  load,
+  get,
+  list,
+  recommendations,
+  downvote,
+  upvote
+};

@@ -15,22 +15,24 @@ router.route('/:relatedLinkId')
   );
 
 router.route('/:relatedLinkId/upvote')
-  .post(expressJwt({ secret: config.jwtSecret })
-  // TODO: refactor to have these into one call like upvote: [method1, method2,...]
-  // upvoteHandlers
-  , transferField({source: 'relatedLink', target: 'entity'})
-  , voteCtrl.findVote
-  , voteCtrl.upvote // rename to upvoteHelper
-  , voteCtrl.finish // IF we add a model.unlike we don't really need this..
-);
+  .post(
+    expressJwt({ secret: config.jwtSecret })
+    // TODO: refactor to have these into one call like upvote: [method1, method2,...]
+    // upvoteHandlers
+    , transferField({ source: 'relatedLink', target: 'entity' })
+    , voteCtrl.findVote
+    , voteCtrl.upvote // rename to upvoteHelper
+    , voteCtrl.finish // IF we add a model.unlike we don't really need this..
+  );
 
 router.route('/:relatedLinkId/downvote')
-  .post(expressJwt({ secret: config.jwtSecret })
-  , transferField({source: 'relatedLink', target: 'entity'})
-  , voteCtrl.findVote
-  , voteCtrl.downvote
-  , voteCtrl.finish
-);
+  .post(
+    expressJwt({ secret: config.jwtSecret })
+    , transferField({ source: 'relatedLink', target: 'entity' })
+    , voteCtrl.findVote
+    , voteCtrl.downvote
+    , voteCtrl.finish
+  );
 
 router.param('relatedLinkId', relatedLinkCtrl.load);
 

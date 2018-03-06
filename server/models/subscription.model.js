@@ -1,7 +1,4 @@
-import Promise from 'bluebird';
-import mongoose, {Schema} from 'mongoose';
-import httpStatus from 'http-status';
-import APIError from '../helpers/APIError';
+import mongoose, { Schema } from 'mongoose';
 
 /**
  * Schema
@@ -11,14 +8,14 @@ const SubscriptionSchema = new mongoose.Schema({
     type: Schema.Types.ObjectId,
     ref: 'User'
   },
-  planFrequency: {type: String, required: true},
+  planFrequency: { type: String, required: true },
   stripe: {
-    customerId: {type: String},
-    subscriptionId: {type: String},
-    planId: {type: String},
-    email: {type: String}
+    customerId: { type: String },
+    subscriptionId: { type: String },
+    planId: { type: String },
+    email: { type: String }
   },
-  active: {type: Boolean}, // if the subscription is still in place...
+  active: { type: Boolean }, // if the subscription is still in place...
   dateCreated: {
     type: Date,
     default: Date.now

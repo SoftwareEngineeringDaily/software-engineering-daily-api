@@ -4,7 +4,6 @@ import APIError from '../helpers/APIError';
 import { signS3 } from '../helpers/s3';
 
 export default {
-
   list: async (req, res, next) => {
     try {
       const query = Company.where('isDeleted').equals(false);
@@ -40,19 +39,24 @@ export default {
   },
 
   signS3CompanyLogoUpload: (req, res, next) => {
-    const fileType = req.body.fileType;
-    const randomNumberString = Math.random() + "";
-    const newFileName = 'company_images/' + randomNumberString.replace(".", "_");
+    const { fileType } = req.body;
+    const randomNumberString = `${Math.random()}`;
+    const newFileName = `company_images/${randomNumberString.replace('.', '_')}`;
 
     const cbSuccess = (result) => {
       res.write(JSON.stringify(result));
       res.end();
     };
 
-    const cbError = () => {
+    // eslint-disable-next-line
+    const cbError = err => {
       if (err) {
-        console.log(err);
-        const error = new APIError('There was a problem getting a signed url', httpStatus.SERVICE_UNAVAILABLE, true);
+        console.log(err); // eslint-disable-line
+        const error = new APIError(
+          'There was a problem getting a signed url',
+          httpStatus.SERVICE_UNAVAILABLE,
+          true
+        );
         return next(error);
       }
     };
@@ -60,8 +64,7 @@ export default {
   },
   update: async (req, res, next) => {
     try {
-      const company = await Company
-        .findById(req.params.companyId);
+      const company = await Company.findById(req.params.companyId);
 
       if (!company) {
         return next(new APIError('Company not found', httpStatus.NOT_FOUND));
@@ -72,10 +75,11 @@ export default {
         return next(new APIError('Not allowed to update company', httpStatus.UNAUTHORIZED));
       }
 
-      const today = new Date().getDate();
-
       if (company.isDeleted) {
-        return next(new APIError('Not allowed to update this company as it has been deleted', httpStatus.FORBIDDEN));
+        return next(new APIError(
+          'Not allowed to update this company as it has been deleted',
+          httpStatus.FORBIDDEN
+        ));
       }
 
       const updated = Object.assign(company, req.body);
@@ -86,7 +90,6 @@ export default {
       return next(err);
     }
   },
-
 
   create: async (req, res, next) => {
     try {
@@ -102,8 +105,7 @@ export default {
 
   delete: async (req, res, next) => {
     try {
-      const company = await Company
-        .findById(req.params.companyId);
+      const company = await Company.findById(req.params.companyId);
 
       if (!company) {
         return next(new APIError('Company not found', httpStatus.NOT_FOUND));
@@ -116,7 +118,8 @@ export default {
 
       /* Since we are checking for being an admin, it should be fine..
       if (company.author.toString() !== req.user._id.toString()) {
-        return next(new APIError('Not allowed to delete a company you did not create', httpStatus.UNAUTHORIZED));
+        return next(new APIError('Not allowed to delete a company you did not create',
+        httpStatus.UNAUTHORIZED));
       }
       */
 
