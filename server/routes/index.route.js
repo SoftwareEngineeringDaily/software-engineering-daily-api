@@ -4,6 +4,7 @@ import jobRoutes from './job.route';
 import companyRoutes from './company.route';
 import postRoutes from './post.route';
 import feedRoutes from './feed.route';
+import threadRoutes from './thread.route';
 import commentRoutes from './comment.route';
 import relatedLinkRoutes from './relatedLink.route';
 import voteRoutes from './vote.route';
@@ -36,13 +37,13 @@ const router = express.Router(); // eslint-disable-line new-cap
  *         description: successful operation
  */
 
-router.get('/health-check', (req, res) =>
-  res.send('OK'));
+router.get('/health-check', (req, res) => res.send('OK'));
 
 router.use('/docs', docRoutes);
 router.use('/related-links', relatedLinkRoutes);
 router.use('/posts', postRoutes);
 router.use('/jobs', jobRoutes);
+router.use('/forum', threadRoutes);
 router.use('/companies', companyRoutes);
 router.use('/comments', commentRoutes);
 router.use('/votes', voteRoutes);

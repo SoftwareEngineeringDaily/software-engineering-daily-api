@@ -7,22 +7,21 @@ import config from '../../config/config';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
+router
+  .route('/create')
+  .post(expressJwt({ secret: config.jwtSecret, credentialsRequired: true }), commentCtrl.create);
 
-router.route('/:commentId/upvote')
-  .post(expressJwt({ secret: config.jwtSecret })
+router.route('/:commentId/upvote').post(
+  expressJwt({ secret: config.jwtSecret }),
   // TODO: refactor to have these into one call like upvote: [method1, method2,...]
   // upvoteHandlers
-  , transferField({source: 'comment', target: 'entity'})
-  , voteCtrl.findVote
-  , voteCtrl.upvote // rename to upvoteHelper
-  , voteCtrl.finish // IF we add a model.unlike we don't really need this..
+  transferField({ source: 'comment', target: 'entity' }),
+  voteCtrl.findVote,
+  voteCtrl.upvote, // rename to upvoteHelper
+  voteCtrl.finish // IF we add a model.unlike we don't really need this..
 );
 
-router.route('/:commentId')
-  .delete(
-    expressJwt({ secret: config.jwtSecret}),
-    commentCtrl.remove
-  );
+router.route('/:commentId').delete(expressJwt({ secret: config.jwtSecret }), commentCtrl.remove);
 
 /*
 router.route('/:commentId/downvote')
@@ -32,7 +31,6 @@ router.route('/:commentId/downvote')
   , voteCtrl.downvote
   , voteCtrl.finish
 ); */
-
 
 // TODO: load comment
 router.param('commentId', commentCtrl.load);
