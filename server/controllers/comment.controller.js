@@ -144,7 +144,10 @@ function create(req, res, next) {
  *         $ref: '#/responses/NotFound'
  */
 function list(req, res, next) {
-  const { entityId } = req.params;
+  let { entityId } = req.params;
+  if (req.post) {
+    entityId = req.post._id;
+  }
   // TODO loop through and replace comments that are deleted with "This comment has been deleted"
   Comment.getFullList(entityId, req.user)
     .then((comments) => {
