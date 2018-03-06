@@ -3,6 +3,7 @@ import logger from 'morgan';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import compress from 'compression';
+import passport from 'passport';
 import methodOverride from 'method-override';
 import cors from 'cors';
 import httpStatus from 'http-status';
@@ -10,7 +11,6 @@ import expressWinston from 'express-winston';
 import expressValidation from 'express-validation';
 import helmet from 'helmet';
 import winstonInstance from './winston';
-import passport from 'passport';
 import routes from '../server/routes/index.route';
 import config from './config';
 import APIError from '../server/helpers/APIError';
@@ -52,7 +52,6 @@ if (config.env === 'development') {
 // mount all routes on /api path
 app.use('/api', routes);
 
-
 // if error is not an instanceOf APIError, convert it.
 app.use((err, req, res, next) => {
   if (err instanceof expressValidation.ValidationError) {
@@ -81,11 +80,15 @@ if (config.env !== 'test') {
 }
 
 // error handler, send stacktrace only during development
-app.use((err, req, res, next) => // eslint-disable-line no-unused-vars
+app.use((
+  err,
+  req,
+  res,
+  next // eslint-disable-line no-unused-vars
+) =>
   res.status(err.status).json({
     message: err.isPublic ? err.message : httpStatus[err.status],
     stack: config.env === 'development' ? err.stack : {}
-  })
-);
+  }));
 
 export default app;

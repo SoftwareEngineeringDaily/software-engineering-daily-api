@@ -1,7 +1,4 @@
-import Promise from 'bluebird';
-import mongoose, {Schema} from 'mongoose';
-import httpStatus from 'http-status';
-import APIError from '../helpers/APIError';
+import mongoose, { Schema } from 'mongoose';
 import Vote from './vote.model';
 /**
  * @swagger
@@ -44,7 +41,7 @@ const RelatedLinkSchema = new Schema({
     type: String,
     required: true
   },
-  image: {type: String},
+  image: { type: String },
   clicks: { type: Number, default: 0 },
   score: { type: Number, default: 0 },
   dateCreated: {
@@ -65,50 +62,52 @@ const RelatedLinkSchema = new Schema({
   }
 });
 
-
 /**
  * Statics
  */
 RelatedLinkSchema.statics = {
-  list({post, user}) {
+  list({ post, user }) {
     const query = {};
     query.post = post;
     query.deleted = false;
 
-    return this.find(query).sort({score: -1}).lean()
+    return this.find(query)
+      .sort({ score: -1 })
+      .lean()
       .then((links) => {
-        if (!user){ return {links} }
-
-        const linkIds = links.map((link) => {
-          return link._id;
-        });
-        return Vote.find({userId: user._id, entityId: {$in: linkIds}})
-          .then((votes) => {
-            return {votes, links}
-          });
-      }).then(({links, votes}) => {
-        const voteMap = {};
-        for (let index in votes) { // eslint-disable-line
-          const vote = votes[index];
-          const voteKey =  vote.entityId;
-          voteMap[voteKey] = vote;
+        if (!user) {
+          return { links };
         }
+
+        const linkIds = links.map(link => link._id);
+        return Vote.find({ userId: user._id, entityId: { $in: linkIds } }).then(votes => ({
+          votes,
+          links
+        }));
+      })
+      .then(({ links, votes }) => {
+        const voteMap = {};
+        votes.forEach((vote) => {
+          const voteKey = vote.entityId;
+          voteMap[voteKey] = vote;
+        });
         // Update links with vote info:
-        for (let index in links) { // eslint-disable-line
+        // eslint-disable-next-line
+        for (const index in links) {
           const link = links[index];
-          links[index] = Vote.updateEntity(link, voteMap[link._id]);
+          links[index] = Vote.updateEntity(link, voteMap[link._id]); // eslint-disable-line
         }
 
         return links;
       });
   },
-  listProfileFeed({userId}) {
-    return this.find({author: userId}).lean()
+  listProfileFeed({ userId }) {
+    return this.find({ author: userId }).lean();
   }
 };
 
 // Indexes
-RelatedLinkSchema.index({ 'url': 'text' });
+RelatedLinkSchema.index({ url: 'text' });
 
 exports.RelatedLinkSchema = RelatedLinkSchema;
 export default mongoose.model('RelatedLink', RelatedLinkSchema);
