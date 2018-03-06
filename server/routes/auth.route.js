@@ -19,7 +19,9 @@ router.route('/register').post(validate(paramValidation.register), authCtrl.regi
 
 router.route('/sign-s3').post(expressJwt({ secret: config.jwtSecret }), authCtrl.signS3);
 
-router.route('/sign-s3').post(expressJwt({ secret: config.jwtSecret }), authCtrl.signS3AvatarUpload);
+router
+  .route('/sign-s3')
+  .post(expressJwt({ secret: config.jwtSecret }), authCtrl.signS3AvatarUpload);
 
 /** GET /api/auth/random-number - Protected route,
  * needs token returned by the above as header. Authorization: Bearer {token} */

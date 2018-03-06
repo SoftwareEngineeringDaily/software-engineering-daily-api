@@ -1,7 +1,6 @@
-require('dotenv').config();
-import httpStatus from 'http-status';
-import APIError from '../helpers/APIError';
 import aws from 'aws-sdk';
+
+require('dotenv').config();
 
 function getS3Config(S3_BUCKET, fileType, fileName) {
   // We should Make this options a helper method:
@@ -34,9 +33,8 @@ function signS3(S3_BUCKET, fileType, newFileName, cbSuccess, cbError) {
       signedRequest: data, // <-- the useful one
       url: `https://${S3_BUCKET}.s3.amazonaws.com/${newFileName}`
     };
-    cbSuccess(returnData);
+    return cbSuccess(returnData);
   });
-
 }
 
 export default {

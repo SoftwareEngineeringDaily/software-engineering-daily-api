@@ -3,7 +3,6 @@ import FacebookTokenStrategy from 'passport-facebook-token';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import httpStatus from 'http-status';
-import aws from 'aws-sdk';
 import APIError from '../helpers/APIError';
 import config from '../../config/config';
 import User from '../models/user.model';
@@ -229,7 +228,7 @@ function register(req, res, next) {
 }
 
 function signS3AvatarUpload(req, res, next) {
-  const fileType = req.body.fileType;
+  const { fileType } = req.body;
   const newFileName = req.user._id;
 
   const cbSuccess = (result) => {
@@ -237,10 +236,15 @@ function signS3AvatarUpload(req, res, next) {
     res.end();
   };
 
-  const cbError = () => {
+  // eslint-disable-next-line
+  const cbError = err => {
     if (err) {
-      console.log(err);
-      const error = new APIError('There was a problem getting a signed url', httpStatus.SERVICE_UNAVAILABLE, true);
+      console.log(err); // eslint-disable-line
+      const error = new APIError(
+        'There was a problem getting a signed url',
+        httpStatus.SERVICE_UNAVAILABLE,
+        true
+      );
       return next(error);
     }
   };
@@ -256,52 +260,6 @@ function socialAuth(req, res) {
     token
   });
 }
-
-function getS3Config(S3_BUCKET, fileType, fileName) {
-  // We should Make this options a helper method:
-  aws.config.region = 'us-west-2';
-  // const fileName = 'record-red-bg-180-2.png'; // This can be anything
-  // const fileType = 'image/png'; // req.query['file-type'];
-  const s3Params = {
-    Bucket: S3_BUCKET,
-    Key: fileName,
-    Expires: 60, // in seconds
-    ContentType: fileType,
-    ACL: 'public-read'
-  };
-  return s3Params;
-}
-
-// This should be a helper library and perhaps part of user.controller isntead:
-function signS3(req, res) {
-  const S3_BUCKET = 'sd-profile-pictures';
-  // Probably only need to do this once:
-  const s3 = new aws.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-  });
-  const { fileType } = req.body;
-  // const fileName = req.body.fileName; // Unused:
-  const newFileName = req.user._id;
-  console.log('fileType:::', fileType); // eslint-disable-line
-  // console.log('FileName::::::', fileName);
-  console.log('newFileName::::::', newFileName); // eslint-disable-line
-  const s3Params = getS3Config(S3_BUCKET, fileType, newFileName);
-
-  s3.getSignedUrl('putObject', s3Params, (err, data) => {
-    if (err) {
-      console.log(err); // eslint-disable-line
-      return res.end();
-    }
-    const returnData = {
-      signedRequest: data, // <-- the useful one
-      url: `https://${S3_BUCKET}.s3.amazonaws.com/${newFileName}`
-    };
-    res.write(JSON.stringify(returnData));
-    return res.end();
-  });
-}
-
 
 /**
  * TODO: add swagger doc
