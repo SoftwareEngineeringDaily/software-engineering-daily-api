@@ -8,8 +8,8 @@ import User from '../models/user.model';
 import { signS3 } from '../helpers/s3';
 import _ from 'lodash';
 
+const http = require('http'); // For mailchimp api call
 require('dotenv').config();
-
 
 
 /**
@@ -169,6 +169,7 @@ function loginWithEmail(req, res, next) {
 function register(req, res, next) {
   const username = req.body.username;
   const password = req.body.password;
+  const newsletterSignup = req.body.newsletter;
 
   if (!username) {
     let err = new APIError('Username is required to register.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
@@ -198,6 +199,34 @@ function register(req, res, next) {
   // We do this so people can't share an email on either field, username or email:
   // also so no-one can have the same email or same username.
   const userQuery = email ? queryIfEmail : queryIfEmailMissing;
+
+  // Sign up user for mailchimp list (if checked)
+  if (newsletterSignup) {
+    const postData = JSON.stringify({ staus: 'subscribed', email });
+    // Build route because it varies based on API key
+    const hostname = `${config.mailchimp.mailchimpKey.split('-')[1]}.api.mailchimp.com`;
+    // Build POST options
+    const options = {
+      hostname,
+      path: `/3.0/lists/${config.mailchimp.mailchimpList}/members`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `apikey ${config.mailchimp.mailchimpKey}`,
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
+    var req = http.request(options, (res) => {
+      res.setEncoding('utf8');
+    });
+    req.on('error', (e) => {
+      console.log(e);
+      const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
+      return next(error);
+    });
+    req.write(postData);
+    req.end();
+  }
 
   User
     .findOne(userQuery).exec()
