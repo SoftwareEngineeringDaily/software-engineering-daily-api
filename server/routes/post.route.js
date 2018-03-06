@@ -45,7 +45,7 @@ router.route('/:postId/comments').get(
 
 // Create a comment:
 router
-  .route('/:entityId/comment')
+  .route('/:postId/comment')
   .post(
     expressJwt({ secret: config.jwtSecret }),
     validate(paramValidation.comment),

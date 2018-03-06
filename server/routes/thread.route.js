@@ -43,5 +43,6 @@ router
     commentController.list
   );
 
+router.param('threadId', threadController.load);
 router.param('entityId', threadController.load);
 export default router;
