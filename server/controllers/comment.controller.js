@@ -1,13 +1,10 @@
-import Promise from 'bluebird';
-import map from 'lodash/map';
-
 import Comment from '../models/comment.model';
 
 /*
 * Load comment and append to req.
 */
 function load(req, res, next, id) {
-  Comment.get(id)
+  Comment.get(id, req.user)
     .then((comment) => {
       req.comment = comment; // eslint-disable-line no-param-reassign
       return next();
@@ -44,7 +41,6 @@ function remove(req, res, next) {
     if (comment.author._id.toString() !== user._id.toString()) {
       return res.status(401).json({ Error: 'Please login' });
     }
-
     comment.deleted = true;
     return comment
       .save()
@@ -97,14 +93,15 @@ function remove(req, res, next) {
  */
 
 function create(req, res, next) {
-  const { postId } = req.params;
+  const entityId = req.entity._id;
   const { parentCommentId } = req.body;
   const { content } = req.body;
   const { user } = req;
 
   const comment = new Comment();
   comment.content = content;
-  comment.post = postId;
+  comment.entity = entityId;
+
   // If this is a child comment we need to assign it's parent
   if (parentCommentId) {
     comment.parentComment = parentCommentId;
@@ -142,24 +139,11 @@ function create(req, res, next) {
  *         $ref: '#/responses/NotFound'
  */
 function list(req, res, next) {
-  const { postId } = req.params;
+  const entityId = req.entity._id;
   // TODO loop through and replace comments that are deleted with "This comment has been deleted"
-  Comment.getTopLevelCommentsForItem(postId)
+  Comment.getFullList(entityId, req.user)
     .then((comments) => {
-      // Here we are fetching our nested comments, and need everything to finish
-      const nestedCommentPromises = map(comments, comment => Comment.fillNestedComments(comment));
-      return Promise.all(nestedCommentPromises);
-    })
-    .then((parentComments) => {
-      // If authed then fill in if user has liked:
-      if (req.user) {
-        // Let's get all our voe info for both children and parent comments:
-        return Comment.populateVoteInfo(parentComments, req.user);
-      }
-      return parentComments;
-    })
-    .then((parentComments) => {
-      res.json({ result: parentComments });
+      res.json({ result: comments });
     })
     .catch(e => next(e));
 }

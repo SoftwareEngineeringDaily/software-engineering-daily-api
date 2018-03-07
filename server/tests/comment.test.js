@@ -44,6 +44,7 @@ describe('## Comment APIs', () => {
       })
       .then((post) => {
         postId = post._id;
+        // console.log('1--res -- postId', postId);
         done();
       })
       .catch(done);
@@ -80,7 +81,7 @@ describe('## Comment APIs', () => {
         .then((res) => {
           expect(res.body).to.exist; //eslint-disable-line
           const comment = res.body.result;
-          expect(comment.post).to.eql(`${postId}`);
+          expect(comment.entity).to.eql(`${postId}`);
           expect(comment.content).to.eql(`${content}`);
           expect(comment.author).to.exist; //eslint-disable-line
           expect(comment.dateCreated).to.exist; //eslint-disable-line
@@ -94,8 +95,9 @@ describe('## Comment APIs', () => {
     it('should get comments', (done) => {
       request(app)
         .get(`/api/posts/${postId}/comments`)
-        .expect(httpStatus.OK)
+        // .expect(httpStatus.OK)
         .then((res) => {
+          // console.log('res -- postId', postId);
           expect(res.body).to.exist; //eslint-disable-line
           expect(res.body.result).to.be.an('array');
           done();
@@ -116,7 +118,7 @@ describe('## Comment APIs', () => {
         .then((res) => {
           expect(res.body).to.exist; //eslint-disable-line
           const reply = res.body.result;
-          expect(reply.post).to.eql(`${postId}`);
+          expect(reply.entity).to.eql(`${postId}`);
           expect(reply.content).to.eql(`${content}`);
           expect(reply.parentComment).to.eql(`${commentId}`);
           expect(reply.author).to.exist; //eslint-disable-line
