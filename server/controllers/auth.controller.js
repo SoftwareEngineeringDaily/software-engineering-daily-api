@@ -203,7 +203,7 @@ function register(req, res, next) {
   // Sign up user for mailchimp list (if checked)
   console.log(`newsletter status:${newsletterSignup}`);
   if (newsletterSignup) {
-    const postData = JSON.stringify({ staus: 'subscribed', "email_address": email });
+    const postData = JSON.stringify({ status: 'subscribed', email_address: email });
     // Build route because it varies based on API key
     const hostname = `${config.mailchimp.mailchimpKey.split('-')[1]}.api.mailchimp.com`;
     // Build POST options
