@@ -80,7 +80,7 @@ describe('## Comment APIs', () => {
         .then((res) => {
           expect(res.body).to.exist; //eslint-disable-line
           const comment = res.body.result;
-          expect(comment.post).to.eql(`${postId}`);
+          expect(comment.root).to.eql(`${postId}`);
           expect(comment.content).to.eql(`${content}`);
           expect(comment.author).to.exist; //eslint-disable-line
           expect(comment.dateCreated).to.exist; //eslint-disable-line
@@ -116,7 +116,7 @@ describe('## Comment APIs', () => {
         .then((res) => {
           expect(res.body).to.exist; //eslint-disable-line
           const reply = res.body.result;
-          expect(reply.post).to.eql(`${postId}`);
+          expect(reply.root).to.eql(`${postId}`);
           expect(reply.content).to.eql(`${content}`);
           expect(reply.parentComment).to.eql(`${commentId}`);
           expect(reply.author).to.exist; //eslint-disable-line

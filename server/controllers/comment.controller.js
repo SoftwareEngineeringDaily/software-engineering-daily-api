@@ -97,14 +97,14 @@ function remove(req, res, next) {
  */
 
 function create(req, res, next) {
-  const { postId } = req.params;
+  const entityId = req.entity._id;
   const { parentCommentId } = req.body;
   const { content } = req.body;
   const { user } = req;
 
   const comment = new Comment();
   comment.content = content;
-  comment.post = postId;
+  comment.root = entityId;
   // If this is a child comment we need to assign it's parent
   if (parentCommentId) {
     comment.parentComment = parentCommentId;
@@ -142,9 +142,9 @@ function create(req, res, next) {
  *         $ref: '#/responses/NotFound'
  */
 function list(req, res, next) {
-  const { postId } = req.params;
+  const entityId = req.entity._id;
   // TODO loop through and replace comments that are deleted with "This comment has been deleted"
-  Comment.getTopLevelCommentsForItem(postId)
+  Comment.getTopLevelCommentsForItem(entityId)
     .then((comments) => {
       // Here we are fetching our nested comments, and need everything to finish
       const nestedCommentPromises = map(comments, comment => Comment.fillNestedComments(comment));
