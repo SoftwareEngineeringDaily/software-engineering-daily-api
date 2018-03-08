@@ -18,6 +18,9 @@ function detail() {
 function create() {
 }
 
+function update() {
+}
+
 function remove() {
 }
 
@@ -26,5 +29,6 @@ export default {
   list,
   detail,
   create,
+  update,
   remove
 };
