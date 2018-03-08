@@ -37,7 +37,7 @@ export default {
     }
   },
 
-    // POST /api/auth/loginWithEmail
+  // POST /api/auth/loginWithEmail
   loginWithEmail: {
     body: {
       email: Joi.string().email().required(),

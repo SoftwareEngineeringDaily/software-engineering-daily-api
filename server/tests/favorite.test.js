@@ -50,7 +50,8 @@ describe('## Favorite APIs', () => {
   });
 
   after((done) => {
-    User.remove({}).exec()
+    User.remove({})
+      .exec()
       .then(() => Post.remove({}).exec())
       .then(() => {
         done();
@@ -58,7 +59,8 @@ describe('## Favorite APIs', () => {
   });
 
   afterEach((done) => {
-    Favorite.remove().exec()
+    Favorite.remove()
+      .exec()
       .then(() => {
         done();
       });
@@ -95,10 +97,11 @@ describe('## Favorite APIs', () => {
         .post(`/api/posts/${postId}/favorite`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.OK)
-        .then(res => request(app)
-          .post(`/api/posts/${postId}/favorite`)
-          .set('Authorization', `Bearer ${userToken}`)
-          .expect(httpStatus.OK))
+        .then(() =>
+          request(app)
+            .post(`/api/posts/${postId}/favorite`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK))
         .then((res) => {
           const favorite = res.body;
           expect(favorite.postId).to.eql(`${postId}`);
@@ -139,7 +142,7 @@ describe('## Favorite APIs', () => {
             .set('Authorization', `Bearer ${userToken}`)
             .expect(httpStatus.OK);
         })
-        .then((res) => {  //eslint-disable-line
+        .then(() => {
           done();
         })
         .catch(done);
@@ -244,14 +247,16 @@ describe('## Favorite APIs', () => {
         .post(`/api/posts/${postId}/favorite`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.OK)
-        .then(() => request(app)
-          .post(`/api/posts/${postId}/unfavorite`)
-          .set('Authorization', `Bearer ${userToken}`)
-          .expect(httpStatus.OK))
-        .then(() => request(app)
-          .get('/api/posts')
-          .set('Authorization', `Bearer ${userToken}`)
-          .expect(httpStatus.OK))
+        .then(() =>
+          request(app)
+            .post(`/api/posts/${postId}/unfavorite`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK))
+        .then(() =>
+          request(app)
+            .get('/api/posts')
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK))
         .then((res) => {
           expect(res.body).to.be.an('array');
           expect(res.body[0].bookmarked).to.equal(false);
@@ -267,9 +272,10 @@ describe('## Favorite APIs', () => {
         .post(`/api/posts/${postId}/favorite`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.OK)
-        .then(() => request(app)
-          .get(`/api/users/${userId}/bookmarked`)
-          .expect(httpStatus.OK))
+        .then(() =>
+          request(app)
+            .get(`/api/users/${userId}/bookmarked`)
+            .expect(httpStatus.OK))
         .then((res) => {
           expect(res.body).to.be.an('array');
           expect(res.body[0]._id).to.equal(`${postId}`);
@@ -282,10 +288,11 @@ describe('## Favorite APIs', () => {
         .post(`/api/posts/${postId}/favorite`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.OK)
-        .then(() => request(app)
-          .get('/api/users/me/bookmarked')
-          .set('Authorization', `Bearer ${userToken}`)
-          .expect(httpStatus.OK))
+        .then(() =>
+          request(app)
+            .get('/api/users/me/bookmarked')
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK))
         .then((res) => {
           expect(res.body).to.be.an('array');
           expect(res.body[0]._id).to.equal(`${postId}`);
@@ -298,14 +305,16 @@ describe('## Favorite APIs', () => {
         .post(`/api/posts/${postId}/favorite`)
         .set('Authorization', `Bearer ${userToken}`)
         .expect(httpStatus.OK)
-        .then(() => request(app)
-          .post(`/api/posts/${postId}/unfavorite`)
-          .set('Authorization', `Bearer ${userToken}`)
-          .expect(httpStatus.OK))
-        .then(() => request(app)
-          .get('/api/users/me/bookmarked')
-          .set('Authorization', `Bearer ${userToken}`)
-          .expect(httpStatus.OK))
+        .then(() =>
+          request(app)
+            .post(`/api/posts/${postId}/unfavorite`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK))
+        .then(() =>
+          request(app)
+            .get('/api/users/me/bookmarked')
+            .set('Authorization', `Bearer ${userToken}`)
+            .expect(httpStatus.OK))
         .then((res) => {
           expect(res.body).to.be.an('array');
           expect(res.body).to.have.lengthOf(0);

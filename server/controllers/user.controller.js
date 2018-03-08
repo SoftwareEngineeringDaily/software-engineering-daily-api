@@ -1,10 +1,9 @@
-import APIError from '../helpers/APIError';
-import httpStatus from 'http-status';
-
 import randomstring from 'randomstring';
+import httpStatus from 'http-status';
+import _ from 'lodash';
+import APIError from '../helpers/APIError';
 // TODO: validate this key and pull from config:
 import Favorite from '../models/favorite.model';
-import _ from 'lodash';
 import User from '../models/user.model';
 import PasswordReset from '../models/passwordReset.model';
 import config from '../../config/config';
@@ -33,7 +32,8 @@ sgMail.setApiKey(config.sendGridKey);
 function load(req, res, next, id) {
   User.get(id)
     .then((user) => {
-      delete user.password; // We probably should't do this, also don't think
+      delete user.password; // eslint-disable-line
+      // We probably should't do this, also don't think
       // it has any effect until we do toObject();
       req.userLoaded = user; // eslint-disable-line no-param-reassign
       return next();
@@ -47,10 +47,10 @@ function load(req, res, next, id) {
 function me(req, res, next) {
   User.get(req.user._id)
     .then((user) => {
-      user.password = null;
+      user.password = null; // eslint-disable-line
       return res.json(user);
     })
-    .catch(e => next(err));
+    .catch(e => next(e));
 }
 
 /**
@@ -73,14 +73,20 @@ function get(req, res) {
  * @property {string} req.body.mobileNumber - The mobileNumber of user.
  * @returns {User}
  */
+// eslint-disable-next-line
 function update(req, res, next) {
   const user = req.userLoaded;
-  const username = req.body.username;
+  const { username } = req.body;
   const avatarWasSet = req.body.isAvatarSet;
   // We gotta check a few things:
   // First we make sure we are the actual user we are modifying.
+  // eslint-disable-next-line
   if (!req.user || user._id != req.user._id) {
-    let err = new APIError('Not enough  permissions to modify that user.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+    const err = new APIError(
+      'Not enough  permissions to modify that user.',
+      httpStatus.UNAUTHORIZED,
+      true
+    ); //eslint-disable-line
     return next(err);
   }
 
@@ -88,8 +94,9 @@ function update(req, res, next) {
   User.findOne({ username })
     .exec()
     .then((_user) => {
+      // eslint-disable-next-line
       if (_user && _user.id != user.id) {
-      let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+        let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
         return next(err);
       }
       // Using _.pick to only get a few properties:
@@ -97,7 +104,7 @@ function update(req, res, next) {
       const newValues = _.pick(req.body, User.updatableFields);
       Object.assign(user, newValues);
       if (avatarWasSet) {
-      // This should be pulled from utils:
+        // This should be pulled from utils:
         const S3_BUCKET = 'sd-profile-pictures';
         user.avatarUrl = `https://${S3_BUCKET}.s3.amazonaws.com/${user._id}`;
       }
@@ -107,7 +114,7 @@ function update(req, res, next) {
       });
     })
     .catch((e) => {
-      console.log('error saving user', e);
+      console.log('error saving user', e); // eslint-disable-line
       next(e);
     });
 }
@@ -119,13 +126,13 @@ function regainPassword(req, res, next) {
     .exec()
     .then((passwordReset) => {
       if (!passwordReset) {
-        console.log('Invalid passwordReset', passwordReset);
-        throw 'Invalid reset password.';
+        console.log('Invalid passwordReset', passwordReset); // eslint-disable-line
+        throw 'Invalid reset password.'; // eslint-disable-line
       }
 
       if (!User.isValidHash({ hash, original: secretKey })) {
-        console.log('---------Invalid hash-----------');
-        throw 'Invalid reset password.';
+        console.log('---------Invalid hash-----------'); // eslint-disable-line
+        throw 'Invalid reset password.'; // eslint-disable-line
       }
 
       // Check that dateCreated is within a certain time period:
@@ -134,26 +141,24 @@ function regainPassword(req, res, next) {
       const timeDiff = Math.abs(date2.getTime() - date1.getTime());
       const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
       if (diffDays > 2) {
-        console.log('Password reset link has expired!------');
-        throw 'Invalid reset password, has expired.';
+        console.log('Password reset link has expired!------'); // eslint-disable-line
+        throw 'Invalid reset password, has expired.'; // eslint-disable-line
       }
       // This is a little ugly and nested:
       return User.findOne({ _id: passwordReset.userId })
         .exec()
         .then((existingUser) => {
           if (!existingUser) {
-            throw 'Invalid reset password.';
+            throw 'Invalid reset password.'; // eslint-disable-line
           }
-          existingUser.password = User.generateHash(newPassword);
-          return existingUser.save()
-            .then(() => {
-              passwordReset.deleted = true;
-              return passwordReset.save()
-                .then(() => {
-                  // TODO: return jwt:
-                  res.json({ success: true });
-                });
+          existingUser.password = User.generateHash(newPassword); // eslint-disable-line
+          return existingUser.save().then(() => {
+            passwordReset.deleted = true; // eslint-disable-line
+            return passwordReset.save().then(() => {
+              // TODO: return jwt:
+              res.json({ success: true });
             });
+          });
         });
     })
     .catch((error) => {
@@ -164,11 +169,9 @@ function regainPassword(req, res, next) {
 function requestPasswordReset(req, res, next) {
   const { email } = req.body;
   User.findOne({
-    $or: [
-      { username: email },
-      { email }
-    ]
-  }).exec()
+    $or: [{ username: email }, { email }]
+  })
+    .exec()
     .then((user) => {
       if (!user) return res.status(404).json({ message: 'User not found.' });
       // This is the key we send out:
@@ -182,34 +185,33 @@ function requestPasswordReset(req, res, next) {
       newPasswordReset.hash = hash;
       newPasswordReset.email = email;
 
-      return newPasswordReset.save()
-        .then((resetPass) => {
-          // TODO: throttle how many emails we send to same email per time.
-          const msg = {
-            to: email,
-            from: 'no-reply@softwaredaily.com',
-            subject: 'Password reset email',
-            text: `Reset your password here ${config.baseUrl}/#/regain-account/${secretKey}/${resetPass._id}`,
-            html: `<strong> <a href="${config.baseUrl}/#/regain-account/${secretKey}/${resetPass._id}"> Click here </a> to reset your password. `,
-          };
-          // TODO: is this async?
-          sgMail.send(msg);
-          res.json({});
-        });
+      return newPasswordReset.save().then((resetPass) => {
+        // TODO: throttle how many emails we send to same email per time.
+        const msg = {
+          to: email,
+          from: 'no-reply@softwaredaily.com',
+          subject: 'Password reset email',
+          text: `Reset your password here ${config.baseUrl}/#/regain-account/${secretKey}/${
+            resetPass._id
+          }`,
+          html: `<strong> <a href="${config.baseUrl}/#/regain-account/${secretKey}/${
+            resetPass._id
+          }"> Click here </a> to reset your password. `
+        };
+        // TODO: is this async?
+        sgMail.send(msg);
+        res.json({});
+      });
     })
     .catch((err) => {
-    err = new APIError('User not found error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+      err = new APIError('User not found error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
       return next(err);
     });
 }
 
 async function list(req, res, next) {
   try {
-    const {
-      username,
-      email,
-      name
-    } = req.query;
+    const { username, email, name } = req.query;
 
     const query = User.find();
     if (username) {
@@ -275,11 +277,19 @@ function listBookmarked(req, res, next) {
   return Favorite.listBookmarkedPostsForUser(userId)
     .then((bookmarked) => {
       res.json(bookmarked);
-    }).catch((e) => {
+    })
+    .catch((e) => {
       next(e);
     });
 }
 
 export default {
-  load, get, me, list, update, listBookmarked, requestPasswordReset, regainPassword
+  load,
+  get,
+  me,
+  list,
+  update,
+  listBookmarked,
+  requestPasswordReset,
+  regainPassword
 };
