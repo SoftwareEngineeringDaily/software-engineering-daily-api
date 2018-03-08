@@ -165,7 +165,6 @@ function loginWithEmail(req, res, next) {
  */
 
 function register(req, res, next) {
-
   const { username } = req.body;
   const { password } = req.body;
   const newsletterSignup = req.body.newsletter;
@@ -225,7 +224,7 @@ function register(req, res, next) {
       mailchimpReq.write(postData);
       mailchimpReq.end();
     }
-  } catch(e) {
+  } catch (e) {
     console.log(`mailchimp error: ${e}`);
     const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
     return next(error);
@@ -241,6 +240,7 @@ function register(req, res, next) {
 
       const newUser = new User();
       newUser.password = User.generateHash(password);
+      newUser.signedupForNewsletter = newsletterSignup; // Probably works
       // We assign a set of "approved fields"
       const newValues = _.pick(req.body, User.updatableFields);
       Object.assign(newUser, newValues);
