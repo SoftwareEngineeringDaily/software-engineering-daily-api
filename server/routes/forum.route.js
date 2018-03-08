@@ -24,7 +24,7 @@ router
   .put(expressJwt({ secret: config.jwtSecret, credentialsRequired: true }), forumCtrl.update)
   .delete(
     expressJwt({ secret: config.jwtSecret, credentialsRequired: true }),
-    forumCtrl.delete
+    forumCtrl.remove
   );
 
 router

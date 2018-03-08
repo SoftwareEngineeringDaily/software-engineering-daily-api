@@ -9,6 +9,22 @@ function load(req, res, next, id) {
     .catch(e => next(e));
 }
 
+
+function list() {
+}
+function detail() {
+}
+
+function create() {
+}
+
+function remove() {
+}
+
 export default {
-  load
+  load,
+  list,
+  detail,
+  create,
+  remove
 };
