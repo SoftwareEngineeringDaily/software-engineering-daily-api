@@ -13,6 +13,11 @@ router.route('/')
     expressJwt({ secret: config.jwtSecret, credentialsRequired: false })
     , loadFullUser
     , forumCtrl.list
+  )
+  .post(
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: true })
+    , loadFullUser
+    , forumCtrl.create
   );
 
 router

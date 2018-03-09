@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import httpStatus from 'http-status';
+import APIError from '../helpers/APIError';
 
 const ForumThreadSchema = new mongoose.Schema({
   id: String,
@@ -20,6 +22,22 @@ const ForumThreadSchema = new mongoose.Schema({
 });
 
 ForumThreadSchema.statics = {
+  /**
+   * Get post
+   * @param {ObjectId} id - The objectId of forum thread.
+   * @returns {Promise<Thread, APIError>}
+   */
+  get(id) {
+    return this.findById(id)
+      .exec()
+      .then((thread) => {
+        if (thread) {
+          return thread;
+        }
+        const err = new APIError('No such thread exists!', httpStatus.NOT_FOUND);
+        return Promise.reject(err);
+      });
+  },
   list() {
     return this.find()
       .exec();
