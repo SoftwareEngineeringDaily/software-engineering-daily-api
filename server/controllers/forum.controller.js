@@ -37,7 +37,7 @@ function create(req, res, next) {
   const { user } = req;
   forumThread.title = title;
   forumThread.content = content;
-  forumThread.authoer = user._id;
+  forumThread.author = user._id;
 
   forumThread
     .save()
