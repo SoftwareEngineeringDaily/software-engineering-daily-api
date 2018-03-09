@@ -13,7 +13,8 @@ const ForumThreadSchema = new mongoose.Schema({
   },
   author: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    required: true
   },
   date: { type: Date, default: Date.now }
 });
