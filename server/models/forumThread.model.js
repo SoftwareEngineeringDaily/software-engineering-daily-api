@@ -19,4 +19,11 @@ const ForumThreadSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now }
 });
 
+ForumThreadSchema.statics = {
+  list() {
+    return this.find()
+      .exec();
+  }
+};
+
 export default mongoose.model('ForumThread', ForumThreadSchema);

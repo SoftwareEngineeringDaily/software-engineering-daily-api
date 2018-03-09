@@ -10,6 +10,7 @@ function load(req, res, next, id) {
 }
 
 function list(req, res, next) {
+  /*
   const {
     limit = null,
     createdAtBefore = null,
@@ -22,9 +23,12 @@ function list(req, res, next) {
   if (createdAtBefore) query.createdAtBefore = createdAtBefore;
   if (createdAfter) query.createdAfter = createdAfter;
   if (search) query.search = search;
-
   ForumThread.list(query)
-    .then(posts => res.json(posts))
+    .then(threads => res.json(threads))
+    .catch(e => next(e));
+  */
+  ForumThread.list()
+    .then(threads => res.json(threads))
     .catch(e => next(e));
 }
 
