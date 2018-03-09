@@ -33,6 +33,12 @@ function detail() {
 
 function create(req, res, next) {
   const forumThread = new ForumThread();
+  const { title, content, } = req.body;
+  const { user } = req;
+  forumThread.title = title;
+  forumThread.content = content;
+  forumThread.authoer = user._id;
+
   forumThread
     .save()
     .then((forumThreadSaved) => {
