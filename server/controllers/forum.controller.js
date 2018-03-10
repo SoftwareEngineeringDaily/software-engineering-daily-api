@@ -32,7 +32,8 @@ function list(req, res, next) {
     .catch(e => next(e));
 }
 
-function detail() {
+function detail(req, res) {
+  return res.json(req.forumThread);
 }
 
 function create(req, res, next) {
