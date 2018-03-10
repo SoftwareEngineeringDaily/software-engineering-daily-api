@@ -13,6 +13,10 @@ const ForumThreadSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  deleted: {
+    type: Boolean,
+    default: false
+  },
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -39,7 +43,9 @@ ForumThreadSchema.statics = {
       });
   },
   list() {
-    return this.find()
+    const query = {};
+    query.deleted = false;
+    return this.find(query)
       .exec();
   }
 };

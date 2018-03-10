@@ -54,7 +54,24 @@ function create(req, res, next) {
 function update() {
 }
 
-function remove() {
+function remove(req, res, next) {
+  const { forumThread, user } = req;
+  if (forumThread && user) {
+    if (forumThread.author.toString() !== user._id.toString()) {
+      return res.status(401).json({ Error: 'Please login' });
+    }
+    forumThread.deleted = true;
+    return forumThread
+      .save()
+      .then(() => {
+        // Sucess:
+        res.json({ deleted: true });
+      })
+      .catch((e) => {
+        next(e);
+      });
+  }
+  return res.status(500).json({});
 }
 
 export default {
