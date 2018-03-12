@@ -74,8 +74,8 @@ router.route('/:postId/upvote')
     expressJwt({ secret: config.jwtSecret })
     , transferField({ source: 'post', target: 'entity' })
     , voteCtrl.findVote
-    , voteCtrl.upvote
-    , postCtrl.upvote
+    , voteCtrl.upvote // normal upvoting via vote model
+    , postCtrl.upvote // special-case: uses racoon upvoting just for posts.
     , voteCtrl.finish
   );
 
