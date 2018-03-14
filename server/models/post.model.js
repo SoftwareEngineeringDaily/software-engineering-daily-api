@@ -190,7 +190,9 @@ PostSchema.statics = {
           const { bookmarkedByUser } = _post;
           const bookmarked = bookmarkedByUser ? bookmarkedByUser.active : false;
           delete _post.bookmarkedByUser;
-          return Object.assign({}, post.toObject(), { bookmarked });
+          const currPost = Object.assign({}, post.toObject(), { bookmarked });
+          console.log('post---? mp3', currPost.mp3);
+          return currPost;
         });
         // add vote info
         return this.addVotesForUserToPosts(postsWithBookmarked, user._id);
