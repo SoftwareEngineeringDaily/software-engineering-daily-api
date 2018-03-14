@@ -3,8 +3,9 @@ const Feed = require('feed');
 import config from '../../config/config';
 
 function replaceWithAdFree(post) {
+  console.log('--mp3', post.toObject().mp3);  
+  console.log('--post', post);
   try {
-    console.log(post);
     const originalMP3Split = post.mp3.split('/');
     if (originalMP3Split.length > 0) {
       const fileName = originalMP3Split[originalMP3Split.length - 1];
@@ -15,18 +16,19 @@ function replaceWithAdFree(post) {
     console.log('Error, could not get mp3', post, e); // eslint-disable-line
     // next(e); // We don't want to do this since it could still return posts.
   }
+  console.log("---done", post, post.mp3)
   return post;
 }
 
 function getAdFreeSinglePostIfSubscribed(post, fullUser, next) {
-  if (fullUser && fullUser.subscription && fullUser.subscription.active) {
+  if (true) {
     return replaceWithAdFree(post, next);
   }
   return post;
 }
 
 function getAdFreePostsIfSubscribed(posts, fullUser, next) {
-  if (fullUser && fullUser.subscription && fullUser.subscription.active) {
+  if (true) {
     // Here we do this so we can fetch subscritions:
     const _posts = posts.map(post => replaceWithAdFree(post, next));
     return _posts;
@@ -35,7 +37,7 @@ function getAdFreePostsIfSubscribed(posts, fullUser, next) {
 }
 
 function convertPostsToAdFreeRssFeed(posts, fullUser) {
-  if (fullUser && fullUser.subscription && fulluser.subscription.active) {
+  if (true) {
     // Convert posts to ad free posts
     const adfree = getAdFreePostsIfSubscribed(posts, fullUser, next);
     const rssepisodes = adfree.map(post => convertToRssItem(post, next));
