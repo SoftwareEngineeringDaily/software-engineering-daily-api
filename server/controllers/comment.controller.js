@@ -104,7 +104,7 @@ function create(req, res, next) {
 
   const comment = new Comment();
   comment.content = content;
-  comment.root = entityId;
+  comment.rootEntity = entityId;
   // If this is a child comment we need to assign it's parent
   if (parentCommentId) {
     comment.parentComment = parentCommentId;
