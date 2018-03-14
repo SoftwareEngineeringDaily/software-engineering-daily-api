@@ -116,7 +116,7 @@ describe('## Comment APIs', () => {
         .then((res) => {
           expect(res.body).to.exist; //eslint-disable-line
           const reply = res.body.result;
-          expect(reply.root).to.eql(`${postId}`);
+          expect(reply.rootEntity).to.eql(`${postId}`);
           expect(reply.content).to.eql(`${content}`);
           expect(reply.parentComment).to.eql(`${commentId}`);
           expect(reply.author).to.exist; //eslint-disable-line
