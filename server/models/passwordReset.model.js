@@ -1,14 +1,12 @@
-import Promise from 'bluebird';
 import mongoose from 'mongoose';
-import httpStatus from 'http-status';
-import APIError from '../helpers/APIError';
 
 const PasswordResetSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId,
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
+    required: true
   },
-  hash: { type: String, required: true},
+  hash: { type: String, required: true },
   email: {
     type: String,
     required: true
@@ -31,7 +29,7 @@ PasswordResetSchema.statics = {
     };
   },
 
-  decodeToken(userKey) {
+  decodeToken() {
     return 'hash'; // this is what we look for in the db
   }
 };

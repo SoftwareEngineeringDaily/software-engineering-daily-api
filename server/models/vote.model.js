@@ -30,7 +30,7 @@ const VoteSchema = new mongoose.Schema({
   postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
   entityId: { type: mongoose.Schema.Types.ObjectId },
   active: { type: Boolean, default: true },
-  direction: String,
+  direction: String
 });
 
 /**
@@ -43,27 +43,26 @@ const VoteSchema = new mongoose.Schema({
 /**
  * Methods
  */
-VoteSchema.method({
-});
+VoteSchema.method({});
 
 /**
  * Statics
  */
 VoteSchema.statics = {
   updateEntity(entity, vote) {
-    entity.upvoted = false;
-    entity.downvoted = false;
+    entity.upvoted = false; // eslint-disable-line
+    entity.downvoted = false; // eslint-disable-line
 
     if (!vote) {
       return entity;
     }
 
     if (vote.direction === 'upvote' && vote.active) {
-      entity.upvoted = true;
+      entity.upvoted = true; // eslint-disable-line
     }
 
     if (vote.direction === 'downvote' && vote.active) {
-      entity.downvoted = true;
+      entity.downvoted = true; // eslint-disable-line
     }
     return entity;
   },

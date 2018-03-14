@@ -2,10 +2,9 @@ import mongoose from 'mongoose';
 import moment from 'moment';
 import request from 'supertest-as-promised';
 import httpStatus from 'http-status';
-import chai, {expect} from 'chai';
+import chai, { expect } from 'chai';
 import app from '../../index';
 import Tag from '../models/tag.model';
-
 
 chai.config.includeStack = true;
 
@@ -13,7 +12,6 @@ function saveMongoArrayPromise(model, dataArray) {
   // this moved later into util file for use by multiple models and tests
   return Promise.all(dataArray.map(data => model(data).save()));
 }
-
 
 /**
  * root level hooks
@@ -30,15 +28,15 @@ describe('## Tag APIs', () => {
   describe('# GET /api/tags/:tagId', () => {
     it('should get a tag details', (done) => {
       const tag = new Tag({
-        'id': 2
+        id: 2
       });
-      tag.save()
-        .then((tagFound) => { //eslint-disable-line
-          return request(app)
+      tag
+        .save()
+        .then(tagFound =>
+          request(app)
             .get(`/api/tags/${tagFound.id}`)
-            .expect(httpStatus.OK);
-        })
-        .then((res) => {  //eslint-disable-line
+            .expect(httpStatus.OK))
+        .then(() => {
           done();
         })
         .catch(done);
@@ -57,30 +55,31 @@ describe('## Tag APIs', () => {
   });
 
   describe('# GET /api/tags/', () => {
-    before((done) => { //eslint-disable-line
+    before((done) => {
+      //eslint-disable-line
       Tag.remove({}, () => {
         done();
       });
     });
 
-    let firstSet = [];
     const limitNum = 5;
     it('should get all tags', (done) => {
       const tagsArrayPromise = saveMongoArrayPromise(
         Tag,
-        new Array(limitNum).fill({}).concat(new Array(limitNum).fill({date: moment().subtract(1, 'minutes')}))
+        new Array(limitNum)
+          .fill({})
+          .concat(new Array(limitNum).fill({ date: moment().subtract(1, 'minutes') }))
       );
       tagsArrayPromise
-        .then((tagFound) => { //eslint-disable-line
-          return request(app)
+        .then(() =>
+          //eslint-disable-line
+          request(app)
             .get('/api/tags')
-            .query({limit: limitNum})
-            .expect(httpStatus.OK);
-        })
+            .query({ limit: limitNum })
+            .expect(httpStatus.OK))
         .then((res) => {
           expect(res.body).to.be.an('array');
           expect(res.body).to.have.lengthOf(limitNum);
-          firstSet = res.body;
           done();
         })
         .catch(done);

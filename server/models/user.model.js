@@ -62,6 +62,10 @@ const UserSchema = new mongoose.Schema({
       type: String
     }
   },
+  signedupForNewsletter: {
+    type: Boolean,
+    default: false
+  },
   // mobileNumber: {
   //   type: String,
   //   required: true,

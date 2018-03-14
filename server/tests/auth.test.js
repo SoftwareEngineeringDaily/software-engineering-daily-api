@@ -9,7 +9,6 @@ import User from '../../server/models/user.model';
 chai.config.includeStack = true;
 
 describe('## Auth APIs', () => {
-
   // Email based login
   const validUserCredentialsWithEmail = {
     username: 'react2',
@@ -20,17 +19,17 @@ describe('## Auth APIs', () => {
   const validEmailAsUsernameLogin = {
     username: 'react2@email.com',
     password: 'express'
-  }
+  };
 
   const validEmailLogin = {
     email: 'react2@email.com',
     password: 'express'
-  }
+  };
 
   const invalidEmailLogin = {
     email: 'react2@email.com',
     password: 'express21321'
-  }
+  };
 
   // -------------------------
   const validUserCredentials = {
@@ -58,7 +57,6 @@ describe('## Auth APIs', () => {
 
   // loingWithEmail
   describe('# POST /api/auth/register (with email & name)', () => {
-
     it('should get valid JWT token', (done) => {
       request(app)
         .post('/api/auth/register')
@@ -93,9 +91,9 @@ describe('## Auth APIs', () => {
         // We want to make sure we reject bad login
         .then((res) => {  //eslint-disable-line
           return request(app)
-          .post('/api/auth/loginWithEmail')
-          .send(invalidEmailLogin)
-          .expect(httpStatus.UNAUTHORIZED);
+            .post('/api/auth/loginWithEmail')
+            .send(invalidEmailLogin)
+            .expect(httpStatus.UNAUTHORIZED);
         })
         .then((res) => {
           expect(res.body.message).to.equal('Password is incorrect.');
@@ -114,10 +112,10 @@ describe('## Auth APIs', () => {
         // We want to make sure we reject bad login
         .then((res) => {  //eslint-disable-line
           return request(app)
-          .post('/api/auth/loginWithEmail')
+            .post('/api/auth/loginWithEmail')
           // THIS is an improperly formatted login format without an email field:
-          .send(invalidLogin)
-          .expect(httpStatus.BAD_REQUEST);
+            .send(invalidLogin)
+            .expect(httpStatus.BAD_REQUEST);
         })
         .then((res) => {
           expect(res.body.message).to.equal('"email" is required');
@@ -127,10 +125,9 @@ describe('## Auth APIs', () => {
     });
   });
 
-  //-------- username <-> email login
+  // -------- username <-> email login
 
   describe('# POST /api/auth/register (+ login with email field as username)', () => {
-
     it('should get valid JWT token', (done) => {
       request(app)
         .post('/api/auth/register')
@@ -165,10 +162,10 @@ describe('## Auth APIs', () => {
         // We want to make sure we reject bad login
         .then((res) => {  //eslint-disable-line
           return request(app)
-          .post('/api/auth/login')
+            .post('/api/auth/login')
           // THIS is an improperly formatted loginf ormat without an email field:
-          .send(invalidEmailLogin)
-          .expect(httpStatus.BAD_REQUEST);
+            .send(invalidEmailLogin)
+            .expect(httpStatus.BAD_REQUEST);
         })
         .then((res) => {
           expect(res.body.message).to.equal('"username" is required');
@@ -178,7 +175,7 @@ describe('## Auth APIs', () => {
     });
   });
 
-  //-------- regular register + login unit tests
+  // -------- regular register + login unit tests
 
   describe('# POST /api/auth/register', () => {
     it('should return bad request error', (done) => {
@@ -304,13 +301,13 @@ describe('## Auth APIs', () => {
   });
 
   xdescribe('# GET /api/auth/:socialNetwork', () => {
-    it('should return bad request error', (done) => {
-      //call /api/auth/twitter
+    it('should return bad request error', () => {
+      // call /api/auth/twitter
     });
 
-    it('should get valid JWT token', (done) => {
-      //call /api/auth/facebook
-      //call /api/auth/google
+    it('should get valid JWT token', () => {
+      // call /api/auth/facebook
+      // call /api/auth/google
     });
   });
 });

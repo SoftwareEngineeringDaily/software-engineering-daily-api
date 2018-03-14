@@ -8,7 +8,7 @@ const router = express.Router(); // eslint-disable-line new-cap
 
 /** GET /api/tags/ - Get list of tags */
 router.route('/')
-  .get(expressJwt({secret: config.jwtSecret, credentialsRequired: false}), tagCtrl.list);
+  .get(expressJwt({ secret: config.jwtSecret, credentialsRequired: false }), tagCtrl.list);
 
 /** GET /api/tags/:tagId - Get tag */
 router.route('/:tagId')

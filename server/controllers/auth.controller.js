@@ -1,16 +1,15 @@
+import _ from 'lodash';
+import FacebookTokenStrategy from 'passport-facebook-token';
+import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import config from '../../config/config';
-import passport from 'passport';
-import FacebookTokenStrategy from 'passport-facebook-token';
 import User from '../models/user.model';
 import { signS3 } from '../helpers/s3';
-import _ from 'lodash';
 
+const http = require('http'); // For mailchimp api call
 require('dotenv').config();
-
-
 
 /**
  * @swagger
@@ -36,10 +35,10 @@ passport.use(new FacebookTokenStrategy(
     clientID: config.facebook.clientID,
     clientSecret: config.facebook.clientSecret
   },
-  ((accessToken, refreshToken, profile, done) => {
+  (accessToken, refreshToken, profile, done) => {
     const username = profile.emails[0].value || profile.id;
-    User
-      .findOne({ username }).exec()
+    User.findOne({ username })
+      .exec()
       .then((user) => {
         if (!user) {
           const newUser = new User();
@@ -50,16 +49,15 @@ passport.use(new FacebookTokenStrategy(
             id: profile.id,
             token: accessToken
           };
-          return newUser.save()
-            .then(userSaved => done(null, userSaved));
+          return newUser.save().then(userSaved => done(null, userSaved));
         }
         return done(null, user);
       })
       .catch((err) => {
-      err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+          err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
         return done(err);
       });
-  })
+  }
 ));
 
 /**
@@ -83,25 +81,24 @@ passport.use(new FacebookTokenStrategy(
  */
 
 function login(req, res, next) {
-  const username = req.body.username;
-  const password = req.body.password;
+  const { username } = req.body;
+  const { password } = req.body;
 
-  User
-    .findOne({
-      $or: [
-        { username },
-        { email: username }
-      ]
-    }).exec()
+  User.findOne({
+    $or: [{ username }, { email: username }]
+  })
+    .exec()
     .then((user) => {
       if (!user) return res.status(404).json({ message: 'User not found.' });
 
-      if (!user.validPassword(password)) return res.status(401).json({ message: 'Password is incorrect.' });
+      if (!user.validPassword(password)) {
+        return res.status(401).json({ message: 'Password is incorrect.' });
+      }
 
       const token = jwt.sign(user.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
 
       return res.status(200).json({
-        token,
+        token
       });
     })
     .catch((err) => {
@@ -111,20 +108,22 @@ function login(req, res, next) {
 }
 
 function loginWithEmail(req, res, next) {
-  const email = req.body.email;
-  const password = req.body.password;
+  const { email } = req.body;
+  const { password } = req.body;
 
-  User
-    .findOne({ email }).exec()
+  User.findOne({ email })
+    .exec()
     .then((user) => {
       if (!user) return res.status(404).json({ message: 'User not found.' });
 
-      if (!user.validPassword(password)) return res.status(401).json({ message: 'Password is incorrect.' });
+      if (!user.validPassword(password)) {
+        return res.status(401).json({ message: 'Password is incorrect.' });
+      }
 
       const token = jwt.sign(user.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
 
       return res.status(200).json({
-        token,
+        token
       });
     })
     .catch((err) => {
@@ -132,7 +131,6 @@ function loginWithEmail(req, res, next) {
       return next(err);
     });
 }
-
 
 /**
  * @swagger
@@ -167,8 +165,9 @@ function loginWithEmail(req, res, next) {
  */
 
 function register(req, res, next) {
-  const username = req.body.username;
-  const password = req.body.password;
+  const { username } = req.body;
+  const { password } = req.body;
+  const newsletterSignup = req.body.newsletter;
 
   if (!username) {
     let err = new APIError('Username is required to register.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
@@ -180,27 +179,59 @@ function register(req, res, next) {
     return next(err);
   }
 
-  const email = req.body.email;
+  const { email } = req.body;
   const queryIfEmail = {
-    $or: [
-      { username },
-      { email }
-    ]
+    $or: [{ username }, { email }]
   };
 
   const queryIfEmailMissing = {
-    $or: [
-      { username },
-      { email: username }
-    ]
+    $or: [{ username }, { email: username }]
   };
 
   // We do this so people can't share an email on either field, username or email:
   // also so no-one can have the same email or same username.
   const userQuery = email ? queryIfEmail : queryIfEmailMissing;
 
-  User
-    .findOne(userQuery).exec()
+  // Sign up user for mailchimp list (if checked)
+  // console.log(`newsletter status:${newsletterSignup}`);
+  try {
+    if (newsletterSignup) {
+      const postData = JSON.stringify({ status: 'subscribed', email_address: email });
+      // Build route because it varies based on API key
+      const hostname = `${config.mailchimp.mailchimpKey.split('-')[1]}.api.mailchimp.com`;
+      // Build POST options
+      const options = {
+        hostname,
+        path: `/3.0/lists/${config.mailchimp.mailchimpList}/members`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `apikey ${config.mailchimp.mailchimpKey}`,
+          'Content-Length': Buffer.byteLength(postData)
+        }
+      };
+      const mailchimpReq = http.request(options, (mailchimpRes) => {
+        mailchimpRes.setEncoding('utf8');
+        mailchimpRes.on('data', (body) => {
+          console.log(`Body: ${body}`);
+        });
+      });
+      mailchimpReq.on('error', (e) => {
+        console.log(`mailchimp error: ${e}`);
+        const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
+        return next(error);
+      });
+      mailchimpReq.write(postData);
+      mailchimpReq.end();
+    }
+  } catch (e) {
+    console.log(`mailchimp error: ${e}`);
+    const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
+    return next(error);
+  }
+
+  User.findOne(userQuery)
+    .exec()
     .then((user) => {
       if (user) {
         let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
@@ -209,6 +240,7 @@ function register(req, res, next) {
 
       const newUser = new User();
       newUser.password = User.generateHash(password);
+      newUser.signedupForNewsletter = newsletterSignup; // Probably works
       // We assign a set of "approved fields"
       const newValues = _.pick(req.body, User.updatableFields);
       Object.assign(newUser, newValues);
@@ -220,23 +252,24 @@ function register(req, res, next) {
 
       return res.status(201).json({
         user: userSaved,
-        token,
+        token
       });
     })
     .catch((err) => {
       if (err.message === 'User already exists.') {
         return res.status(401).json({
-          message: err.message,
+          message: err.message
         });
       }
       // return res.status(400).json({err: err});
       const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true);
       return next(error);
     });
+  return null;
 }
 
 function signS3AvatarUpload(req, res, next) {
-  const fileType = req.body.fileType;
+  const { fileType } = req.body;
   const newFileName = req.user._id;
 
   const cbSuccess = (result) => {
@@ -244,10 +277,15 @@ function signS3AvatarUpload(req, res, next) {
     res.end();
   };
 
-  const cbError = () => {
+  // eslint-disable-next-line
+  const cbError = err => {
     if (err) {
-      console.log(err);
-      const error = new APIError('There was a problem getting a signed url', httpStatus.SERVICE_UNAVAILABLE, true);
+      console.log(err); // eslint-disable-line
+      const error = new APIError(
+        'There was a problem getting a signed url',
+        httpStatus.SERVICE_UNAVAILABLE,
+        true
+      );
       return next(error);
     }
   };
@@ -257,10 +295,10 @@ function signS3AvatarUpload(req, res, next) {
 /**
  *
  */
-function socialAuth(req, res, next) {
+function socialAuth(req, res) {
   const token = jwt.sign(req.user.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
   return res.status(200).json({
-    token,
+    token
   });
 }
 
@@ -280,5 +318,11 @@ function getRandomNumber(req, res) {
 }
 
 export default {
-  login, loginWithEmail, getRandomNumber, register, socialAuth, signS3AvatarUpload
+  login,
+  loginWithEmail,
+  getRandomNumber,
+  register,
+  socialAuth,
+  signS3,
+  signS3AvatarUpload
 };

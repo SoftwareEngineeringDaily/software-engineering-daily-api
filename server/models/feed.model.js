@@ -1,7 +1,6 @@
-import Promise from 'bluebird';
-import mongoose, {Schema} from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
-var feedItemSchema = new Schema(); // TODO: replace with proper import
+const feedItemSchema = new Schema(); // TODO: replace with proper import
 const FeedSchema = new Schema({
   user: {
     type: Schema.Types.ObjectId,

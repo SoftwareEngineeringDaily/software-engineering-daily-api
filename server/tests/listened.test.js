@@ -107,12 +107,10 @@ describe('## Listened APIs', () => {
         postId
       });
       listened.save()
-        .then(() => {
-          return request(app)
-            .get('/api/listened')
-            .set('Authorization', `Bearer ${userToken}`)
-            .expect(httpStatus.OK);
-        })
+        .then(() => request(app)
+          .get('/api/listened')
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(httpStatus.OK))
         .then((res) => {
           const item = res.body;
           expect(item).to.have.lengthOf(1);
