@@ -1,8 +1,10 @@
 const Feed = require('feed');
+
 import config from '../../config/config';
 
 function replaceWithAdFree(post) {
   try {
+    console.log(post);
     const originalMP3Split = post.mp3.split('/');
     if (originalMP3Split.length > 0) {
       const fileName = originalMP3Split[originalMP3Split.length - 1];
@@ -35,13 +37,13 @@ function getAdFreePostsIfSubscribed(posts, fullUser, next) {
 function convertPostsToAdFreeRssFeed(posts, fullUser) {
   if (fullUser && fullUser.subscription && fulluser.subscription.active) {
     // Convert posts to ad free posts
-    var adfree = getAdFreePostsIfSubscribed(posts, fullUser, next);
-    var rssepisodes = adfree.map(post => convertToRssItem(post, next));
+    const adfree = getAdFreePostsIfSubscribed(posts, fullUser, next);
+    const rssepisodes = adfree.map(post => convertToRssItem(post, next));
     // Build RSS feed options
-    let feed = new Feed({
+    const feed = new Feed({
       title: 'SE Daily Ad-Free Feed',
       description: 'Ad-free RSS feed for Software Engineering Daily',
-      id: config.baseUrl+'/adfreerss',
+      id: `${config.baseUrl}/adfreerss`,
       link: config.baseUrl,
       image: 'http://softwareengineeringdaily.com/wp-content/uploads/powerpress/SED_square_solid_bg.png',
       generator: 'SEDaily Open Source Project',
@@ -51,7 +53,7 @@ function convertPostsToAdFreeRssFeed(posts, fullUser) {
         link: config.baseUrl
       }
     });
-    rssepisodes.forEach(post => {
+    rssepisodes.forEach((post) => {
       feed.addItem({
         title: post.title.rendered,
       });
