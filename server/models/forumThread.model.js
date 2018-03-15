@@ -62,10 +62,13 @@ ForumThreadSchema.statics = {
         });
         console.log('threadIds', threadIds);
         return Comment.aggregate([
+          // Restrict to subset of threads (todo: paginate).
           { $match: { rootEntity: { $in: threadIds } } },
           { $group: { _id: '$rootEntity', count: { $sum: 1 } } }
         ])
           .then((result) => {
+            // TODO: loop and make commentCount = zero for all threads.
+            // TODO: loop through threads and add counts:
             console.log('-----------RESULT', result);
             // return result;
             return threads;
