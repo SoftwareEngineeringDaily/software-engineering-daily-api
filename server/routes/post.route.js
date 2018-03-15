@@ -5,7 +5,6 @@ import paramValidation from '../../config/param-validation';
 import postCtrl from '../controllers/post.controller';
 import voteCtrl from '../controllers/vote.controller';
 import transferField from '../middleware/transferField';
-import commentCtrl from '../controllers/comment.controller';
 import relatedLinkCtrl from '../controllers/relatedLink.controller';
 import bookmarkCtrl from '../controllers/bookmark.controller';
 import listenedCtrl from '../controllers/listened.controller';
@@ -34,26 +33,6 @@ router.route('/:postId')
     , loadFullUser
     , postCtrl.get
   );
-
-router.route('/:postId/comments')
-  .get(
-    expressJwt({
-      secret: config.jwtSecret,
-      credentialsRequired: false
-    }),
-    transferField({ source: 'post', target: 'entity' }),
-    commentCtrl.list
-  );
-
-// Create a comment:
-router.route('/:postId/comment')
-  .post(
-    expressJwt({ secret: config.jwtSecret })
-    , validate(paramValidation.comment)
-    , transferField({ source: 'post', target: 'entity' })
-    , commentCtrl.create
-  );
-
 // Get related links associated with postId
 router.route('/:postId/related-links')
   .get(
