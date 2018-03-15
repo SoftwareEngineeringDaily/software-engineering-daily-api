@@ -55,12 +55,14 @@ ForumThreadSchema.statics = {
       .then((threads) => {
         // Let's fill in the commentCount for each thread.
         // First we get the ids in an array:
-        const ids = map(threads, (thread) => {
-          console.log('ff');
+        const threadIds = map(threads, (thread) => {
+          // Get Thread ids
+          console.log('thread');
           return thread._id;
         });
-        console.log('---ids', ids);
+        console.log('threadIds', threadIds);
         return Comment.aggregate([
+          // { $match: { rootEntity: { $in: threadIds } } },
           { $group: { _id: '$rootEntity', count: { $sum: 1 } } }
         ])
           .then((result) => {
