@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
+import map from 'lodash/map';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
+import Comment from './comment.model';
 
 const ForumThreadSchema = new mongoose.Schema({
   id: String,
@@ -43,6 +45,33 @@ ForumThreadSchema.statics = {
         return Promise.reject(err);
       });
   },
+
+  list() {
+    const query = {};
+    query.deleted = false;
+    return this.find(query)
+      .populate('author', '-password')
+      .exec()
+      .then((threads) => {
+        // Let's fill in the commentCount for each thread.
+        // First we get the ids in an array:
+        const ids = map(threads, (thread) => {
+          console.log('ff');
+          return thread._id;
+        });
+        console.log('---ids', ids);
+        return Comment.aggregate([
+          { $group: { _id: '$rootEntity', count: { $sum: 1 } } }
+        ])
+          .then((result) => {
+            console.log('-----------RESULT', result);
+            // return result;
+            return threads;
+          });
+      });
+  }
+
+  /*
   list() {
     const query = {};
     query.deleted = false;
@@ -50,6 +79,7 @@ ForumThreadSchema.statics = {
       .populate('author', '-password')
       .exec();
   }
+  */
 };
 
 export default mongoose.model('ForumThread', ForumThreadSchema);
