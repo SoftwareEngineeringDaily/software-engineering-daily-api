@@ -62,7 +62,7 @@ ForumThreadSchema.statics = {
         });
         console.log('threadIds', threadIds);
         return Comment.aggregate([
-          // { $match: { rootEntity: { $in: threadIds } } },
+          { $match: { rootEntity: { $in: threadIds } } },
           { $group: { _id: '$rootEntity', count: { $sum: 1 } } }
         ])
           .then((result) => {
