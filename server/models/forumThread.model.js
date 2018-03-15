@@ -33,6 +33,7 @@ ForumThreadSchema.statics = {
    */
   get(id) {
     return this.findById(id)
+      .populate('author', '-password')
       .exec()
       .then((thread) => {
         if (thread) {
