@@ -97,7 +97,7 @@ function remove(req, res, next) {
  */
 
 function create(req, res, next) {
-  const entityId = req.entity._id;
+  const { entityId } = req.params;
   const { parentCommentId } = req.body;
   const { content } = req.body;
   const { user } = req;
@@ -142,7 +142,7 @@ function create(req, res, next) {
  *         $ref: '#/responses/NotFound'
  */
 function list(req, res, next) {
-  const entityId = req.entity._id;
+  const { entityId } = req.params;
   // TODO loop through and replace comments that are deleted with "This comment has been deleted"
   Comment.getTopLevelCommentsForItem(entityId)
     .then((comments) => {
