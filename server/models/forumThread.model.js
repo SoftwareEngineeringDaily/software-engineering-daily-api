@@ -46,6 +46,7 @@ ForumThreadSchema.statics = {
     const query = {};
     query.deleted = false;
     return this.find(query)
+      .populate('author', '-password')
       .exec();
   }
 };
