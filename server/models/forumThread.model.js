@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import map from 'lodash/map';
+import each from 'lodash/each';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Comment from './comment.model';
@@ -66,12 +67,33 @@ ForumThreadSchema.statics = {
           { $match: { rootEntity: { $in: threadIds } } },
           { $group: { _id: '$rootEntity', count: { $sum: 1 } } }
         ])
-          .then((result) => {
+          .then((counts) => {
             // TODO: loop and make commentCount = zero for all threads.
             // TODO: loop through threads and add counts:
-            console.log('-----------RESULT', result);
+            console.log('-----------counts', counts);
+            const expandedThreads = map(threads, (thread) => {
+              const expandedThread = Object.assign({}, thread.toObject(), { commentCount: 0 });
+              return expandedThread;
+            });
+            // Let's make a map of our counts to make it easier to look up:
+            const countsMap = {};
+            each(counts, (count) => {
+              countsMap[count._id] = count.count;
+            });
+            console.log('------------countsMap', countsMap);
+
+            /* eslint-disable no-param-reassign */
+            each(expandedThreads, (expandedThread) => {
+              if (countsMap[expandedThread._id]) {
+                console.log('****************');
+                expandedThread.commentCount = countsMap[expandedThread._id];
+                console.log('new thread', expandedThread);
+              }
+            });
+            /* eslint-enable no-param-reassign */
+
             // return result;
-            return threads;
+            return expandedThreads;
           });
       });
   }
