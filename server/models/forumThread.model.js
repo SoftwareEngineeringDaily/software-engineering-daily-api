@@ -25,7 +25,8 @@ const ForumThreadSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  date: { type: Date, default: Date.now }
+  dateLastAcitiy: { type: Date, default: Date.now },
+  dateCreated: { type: Date, default: Date.now }
 });
 
 ForumThreadSchema.statics = {
@@ -61,7 +62,6 @@ ForumThreadSchema.statics = {
           console.log('thread');
           return thread._id;
         });
-        console.log('threadIds', threadIds);
         return Comment.aggregate([
           // Restrict to subset of threads (todo: paginate).
           { $match: { rootEntity: { $in: threadIds } } },
@@ -70,7 +70,6 @@ ForumThreadSchema.statics = {
           .then((counts) => {
             // TODO: loop and make commentCount = zero for all threads.
             // TODO: loop through threads and add counts:
-            console.log('-----------counts', counts);
             const expandedThreads = map(threads, (thread) => {
               const expandedThread = Object.assign({}, thread.toObject(), { commentCount: 0 });
               return expandedThread;
@@ -80,19 +79,15 @@ ForumThreadSchema.statics = {
             each(counts, (count) => {
               countsMap[count._id] = count.count;
             });
-            console.log('------------countsMap', countsMap);
 
             /* eslint-disable no-param-reassign */
             each(expandedThreads, (expandedThread) => {
               if (countsMap[expandedThread._id]) {
-                console.log('****************');
                 expandedThread.commentCount = countsMap[expandedThread._id];
-                console.log('new thread', expandedThread);
               }
             });
             /* eslint-enable no-param-reassign */
 
-            // return result;
             return expandedThreads;
           });
       });
