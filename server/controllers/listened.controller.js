@@ -33,27 +33,30 @@ import Listened from '../models/listened.model';
  */
 
 function create(req, res, next) {
-  const post = req.post;
+  const { post } = req;
   const userId = req.user._id;
 
   // Get the item
   Listened.findOne({
     postId: post._id,
     userId
-  }).then((listened) => {
-    // Return the found item if any
-    if (listened) {
-      return Bluebird.all([listened.save()]);
-    }
-    // Create the new model
-    const listenedModel = new Listened({
-      userId,
-      postId: post._id
+  })
+    .then((listened) => {
+      // Return the found item if any
+      if (listened) {
+        return Bluebird.all([listened.save()]);
+      }
+      // Create the new model
+      const listenedModel = new Listened({
+        userId,
+        postId: post._id
+      });
+      return Bluebird.all([listenedModel.save()]);
+    })
+    .then(listened => res.json(listened))
+    .catch((e) => {
+      next(e);
     });
-    return Bluebird.all([listenedModel.save()]);
-  }).then(listened => res.json(listened)).catch((e) => {
-    next(e);
-  });
 }
 
 /**
@@ -105,5 +108,7 @@ function listByUser(req, res, next) {
  * Default export
  */
 export default {
-  create, listByPost, listByUser
+  create,
+  listByPost,
+  listByUser
 };

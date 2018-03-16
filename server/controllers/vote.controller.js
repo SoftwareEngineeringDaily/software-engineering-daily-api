@@ -1,6 +1,4 @@
-import raccoon from 'raccoon';
 import Bluebird from 'bluebird';
-import mongoose from 'mongoose';
 
 import Vote from '../models/vote.model';
 
@@ -53,8 +51,6 @@ function get(req, res) {
   return res.json(req.vote);
 }
 
-
-
 /**
  * @swagger
  *   /votes:
@@ -85,37 +81,40 @@ function list(req, res, next) {
     .catch(e => next(e));
 }
 
-
 function findVote(req, res, next) {
   // TODO: REMOVE once we migrate over to entityId only
 
   const successCB = (vote) => {
-    if( vote) {
+    if (vote) {
       req.vote = vote;
     }
     next();
   };
 
-  const errorCB = (error) => {
-    next(error);
-  };
+  error => next(error); // eslint-disable-line
 
   // We need to account for the fact that posts could either be
   // liked under entityId or postId
   if (req.post) {
-    Vote.findOne({$or: [
-      {postId: req.post._id, userId: req.user._id},
-      {entityId: req.entity._id, userId: req.user._id}
-    ]})
-    .then(successCB)
-    .catch( (error) => { next(error) } );
+    Vote.findOne({
+      $or: [
+        { postId: req.post._id, userId: req.user._id },
+        { entityId: req.entity._id, userId: req.user._id }
+      ]
+    })
+      .then(successCB)
+      .catch((error) => {
+        next(error);
+      });
   } else {
     Vote.findOne({
       entityId: req.entity._id,
-      userId: req.user._id,
+      userId: req.user._id
     })
-    .then(successCB)
-    .catch( (error) => { next(error) } );
+      .then(successCB)
+      .catch((error) => {
+        next(error);
+      });
   }
 }
 
@@ -144,42 +143,41 @@ function findVote(req, res, next) {
  */
 
 function upvote(req, res, next) {
-  const entity = req.entity;
+  const { entity } = req;
 
   if (!entity.score) entity.score = 0;
   let promise;
-  const vote = req.vote;
+  const { vote } = req;
 
   // TODO: rewrite this to have it be model / entity.liked(vote)
-    if (vote) {
-      let incrementValue = 1;
-      // We are changing directly from down to up
-      if (vote.direction !== 'upvote' && vote.active) {
-        incrementValue = 2;
-      }
+  if (vote) {
+    let incrementValue = 1;
+    // We are changing directly from down to up
+    if (vote.direction !== 'upvote' && vote.active) {
+      incrementValue = 2;
+    }
 
-      vote.active = !vote.active;
+    vote.active = !vote.active;
 
-      if (vote.direction !== 'upvote') {
-        vote.direction = 'upvote';
-        vote.active = true;
-      }
+    if (vote.direction !== 'upvote') {
+      vote.direction = 'upvote';
+      vote.active = true;
+    }
 
-      if (vote.active) {
-        entity.score += incrementValue;
-        req.liked = true;
-      } else {
-        entity.score -= incrementValue;
-        req.unliked = true;
-      }
-      promise = Bluebird.all([vote.save(), entity.save()]);
+    if (vote.active) {
+      entity.score += incrementValue;
+      req.liked = true;
     } else {
-
+      entity.score -= incrementValue;
+      req.unliked = true;
+    }
+    promise = Bluebird.all([vote.save(), entity.save()]);
+  } else {
     const newvote = new Vote();
     newvote.entityId = entity._id;
     // SPECIAL CASE to be removed when vote.postId is deprecreated from mobile
     // we should really be versioning the API.....
-    if (req.post && req.post._id === req.entity._id)  {
+    if (req.post && req.post._id === req.entity._id) {
       newvote.postId = entity._id;
     }
 
@@ -191,15 +189,14 @@ function upvote(req, res, next) {
     promise = Bluebird.all([newvote.save(), entity.save()]);
   }
   promise
-  .then((vote) => {
-    req.vote = vote[0]; // eslint-disable-line no-param-reassign
-    next();
-  })
-  .catch((e) => {
-    next(e);
-  });
+    .then((vote1) => {
+      req.vote = vote1[0]; // eslint-disable-line
+      next();
+    })
+    .catch((e) => {
+      next(e);
+    });
 }
-
 
 /**
  * @swagger
@@ -224,11 +221,11 @@ function upvote(req, res, next) {
  */
 
 function downvote(req, res, next) {
-  const entity = req.entity;
+  const { entity } = req;
 
   if (!entity.score) entity.score = 0;
   let promise;
-  const vote = req.vote;
+  const { vote } = req;
   if (vote) {
     let incrementValue = 1;
 
@@ -254,11 +251,10 @@ function downvote(req, res, next) {
 
     promise = Bluebird.all([vote.save(), entity.save()]);
   } else {
-
     const newvote = new Vote();
     newvote.entityId = entity._id;
     // SPECIAL CASE to be removed when vote.postId is deprecreated from mobile
-    if (req.post && req.post._id === req.entity._id)  {
+    if (req.post && req.post._id === req.entity._id) {
       newvote.postId = entity._id;
     }
     newvote.userId = req.user._id;
@@ -270,15 +266,23 @@ function downvote(req, res, next) {
     promise = Bluebird.all([newvote.save(), entity.save()]);
   }
   promise
-  .then((vote) => {
-    req.vote = vote[0]; // eslint-disable-line no-param-reassign
-    next();
-  })
-  .catch(e => next(e));
+    .then((vote1) => {
+      req.vote = vote1[0]; // eslint-disable-line
+      next();
+    })
+    .catch(e => next(e));
 }
 
-function finish(req, res, next) {
-    return res.json(req.vote);
+function finish(req, res) {
+  return res.json(req.vote);
 }
 
-export default { load, get, findVote, finish, list, upvote, downvote };
+export default {
+  load,
+  get,
+  findVote,
+  finish,
+  list,
+  upvote,
+  downvote
+};

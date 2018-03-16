@@ -11,6 +11,7 @@ import bookmarkRoutes from './bookmark.route';
 import authRoutes from './auth.route';
 import userRoutes from './user.route';
 import subscriptionRoutes from './subscription.route';
+import forumRoutes from './forum.route';
 import listenedRoutes from './listened.route';
 import tagsRoutes from './tag.route';
 // import userRoutes from './user.route';
@@ -42,6 +43,7 @@ router.get('/health-check', (req, res) =>
 router.use('/docs', docRoutes);
 router.use('/related-links', relatedLinkRoutes);
 router.use('/posts', postRoutes);
+router.use('/forum', forumRoutes);
 router.use('/jobs', jobRoutes);
 router.use('/companies', companyRoutes);
 router.use('/comments', commentRoutes);
