@@ -25,7 +25,7 @@ import Vote from './vote.model';
  *         example: 2017-10-30T01:05:39.674Z
  *       author:
  *         $ref: '#/definitions/ObjectId'
- *       post:
+ *       rootEntity:
  *         $ref: '#/definitions/ObjectId'
  */
 const CommentSchema = new Schema({
@@ -50,19 +50,14 @@ const CommentSchema = new Schema({
   lastEdited: {
     type: Date
   },
-  /*
-  root: {
-    type: Schema.Types.ObjectId
+  rootEntity: {
+    type: Schema.Types.ObjectId // The entity that owns this comment
     // , ref: 'Post' | 'AMA'
-  },
-  */
-  post: {
-    type: Schema.Types.ObjectId,
-    ref: 'Post'
   },
   author: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    required: true
   }
 });
 
@@ -110,7 +105,7 @@ CommentSchema.statics = {
   get(id) {
     return this.findById(id)
       .populate('author', '-password')
-      .populate('post')
+      // .populate('rootEntity')
       .exec()
       .then((comment) => {
         if (comment) {
@@ -177,8 +172,8 @@ CommentSchema.statics = {
     return commentIds;
   },
 
-  getTopLevelCommentsForItem(postId) {
-    return this.find({ post: postId, parentComment: null })
+  getTopLevelCommentsForItem(entityId) {
+    return this.find({ rootEntity: entityId, parentComment: null })
       .sort({ dateCreated: -1 })
       .populate('author', '-password');
   },

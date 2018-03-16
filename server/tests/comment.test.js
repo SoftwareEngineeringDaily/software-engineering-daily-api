@@ -59,10 +59,10 @@ describe('## Comment APIs', () => {
       });
   });
 
-  describe('# POST /api/posts/$postId/comment', () => {
+  describe('# POST /api/comments/forEntity/$postId', () => {
     it('errors when not logged in', (done) => {
       request(app)
-        .post(`/api/posts/${postId}/comment`)
+        .post(`/api/comments/forEntity/${postId}`)
         .expect(httpStatus.UNAUTHORIZED)
         .then((res) => {
           expect(res.body).to.exist; //eslint-disable-line
@@ -73,14 +73,14 @@ describe('## Comment APIs', () => {
     it('comment on a post', (done) => {
       const content = 'Hello content!';
       request(app)
-        .post(`/api/posts/${postId}/comment`)
+        .post(`/api/comments/forEntity/${postId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .send({ content })
         .expect(httpStatus.CREATED)
         .then((res) => {
           expect(res.body).to.exist; //eslint-disable-line
           const comment = res.body.result;
-          expect(comment.post).to.eql(`${postId}`);
+          expect(comment.rootEntity).to.eql(`${postId}`);
           expect(comment.content).to.eql(`${content}`);
           expect(comment.author).to.exist; //eslint-disable-line
           expect(comment.dateCreated).to.exist; //eslint-disable-line
@@ -93,7 +93,7 @@ describe('## Comment APIs', () => {
 
     it('should get comments', (done) => {
       request(app)
-        .get(`/api/posts/${postId}/comments`)
+        .get(`/api/comments/forEntity/${postId}`)
         .expect(httpStatus.OK)
         .then((res) => {
           expect(res.body).to.exist; //eslint-disable-line
@@ -106,7 +106,7 @@ describe('## Comment APIs', () => {
     it('should reply a comment', (done) => {
       const content = 'Hello reply content!';
       request(app)
-        .post(`/api/posts/${postId}/comment`)
+        .post(`/api/comments/forEntity/${postId}`)
         .set('Authorization', `Bearer ${userToken}`)
         .send({
           content,
@@ -116,7 +116,7 @@ describe('## Comment APIs', () => {
         .then((res) => {
           expect(res.body).to.exist; //eslint-disable-line
           const reply = res.body.result;
-          expect(reply.post).to.eql(`${postId}`);
+          expect(reply.rootEntity).to.eql(`${postId}`);
           expect(reply.content).to.eql(`${content}`);
           expect(reply.parentComment).to.eql(`${commentId}`);
           expect(reply.author).to.exist; //eslint-disable-line
