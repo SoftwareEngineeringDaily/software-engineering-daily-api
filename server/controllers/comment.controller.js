@@ -2,6 +2,7 @@ import Promise from 'bluebird';
 import map from 'lodash/map';
 
 import Comment from '../models/comment.model';
+import ForumThread from '../models/forumThread.model';
 
 /*
 * Load comment and append to req.
@@ -99,7 +100,7 @@ function remove(req, res, next) {
 function create(req, res, next) {
   const { entityId } = req.params;
   const { parentCommentId } = req.body;
-  const { content } = req.body;
+  const { content, entityType } = req.body;
   const { user } = req;
 
   const comment = new Comment();
@@ -112,9 +113,19 @@ function create(req, res, next) {
   comment.author = user._id;
   comment
     .save()
-    .then(commentSaved =>
+    .then((commentSaved) => {
       // TODO: result key is not consistent with other responses, consider changing this
-      res.status(201).json({ result: commentSaved }))
+      if (entityType) {
+        switch (entityType.toLowerCase()) {
+          case 'forumthread':
+            // TODO: should return here
+            return ForumThread.increaseCommentCount(entityId).then(() =>
+              res.status(201).json({ result: commentSaved }));
+          default:
+        }
+      }
+      return res.status(201).json({ result: commentSaved });
+    })
     .catch(err => next(err));
 }
 

@@ -25,6 +25,7 @@ const ForumThreadSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  commentsCount: { type: Number, default: 0 },
   dateLastAcitiy: { type: Date, default: Date.now },
   dateCreated: { type: Date, default: Date.now }
 });
@@ -48,11 +49,21 @@ ForumThreadSchema.statics = {
       });
   },
 
+  increaseCommentCount(id) {
+    return this.get(id).then((thread) => {
+      const forumThread = thread;
+      forumThread.commentCount += 1;
+      forumThread.dateLastAcitiy = new Date();
+      return forumThread.save();
+    });
+  },
+
   list() {
     const query = {};
     query.deleted = false;
     return this.find(query)
       .populate('author', '-password')
+      .sort({ dateLastAcitiy: -1 })
       .exec()
       .then((threads) => {
         // Let's fill in the commentCount for each thread.
