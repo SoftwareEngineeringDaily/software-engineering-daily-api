@@ -189,8 +189,9 @@ function upvote(req, res, next) {
     promise = Bluebird.all([newvote.save(), entity.save()]);
   }
   promise
-    .then((vote1) => {
-      req.vote = vote1[0]; // eslint-disable-line
+    .then((results) => {
+      req.vote = results[0]; // eslint-disable-line
+      req.entity = results[1]; // eslint-disable-line
       next();
     })
     .catch((e) => {
@@ -266,14 +267,36 @@ function downvote(req, res, next) {
     promise = Bluebird.all([newvote.save(), entity.save()]);
   }
   promise
-    .then((vote1) => {
-      req.vote = vote1[0]; // eslint-disable-line
+    .then((results) => {
+      req.vote = results[0]; // eslint-disable-line
+      req.entity = results[1]; // eslint-disable-line
       next();
     })
     .catch(e => next(e));
 }
 
+function updateVotingInfo(vote, entityClean) {
+  const entity = entityClean;
+  entity.upvoted = false;
+  entity.downvoted = false;
+
+  if (!vote) {
+    return entity;
+  }
+
+  if (vote.direction === 'upvote' && vote.active) {
+    entity.upvoted = true;
+  }
+
+  if (vote.direction === 'downvote' && vote.active) {
+    entity.downvoted = true;
+  }
+  return entity;
+}
 function finish(req, res) {
+  req.vote = req.vote.toObject();
+  // Pass down the entity
+  req.vote.entity = updateVotingInfo(req.vote, req.entity.toObject());
   return res.json(req.vote);
 }
 

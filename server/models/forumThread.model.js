@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
+import Vote from './vote.model';
 
 const ForumThreadSchema = new mongoose.Schema({
   id: String,
@@ -29,7 +30,7 @@ const ForumThreadSchema = new mongoose.Schema({
 
 ForumThreadSchema.statics = {
   /**
-   * Get post
+   * Get thread
    * @param {ObjectId} id - The objectId of forum thread.
    * @returns {Promise<Thread, APIError>}
    */
@@ -55,14 +56,71 @@ ForumThreadSchema.statics = {
     });
   },
 
-  list() {
+  list({
+    user = null,
+  } = {}) {
     const query = {};
     query.deleted = false;
     return this.find(query)
       .populate('author', '-password')
       .sort({ dateLastAcitiy: -1 })
-      .exec();
+      .exec()
+      .then((threadsFound) => {
+        const threadsFoundProcessed = threadsFound.map((thread) => {
+          console.log('-');
+          return Object.assign({}, thread.toObject());
+        });
+        if (!user) {
+          return threadsFoundProcessed;
+        }
+        return this.addVotesForUserToEntities(threadsFoundProcessed, user._id);
+      });
+  },
+
+  addVotesForUserToEntities(entities, userId) {
+    const ids = entities.map((entity) => { //eslint-disable-line
+      return entity._id;
+    });
+    return Vote.find({
+      userId,
+      entityId: { $in: ids },
+    })
+      .exec()
+      .then((votes) => {
+        const voteMap = {};
+        for (let index in votes) { // eslint-disable-line
+          const vote = votes[index];
+          const voteKey = vote.entityId;
+          voteMap[voteKey] = vote;
+        }
+
+        const updatedEntities = [];
+        for (let index in entities) { // eslint-disable-line
+          const entity = entities[index];
+          // TODO: refactor into its own fxn:
+          entity.upvoted = false;
+          entity.downvoted = false;
+
+          if (!voteMap[entity._id]) {
+            updatedEntities.push(entity);
+            continue; // eslint-disable-line
+          }
+
+          if (voteMap[entity._id].direction === 'upvote' && voteMap[entity._id].active) {
+            entity.upvoted = true;
+          }
+
+          if (voteMap[entity._id].direction === 'downvote' && voteMap[entity._id].active) {
+            entity.downvoted = true;
+          }
+
+          updatedEntities.push(entity);
+        }
+
+        return updatedEntities;
+      });
   }
+
 
   /*
   list() {
