@@ -56,13 +56,25 @@ ForumThreadSchema.statics = {
     });
   },
 
-  list() {
+  list({
+    user = null,
+  } = {}) {
     const query = {};
     query.deleted = false;
     return this.find(query)
       .populate('author', '-password')
       .sort({ dateLastAcitiy: -1 })
-      .exec();
+      .exec()
+      .then((threadsFound) => {
+        const threadsFoundProcessed = threadsFound.map((thread) => {
+          console.log('-');
+          return Object.assign({}, thread.toObject());
+        });
+        if (!user) {
+          return threadsFoundProcessed;
+        }
+        return this.addVotesForUserToEntities(threadsFoundProcessed, user._id);
+      });
   },
 
   addVotesForUserToEntities(entities, userId) {
