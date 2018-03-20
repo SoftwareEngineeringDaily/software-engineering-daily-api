@@ -64,7 +64,8 @@ ForumThreadSchema.statics = {
       .sort({ dateLastAcitiy: -1 })
       .exec();
   },
-  addVotesForUserToPosts(entities, userId) {
+
+  addVotesForUserToEntities(entities, userId) {
     const ids = posts.map((entity) => { //eslint-disable-line
       return entity._id;
     });
