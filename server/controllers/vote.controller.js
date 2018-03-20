@@ -275,9 +275,28 @@ function downvote(req, res, next) {
     .catch(e => next(e));
 }
 
+function updateVotingInfo(vote, entityClean) {
+  const entity = entityClean;
+  entity.upvoted = false;
+  entity.downvoted = false;
+
+  if (!vote) {
+    return entity;
+  }
+
+  if (vote.direction === 'upvote' && vote.active) {
+    entity.upvoted = true;
+  }
+
+  if (vote.direction === 'downvote' && vote.active) {
+    entity.downvoted = true;
+  }
+  return entity;
+}
 function finish(req, res) {
   req.vote = req.vote.toObject();
-  req.vote.entity = req.entity; // Pass down the entity
+  // Pass down the entity
+  req.vote.entity = updateVotingInfo(req.vote, req.entity.toObject());
   return res.json(req.vote);
 }
 
