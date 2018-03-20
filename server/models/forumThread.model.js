@@ -30,7 +30,7 @@ const ForumThreadSchema = new mongoose.Schema({
 
 ForumThreadSchema.statics = {
   /**
-   * Get post
+   * Get thread
    * @param {ObjectId} id - The objectId of forum thread.
    * @returns {Promise<Thread, APIError>}
    */
@@ -78,7 +78,7 @@ ForumThreadSchema.statics = {
   },
 
   addVotesForUserToEntities(entities, userId) {
-    const ids = posts.map((entity) => { //eslint-disable-line
+    const ids = entities.map((entity) => { //eslint-disable-line
       return entity._id;
     });
     return Vote.find({
@@ -97,6 +97,7 @@ ForumThreadSchema.statics = {
         const updatedEntities = [];
         for (let index in entities) { // eslint-disable-line
           const entity = entities[index];
+          // TODO: refactor into its own fxn:
           entity.upvoted = false;
           entity.downvoted = false;
 
