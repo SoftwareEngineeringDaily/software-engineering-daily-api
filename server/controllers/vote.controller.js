@@ -189,8 +189,10 @@ function upvote(req, res, next) {
     promise = Bluebird.all([newvote.save(), entity.save()]);
   }
   promise
-    .then((vote1) => {
-      req.vote = vote1[0]; // eslint-disable-line
+    .then((results) => {
+      req.vote = results[0]; // eslint-disable-line
+      req.entity = results[1]; // eslint-disable-line
+      console.log('results----------', results);
       next();
     })
     .catch((e) => {
@@ -266,14 +268,20 @@ function downvote(req, res, next) {
     promise = Bluebird.all([newvote.save(), entity.save()]);
   }
   promise
-    .then((vote1) => {
-      req.vote = vote1[0]; // eslint-disable-line
+    .then((results) => {
+      req.vote = results[0]; // eslint-disable-line
+      req.entity = results[1]; // eslint-disable-line
+      console.log('results----------', results);
       next();
     })
     .catch(e => next(e));
 }
 
 function finish(req, res) {
+  req.vote = req.vote.toObject();
+  req.vote.entity = req.entity; // Pass down the entity
+  console.log('finish----------', req.vote);
+  console.log('finish entity----------', req.entity);
   return res.json(req.vote);
 }
 
