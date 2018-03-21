@@ -98,7 +98,7 @@ ForumThreadSchema.statics = {
         for (let index in entities) { // eslint-disable-line
           const entity = entities[index];
           const vote = voteMap[entity._id];
-          updatedEntities.push(Vote.generateEntityVoteInfo(vote, entity));
+          updatedEntities.push(Vote.generateEntityVoteInfo(entity, vote));
         }
 
         return updatedEntities;

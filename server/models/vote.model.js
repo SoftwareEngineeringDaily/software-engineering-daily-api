@@ -50,7 +50,7 @@ VoteSchema.method({});
  */
 VoteSchema.statics = {
 
-  generateEntityVoteInfo(vote, entityClean) {
+  generateEntityVoteInfo(entityClean, vote) {
     const entity = entityClean;
     entity.upvoted = false;
     entity.downvoted = false;

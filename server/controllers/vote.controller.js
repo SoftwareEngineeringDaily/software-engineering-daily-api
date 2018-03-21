@@ -282,7 +282,7 @@ function finish(req, res) {
   // entity object so that the clients can have an easier time figuring
   // out if something has been liked or not. It keeps a consistent
   // pattern to how entities come down on their own.
-  req.vote.entity = Vote.generateEntityVoteInfo(req.vote, req.entity.toObject());
+  req.vote.entity = Vote.generateEntityVoteInfo(req.entity.toObject(), req.vote);
   return res.json(req.vote);
 }
 
