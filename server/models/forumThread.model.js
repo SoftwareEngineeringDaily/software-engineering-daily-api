@@ -97,24 +97,8 @@ ForumThreadSchema.statics = {
         const updatedEntities = [];
         for (let index in entities) { // eslint-disable-line
           const entity = entities[index];
-          // TODO: refactor into its own fxn:
-          entity.upvoted = false;
-          entity.downvoted = false;
-
-          if (!voteMap[entity._id]) {
-            updatedEntities.push(entity);
-            continue; // eslint-disable-line
-          }
-
-          if (voteMap[entity._id].direction === 'upvote' && voteMap[entity._id].active) {
-            entity.upvoted = true;
-          }
-
-          if (voteMap[entity._id].direction === 'downvote' && voteMap[entity._id].active) {
-            entity.downvoted = true;
-          }
-
-          updatedEntities.push(entity);
+          const vote = voteMap[entity._id];
+          updatedEntities.push(Vote.generateEntityVoteInfo(vote, entity));
         }
 
         return updatedEntities;

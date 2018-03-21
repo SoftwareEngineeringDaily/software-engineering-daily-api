@@ -49,6 +49,25 @@ VoteSchema.method({});
  * Statics
  */
 VoteSchema.statics = {
+
+  generateEntityVoteInfo(vote, entityClean) {
+    const entity = entityClean;
+    entity.upvoted = false;
+    entity.downvoted = false;
+
+    if (!vote) {
+      return entity;
+    }
+
+    if (vote.direction === 'upvote' && vote.active) {
+      entity.upvoted = true;
+    }
+
+    if (vote.direction === 'downvote' && vote.active) {
+      entity.downvoted = true;
+    }
+    return entity;
+  },
   updateEntity(entity, vote) {
     entity.upvoted = false; // eslint-disable-line
     entity.downvoted = false; // eslint-disable-line
