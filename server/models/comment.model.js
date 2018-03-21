@@ -116,22 +116,6 @@ CommentSchema.statics = {
       });
   },
 
-  updateVoteInfo(comment, vote) {
-    comment.upvoted = false; // eslint-disable-line
-    comment.downvoted = false; // eslint-disable-line
-    if (!vote) {
-      return comment;
-    }
-
-    if (vote.direction === 'upvote' && vote.active) {
-      comment.upvoted = true; // eslint-disable-line
-    }
-
-    if (vote.direction === 'downvote' && vote.active) {
-      comment.downvoted = true; // eslint-disable-line
-    }
-    return comment;
-  },
   // Take all comments, including their children/replies
   // and fill in the vote information.
   // NOTE: this requires parentComments to not be a mongoose objects
@@ -153,10 +137,12 @@ CommentSchema.statics = {
         // Fill up the actual parent comments to contain
         // vote info.
         parentComments.forEach((parentComment) => {
-          this.updateVoteInfo(parentComment, voteMap[parentComment._id]);
+          Vote.generateEntityVoteInfo(parentComment, voteMap[parentComment._id]);
           const { replies } = parentComment;
-          replies.forEach((comment) => {
-            this.updateVoteInfo(comment, voteMap[comment._id]);
+          // TODO: move this to the fillNestedComments fxn
+          replies.map((comment) => {
+            const vote = voteMap[comment._id];
+            return Vote.generateEntityVoteInfo(comment, vote);
           });
         });
         return parentComments;

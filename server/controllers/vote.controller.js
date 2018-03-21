@@ -275,28 +275,14 @@ function downvote(req, res, next) {
     .catch(e => next(e));
 }
 
-function updateVotingInfo(vote, entityClean) {
-  const entity = entityClean;
-  entity.upvoted = false;
-  entity.downvoted = false;
-
-  if (!vote) {
-    return entity;
-  }
-
-  if (vote.direction === 'upvote' && vote.active) {
-    entity.upvoted = true;
-  }
-
-  if (vote.direction === 'downvote' && vote.active) {
-    entity.downvoted = true;
-  }
-  return entity;
-}
 function finish(req, res) {
   req.vote = req.vote.toObject();
   // Pass down the entity
-  req.vote.entity = updateVotingInfo(req.vote, req.entity.toObject());
+  // We are getting the correct vote information to be part of the
+  // entity object so that the clients can have an easier time figuring
+  // out if something has been liked or not. It keeps a consistent
+  // pattern to how entities come down on their own.
+  req.vote.entity = Vote.generateEntityVoteInfo(req.entity.toObject(), req.vote);
   return res.json(req.vote);
 }
 
