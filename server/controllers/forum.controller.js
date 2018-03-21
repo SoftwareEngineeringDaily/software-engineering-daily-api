@@ -10,24 +10,9 @@ function load(req, res, next, id) {
 }
 
 function list(req, res, next) {
-  /*
-  const {
-    limit = null,
-    createdAtBefore = null,
-    createdAfter = null,
-    search = null
-  } = req.query;
-
   const query = {};
-  if (limit) query.limit = Math.min(limit, 500);
-  if (createdAtBefore) query.createdAtBefore = createdAtBefore;
-  if (createdAfter) query.createdAfter = createdAfter;
-  if (search) query.search = search;
+  if (req.user) query.user = req.user;
   ForumThread.list(query)
-    .then(threads => res.json(threads))
-    .catch(e => next(e));
-  */
-  ForumThread.list()
     .then(threads => res.json(threads))
     .catch(e => next(e));
 }

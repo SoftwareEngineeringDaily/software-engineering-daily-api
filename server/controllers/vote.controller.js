@@ -189,8 +189,9 @@ function upvote(req, res, next) {
     promise = Bluebird.all([newvote.save(), entity.save()]);
   }
   promise
-    .then((vote1) => {
-      req.vote = vote1[0]; // eslint-disable-line
+    .then((results) => {
+      req.vote = results[0]; // eslint-disable-line
+      req.entity = results[1]; // eslint-disable-line
       next();
     })
     .catch((e) => {
@@ -266,14 +267,22 @@ function downvote(req, res, next) {
     promise = Bluebird.all([newvote.save(), entity.save()]);
   }
   promise
-    .then((vote1) => {
-      req.vote = vote1[0]; // eslint-disable-line
+    .then((results) => {
+      req.vote = results[0]; // eslint-disable-line
+      req.entity = results[1]; // eslint-disable-line
       next();
     })
     .catch(e => next(e));
 }
 
 function finish(req, res) {
+  req.vote = req.vote.toObject();
+  // Pass down the entity
+  // We are getting the correct vote information to be part of the
+  // entity object so that the clients can have an easier time figuring
+  // out if something has been liked or not. It keeps a consistent
+  // pattern to how entities come down on their own.
+  req.vote.entity = Vote.generateEntityVoteInfo(req.entity.toObject(), req.vote);
   return res.json(req.vote);
 }
 
