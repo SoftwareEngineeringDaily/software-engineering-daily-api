@@ -5,6 +5,9 @@
       2,
       {
         "SwitchCase": 1
+      },
+      {
+        "MemberExpression": "off"
       }
     ],
     "space-before-function-paren": [
