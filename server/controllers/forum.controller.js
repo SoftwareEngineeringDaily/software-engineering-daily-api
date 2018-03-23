@@ -43,8 +43,8 @@ function update() {
 function remove(req, res, next) {
   const { forumThread, user } = req;
   if (forumThread && user) {
-    if (forumThread.author.toString() !== user._id.toString()) {
-      return res.status(401).json({ Error: 'Please login' });
+    if (forumThread.author._id.toString() !== user._id.toString()) {
+      return res.status(401).json({ Error: 'You cant delete this.' });
     }
     forumThread.deleted = true;
     return forumThread
