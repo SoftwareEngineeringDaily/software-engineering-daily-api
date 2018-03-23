@@ -7,6 +7,7 @@ import APIError from '../helpers/APIError';
 import config from '../../config/config';
 import User from '../models/user.model';
 import { signS3 } from '../helpers/s3';
+import sendError from '../helpers/events.helper';
 
 const http = require('http'); // For mailchimp api call
 require('dotenv').config();
@@ -218,6 +219,12 @@ function register(req, res, next) {
       });
       mailchimpReq.on('error', (e) => {
         console.log(`mailchimp error: ${e}`);
+        sendError({
+          userName: username,
+          eventData: {
+            message: e
+          }
+        });
         const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
         return next(error);
       });
@@ -226,6 +233,12 @@ function register(req, res, next) {
     }
   } catch (e) {
     console.log(`mailchimp error: ${e}`);
+    sendError({
+      userName: username,
+      eventData: {
+        message: e
+      }
+    });
     const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
     return next(error);
   }
