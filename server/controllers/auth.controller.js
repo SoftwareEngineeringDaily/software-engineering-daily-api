@@ -70,7 +70,12 @@ passport.use(new FacebookTokenStrategy(
  *      This is because of legacy issues.
  *     tags: [auth]
  *     parameters:
- *       - $ref: '#/parameters/userParam'
+ *       - in: body
+ *         name: user
+ *         description: User to login
+ *         schema:
+ *           $ref: '#/parameters/userParam'
+ *         required: true
  *     responses:
  *       '200':
  *         $ref: '#/responses/SuccessfulAuthentication'
@@ -78,6 +83,8 @@ passport.use(new FacebookTokenStrategy(
  *         $ref: '#/responses/BadRequest'
  *       '404':
  *         $ref: '#/responses/NotFound'
+ *       '401':
+ *         $ref: '#/responses/Unauthorized'
  */
 
 function login(req, res, next) {

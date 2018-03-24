@@ -23,19 +23,26 @@ function load(req, res, next, id) {
  *     summary: Delete a comment
  *     description: Mark a comment as deleted
  *     tags: [comment]
- *     security: []
+ *     security:
+ *       - Token: []
  *     parameters:
- *       - $ref: '#/parameters/commentId'
+ *       - in: path
+ *         name: commentId
+ *         schema:
+ *            type: String
+ *         required: true
+ *         description: Id of the comment to be deleted
  *     responses:
  *       '200':
  *         description: successful operation
  *         schema:
- *           type: object
- *           properties:
- *             result:
- *               type: array
- *               items:
- *                 $ref: '#/definitions/Comment'
+ *            type: object
+ *            properties:
+ *              deleted:
+ *                type: string
+ *                enum: 'true'
+ *       '401':
+ *         $ref: '#/responses/Unauthorized'
  *       '404':
  *         $ref: '#/responses/NotFound'
  */
@@ -47,6 +54,7 @@ function remove(req, res, next) {
     }
 
     comment.deleted = true;
+    comment.dateDeleted = Date.now();
     return comment
       .save()
       .then(() => {
@@ -161,10 +169,14 @@ function list(req, res, next) {
       const nestedCommentPromises = map(comments, comment => Comment.fillNestedComments(comment));
       return Promise.all(nestedCommentPromises);
     })
+    .then((comments) => {
+      const updatedComments = Comment.upadteDeletedCommentContent(comments);
+      return updatedComments;
+    })
     .then((parentComments) => {
       // If authed then fill in if user has liked:
       if (req.user) {
-        // Let's get all our voe info for both children and parent comments:
+        // Let's get all our vote info for both children and parent comments:
         return Comment.populateVoteInfo(parentComments, req.user);
       }
       return parentComments;
