@@ -13,6 +13,7 @@ import userRoutes from './user.route';
 import subscriptionRoutes from './subscription.route';
 import forumRoutes from './forum.route';
 import listenedRoutes from './listened.route';
+import rssRoutes from './rss.route';
 import tagsRoutes from './tag.route';
 // import userRoutes from './user.route';
 
@@ -56,6 +57,7 @@ router.use('/tags', tagsRoutes);
 router.use('/users', userRoutes);
 router.use('/subscription', subscriptionRoutes);
 router.use('/feed', feedRoutes);
+router.use('/rss', rssRoutes);
 router.use('/auth', authRoutes);
 
 export default router;
