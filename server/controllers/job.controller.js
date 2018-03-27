@@ -185,7 +185,7 @@ export default {
   *           $ref: '#/definitions/Job'
   *       '400':
   *         description: validation error when required parameters are missing
-  *         $ref: '#/response/BadRequest'
+  *         $ref: '#/responses/BadRequest'
   *       '404':
   *         description: The job being applied for does not exist, has been deleted or has expired
   *         $ref: '#/responses/NotFound'
