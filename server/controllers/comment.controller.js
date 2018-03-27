@@ -1,5 +1,6 @@
 import Promise from 'bluebird';
 import map from 'lodash/map';
+import moment from 'moment';
 
 import Comment from '../models/comment.model';
 import ForumThread from '../models/forumThread.model';
@@ -54,7 +55,7 @@ function remove(req, res, next) {
     }
 
     comment.deleted = true;
-    comment.dateDeleted = Date.now();
+    comment.dateDeleted = moment().format('LLL');
     return comment
       .save()
       .then(() => {

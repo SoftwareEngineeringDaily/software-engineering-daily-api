@@ -209,8 +209,13 @@ CommentSchema.statics = {
   },
   upadteDeletedContent(comment) {
     if (comment && comment.deleted) {
-      const deleteDate = moment(comment.dateDeleted).format('MM/DD/YYYY HH:mm:ss');
-      comment.content = `Deleted on ${deleteDate}`; // eslint-disable-line
+      //  Older comments didn't have the dateDeleted property
+      if (comment.dateDeleted) {
+        const deleteDate = moment(comment.dateDeleted).format('LLL');
+        comment.content = `Deleted on ${deleteDate}`; // eslint-disable-line
+      } else {
+        comment.content = 'Deleted'; // eslint-disable-line
+      }
     }
   }
 };

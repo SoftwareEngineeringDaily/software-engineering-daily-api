@@ -184,11 +184,14 @@ describe('## Comment APIs', () => {
         .then((res) => {
           const deletedComment = res.body.result.find(c => c.deleted === true);
           if (deletedComment) {
-            const deleteDate = moment(deletedComment.dateDeleted).format('MM/DD/YYYY HH:mm:ss');
-
-            expect(deletedComment).to.have.property('dateDeleted');
-            expect(deletedComment.content).to.contain(`${content}`);
-            expect(deletedComment.content).to.contain(deleteDate);
+            if (deletedComment.dateDeleted) {
+              const deleteDate = moment(deletedComment.dateDeleted).format('LLL');
+              expect(deletedComment).to.have.property('dateDeleted');
+              expect(deletedComment.content).to.contain(`${content}`);
+              expect(deletedComment.content).to.contain(deleteDate);
+            } else {
+              expect(deletedComment.content).to.contain('Was deleted');
+            }
           }
           done();
         })
