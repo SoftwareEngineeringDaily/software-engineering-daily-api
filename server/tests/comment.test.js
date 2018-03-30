@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import request from 'supertest-as-promised';
+import moment from 'moment';
 import httpStatus from 'http-status';
 import chai, { expect } from 'chai';
 import app from '../../index';
@@ -157,6 +158,41 @@ describe('## Comment APIs', () => {
           expect(vote.direction).to.exist; //eslint-disable-line
           expect(vote.userId).to.exist; //eslint-disable-line
           expect(vote.entityId).to.exist; //eslint-disable-line
+          done();
+        })
+        .catch(done);
+    });
+
+    it('should delete a comment', (done) => {
+      request(app)
+        .delete(`/api/comments/${commentId}`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          expect(res.body).to.exist; // eslint-disable-line
+          expect(res.body.deleted);
+          done();
+        })
+        .catch(done);
+    });
+
+    it('should return transformed deleted comment', (done) => {
+      const content = 'Deleted';
+      request(app)
+        .get(`/api/comments/forEntity/${postId}`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          const deletedComment = res.body.result.find(c => c.deleted === true);
+          if (deletedComment) {
+            if (deletedComment.dateDeleted) {
+              const deleteDate = moment(deletedComment.dateDeleted).format('LLL');
+              expect(deletedComment).to.have.property('dateDeleted');
+              expect(deletedComment.content).to.contain(`${content}`);
+              expect(deletedComment.content).to.contain(deleteDate);
+            } else {
+              expect(deletedComment.content).to.contain('Was deleted');
+            }
+          }
           done();
         })
         .catch(done);

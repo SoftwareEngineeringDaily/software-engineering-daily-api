@@ -1,5 +1,6 @@
 import Promise from 'bluebird';
 import each from 'lodash/each';
+import moment from 'moment';
 import mongoose, { Schema } from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
@@ -27,6 +28,14 @@ import Vote from './vote.model';
  *         $ref: '#/definitions/ObjectId'
  *       rootEntity:
  *         $ref: '#/definitions/ObjectId'
+ *       deleted:
+ *         type: boolean
+ *         description: Flag to be used in setting delete status
+ *         example: true
+ *       dateDeleted:
+ *         type: string
+ *         format: date-time
+ *         description: Date comment deleted
  */
 const CommentSchema = new Schema({
   id: String,
@@ -46,6 +55,9 @@ const CommentSchema = new Schema({
   deleted: {
     type: Boolean,
     default: false
+  },
+  dateDeleted: {
+    type: Date
   },
   lastEdited: {
     type: Date
@@ -109,6 +121,7 @@ CommentSchema.statics = {
       .exec()
       .then((comment) => {
         if (comment) {
+          this.upadteDeletedContent(comment);
           return comment;
         }
         const err = new APIError('No such comment exists!', httpStatus.NOT_FOUND);
@@ -183,6 +196,27 @@ CommentSchema.statics = {
     return this.find({ parentComment: parentCommentId })
       .populate('author', '-password')
       .lean(); // so not Mongoose objects
+  },
+  upadteDeletedCommentContent(comments) {
+    if (comments) {
+      comments.forEach((comment) => {
+        this.upadteDeletedContent(comment);
+        // also updaate nested comment
+        comment.replies = this.upadteDeletedCommentContent(comment.replies); // eslint-disable-line
+      });
+    }
+    return comments;
+  },
+  upadteDeletedContent(comment) {
+    if (comment && comment.deleted) {
+      //  Older comments didn't have the dateDeleted property
+      if (comment.dateDeleted) {
+        const deleteDate = moment(comment.dateDeleted).format('LLL');
+        comment.content = `Deleted on ${deleteDate}`; // eslint-disable-line
+      } else {
+        comment.content = 'Deleted'; // eslint-disable-line
+      }
+    }
   }
 };
 

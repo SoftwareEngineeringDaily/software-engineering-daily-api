@@ -7,7 +7,9 @@ import APIError from '../helpers/APIError';
 import config from '../../config/config';
 import User from '../models/user.model';
 import { signS3 } from '../helpers/s3';
+import sendError from '../helpers/events.helper';
 
+const http = require('http'); // For mailchimp api call
 require('dotenv').config();
 
 /**
@@ -69,7 +71,12 @@ passport.use(new FacebookTokenStrategy(
  *      This is because of legacy issues.
  *     tags: [auth]
  *     parameters:
- *       - $ref: '#/parameters/userParam'
+ *       - in: body
+ *         name: user
+ *         description: User to login
+ *         schema:
+ *           $ref: '#/parameters/userParam'
+ *         required: true
  *     responses:
  *       '200':
  *         $ref: '#/responses/SuccessfulAuthentication'
@@ -77,6 +84,8 @@ passport.use(new FacebookTokenStrategy(
  *         $ref: '#/responses/BadRequest'
  *       '404':
  *         $ref: '#/responses/NotFound'
+ *       '401':
+ *         $ref: '#/responses/Unauthorized'
  */
 
 function login(req, res, next) {
@@ -166,6 +175,7 @@ function loginWithEmail(req, res, next) {
 function register(req, res, next) {
   const { username } = req.body;
   const { password } = req.body;
+  const newsletterSignup = req.body.newsletter;
 
   if (!username) {
     let err = new APIError('Username is required to register.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
@@ -190,6 +200,56 @@ function register(req, res, next) {
   // also so no-one can have the same email or same username.
   const userQuery = email ? queryIfEmail : queryIfEmailMissing;
 
+  // Sign up user for mailchimp list (if checked)
+  // console.log(`newsletter status:${newsletterSignup}`);
+  try {
+    if (newsletterSignup) {
+      const postData = JSON.stringify({ status: 'subscribed', email_address: email });
+      // Build route because it varies based on API key
+      const hostname = `${config.mailchimp.mailchimpKey.split('-')[1]}.api.mailchimp.com`;
+      // Build POST options
+      const options = {
+        hostname,
+        path: `/3.0/lists/${config.mailchimp.mailchimpList}/members`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `apikey ${config.mailchimp.mailchimpKey}`,
+          'Content-Length': Buffer.byteLength(postData)
+        }
+      };
+      const mailchimpReq = http.request(options, (mailchimpRes) => {
+        mailchimpRes.setEncoding('utf8');
+        mailchimpRes.on('data', (body) => {
+          console.log(`Body: ${body}`);
+        });
+      });
+      mailchimpReq.on('error', (e) => {
+        console.log(`mailchimp error: ${e}`);
+        sendError({
+          userName: username,
+          eventData: {
+            message: e
+          }
+        });
+        const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
+        return next(error);
+      });
+      mailchimpReq.write(postData);
+      mailchimpReq.end();
+    }
+  } catch (e) {
+    console.log(`mailchimp error: ${e}`);
+    sendError({
+      userName: username,
+      eventData: {
+        message: e
+      }
+    });
+    const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
+    return next(error);
+  }
+
   User.findOne(userQuery)
     .exec()
     .then((user) => {
@@ -200,6 +260,7 @@ function register(req, res, next) {
 
       const newUser = new User();
       newUser.password = User.generateHash(password);
+      newUser.signedupForNewsletter = newsletterSignup; // Probably works
       // We assign a set of "approved fields"
       const newValues = _.pick(req.body, User.updatableFields);
       Object.assign(newUser, newValues);

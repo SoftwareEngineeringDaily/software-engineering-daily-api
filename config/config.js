@@ -34,7 +34,11 @@ const envVarsSchema = Joi.object({
   FACEBOOK_ID: Joi.string().required()
     .description('Facbook application id'),
   FACEBOOK_SECRET: Joi.string().required()
-    .description('Facebook application secret')
+    .description('Facebook application secret'),
+  MAILCHIMP_KEY: Joi.string().required()
+    .description('Mailchimp API key'),
+  MAILCHIMP_LIST_ID: Joi.string().required()
+    .description('Mailchimp list id')
 }).unknown()
   .required();
 
@@ -60,6 +64,10 @@ const config = {
   facebook: {
     clientID: envVars.FACEBOOK_ID,
     clientSecret: envVars.FACEBOOK_SECRET
+  },
+  mailchimp: {
+    mailchimpKey: envVars.MAILCHIMP_KEY,
+    mailchimpList: envVars.MAILCHIMP_LIST_ID
   }
 };
 
