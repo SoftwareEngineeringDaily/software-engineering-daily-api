@@ -228,7 +228,7 @@ function register(req, res, next) {
         console.log(`mailchimp error: ${e}`);
         sendError({
           userName: username,
-          eventData: {
+          errorData: {
             message: e
           }
         });
@@ -242,7 +242,7 @@ function register(req, res, next) {
     console.log(`mailchimp error: ${e}`);
     sendError({
       userName: username,
-      eventData: {
+      errorData: {
         message: e
       }
     });
