@@ -39,8 +39,12 @@ function create(req, res, next) {
 
 function update(req, res, next) {
   const {
-    forumThread, user, content, title
+    forumThread, user
   } = req;
+  const {
+    content, title
+  } = req.body;
+
   if (forumThread && forumThread.author && forumThread.author._id && user) {
     if (forumThread.author._id.toString() !== user._id.toString()) {
       return res.status(401).json({ Error: 'Please login' });
