@@ -59,9 +59,7 @@ const CommentSchema = new Schema({
   dateDeleted: {
     type: Date
   },
-  lastEdited: {
-    type: Date
-  },
+  dateLastEdited: { type: Date },
   rootEntity: {
     type: Schema.Types.ObjectId // The entity that owns this comment
     // , ref: 'Post' | 'AMA'
