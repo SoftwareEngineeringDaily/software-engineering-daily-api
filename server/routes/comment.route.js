@@ -36,6 +36,11 @@ router.route('/:commentId/upvote')
   );
 
 router.route('/:commentId')
+  .put(
+    expressJwt({ secret: config.jwtSecret })
+    , validate(paramValidation.comment)
+    , commentCtrl.update
+  )
   .delete(
     expressJwt({ secret: config.jwtSecret }),
     commentCtrl.remove
