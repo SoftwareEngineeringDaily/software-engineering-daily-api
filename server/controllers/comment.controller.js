@@ -69,6 +69,28 @@ function remove(req, res, next) {
   return res.status(500).json({});
 }
 
+function update(req, res, next) {
+  const { comment, user } = req;
+  const { content } = req.body;
+  if (comment && user) {
+    if (comment.author._id.toString() !== user._id.toString()) {
+      return res.status(401).json({ Error: 'Please login' });
+    }
+    comment.content = content;
+    comment.dateLastEdited = Date();
+    return comment
+      .save()
+      .then((editedComment) => {
+        // Sucess:
+        res.json(editedComment);
+      })
+      .catch((e) => {
+        next(e);
+      });
+  }
+  return res.status(500).json({});
+}
+
 /**
  * @swagger
  * tags:
@@ -192,5 +214,6 @@ export default {
   load,
   list,
   create,
-  remove
+  remove,
+  update
 };

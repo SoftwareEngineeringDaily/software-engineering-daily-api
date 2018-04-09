@@ -37,13 +37,39 @@ function create(req, res, next) {
     .catch(err => next(err));
 }
 
-function update() {
+function update(req, res, next) {
+  const {
+    forumThread, user
+  } = req;
+  const {
+    content, title
+  } = req.body;
+
+  if (forumThread && forumThread.author && forumThread.author._id && user) {
+    if (forumThread.author._id.toString() !== user._id.toString()) {
+      return res.status(401).json({ Error: 'Please login' });
+    }
+    forumThread.content = content;
+    forumThread.title = title;
+    forumThread.dateLastEdited = Date();
+    return forumThread
+      .save()
+      .then((editedThread) => {
+        // Sucess:
+        res.json(editedThread);
+      })
+      .catch((e) => {
+        next(e);
+      });
+  }
+  return res.status(500).json({});
 }
 
 function remove(req, res, next) {
   const { forumThread, user } = req;
-  if (forumThread && user) {
-    if (forumThread.author.toString() !== user._id.toString()) {
+  // TODO: if admin should be able to delete too
+  if (forumThread && forumThread.author && forumThread.author._id && user) {
+    if (forumThread.author._id.toString() !== user._id.toString()) {
       return res.status(401).json({ Error: 'Please login' });
     }
     forumThread.deleted = true;
