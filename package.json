@@ -12,6 +12,8 @@
   "scripts": {
     "launch": "npm run build && node dist/index.js",
     "start": "gulp serve",
+    "staging-deploy": "git push staging develop:master",
+    "deploy": "git push production master:master",
     "start:debug": "cross-env DEBUG=software-engineering-daily-api:* npm run start",
     "build": "gulp",
     "lint": "esw *.js server config --color",
