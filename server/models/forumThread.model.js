@@ -25,6 +25,7 @@ const ForumThreadSchema = new mongoose.Schema({
   },
   commentsCount: { type: Number, default: 0 },
   dateLastAcitiy: { type: Date, default: Date.now },
+  dateLastEdited: { type: Date },
   dateCreated: { type: Date, default: Date.now }
 });
 
