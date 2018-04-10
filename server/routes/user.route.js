@@ -24,6 +24,14 @@ router.route('/search')
     , userCtrl.list
   );
 
+router.route('/update-email-notiication-settings')
+  .put(
+    expressJwt({ secret: config.jwtSecret })
+    , loadFullUser
+    , validate(paramValidation.updateEmailNotiicationSettings)
+    , userCtrl.updateEmailNotiicationSettings
+  );
+
 router.route('/:userId')
   /** GET /api/users/:userId - Get user */
   .get(

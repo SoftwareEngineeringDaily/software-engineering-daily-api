@@ -14,7 +14,7 @@ function getUserDescription(userWhoReplied) {
   return userDesc;
 }
 // TODO: don't email if you are the author and replying to own stuff:
-function sendForumNotificationEmail({ threadId, userWhoReplied }) {
+async function sendForumNotificationEmail({ threadId, userWhoReplied }) {
   try {
     const userIdWhoReplied = userWhoReplied._id;
     const userDesc = getUserDescription(userWhoReplied);
@@ -40,8 +40,9 @@ function sendForumNotificationEmail({ threadId, userWhoReplied }) {
 }
 
 // TODO: don't send if parentComment is owned by thread creator. To prevent
+// TODO: add date so it doesn't get minimized by google.
 // double emailing.
-function sendReplyEmailNotificationEmail({ parentCommentId, threadId, userWhoReplied }) {
+async function sendReplyEmailNotificationEmail({ parentCommentId, threadId, userWhoReplied }) {
   // We need to get the info for the person who made the original comment:
   try {
     const userIdWhoReplied = userWhoReplied._id;
