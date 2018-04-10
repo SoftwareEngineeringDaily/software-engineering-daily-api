@@ -4,7 +4,7 @@ import moment from 'moment';
 
 import Comment from '../models/comment.model';
 import ForumThread from '../models/forumThread.model';
-
+import ForumNotifications from '../helpers/forumNotifications.helper';
 /*
 * Load comment and append to req.
 */
@@ -145,6 +145,9 @@ function create(req, res, next) {
   comment
     .save()
     .then((commentSaved) => {
+      if (parentCommentId) {
+        ForumNotifications.sendReplyEmailNotificationEmail(parentCommentId, entityId);
+      }
       // TODO: result key is not consistent with other responses, consider changing this
       if (entityType) {
         switch (entityType.toLowerCase()) {
