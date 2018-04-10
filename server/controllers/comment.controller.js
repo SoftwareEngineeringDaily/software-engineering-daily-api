@@ -146,13 +146,21 @@ function create(req, res, next) {
     .save()
     .then((commentSaved) => {
       if (parentCommentId) {
-        ForumNotifications.sendReplyEmailNotificationEmail(parentCommentId, entityId);
+        // TODO: don't email if you are the author and replying to own stuff:
+        ForumNotifications.sendReplyEmailNotificationEmail({
+          parentCommentId,
+          threadId: entityId,
+          userWhoReplied: user._id
+        });
       }
       // TODO: result key is not consistent with other responses, consider changing this
       if (entityType) {
         switch (entityType.toLowerCase()) {
           case 'forumthread':
-            // TODO: should return here
+            ForumNotifications.sendForumNotificationEmail({
+              threadId: entityId,
+              userWhoReplied: user._id
+            });
             return ForumThread.increaseCommentCount(entityId).then(() =>
               res.status(201).json({ result: commentSaved }));
           default:
