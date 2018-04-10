@@ -62,6 +62,16 @@ const UserSchema = new mongoose.Schema({
       type: String
     }
   },
+  emailNotiications: {
+    unsubscribedFromThreads: {
+      type: Boolean,
+      default: false
+    },
+    unsubscribedFromCommentReplies: {
+      type: Boolean,
+      default: false
+    }
+  },
   signedupForNewsletter: {
     type: Boolean,
     default: false
