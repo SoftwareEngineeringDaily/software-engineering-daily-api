@@ -283,6 +283,20 @@ function listBookmarked(req, res, next) {
     });
 }
 
+function updateEmailNotiications(req, res, next) {
+  const user = req.userLoaded;
+  User.get(user._id)
+    .then((_user) => {
+      _user.emailNotiications = req; // eslint-disable-line no-param-reassign
+      return _user.save()
+        .then(() => res.json({}));
+    })
+    .catch(() => {
+      const err = new APIError('Not able to update settings.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+      return next(err);
+    });
+}
+
 export default {
   load,
   get,
@@ -291,5 +305,6 @@ export default {
   update,
   listBookmarked,
   requestPasswordReset,
+  updateEmailNotiications,
   regainPassword
 };

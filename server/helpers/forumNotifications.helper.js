@@ -39,6 +39,8 @@ function sendForumNotificationEmail({ threadId, userWhoReplied }) {
   }
 }
 
+// TODO: don't send if parentComment is owned by thread creator. To prevent
+// double emailing.
 function sendReplyEmailNotificationEmail({ parentCommentId, threadId, userWhoReplied }) {
   // We need to get the info for the person who made the original comment:
   try {
