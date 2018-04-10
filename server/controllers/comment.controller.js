@@ -142,6 +142,7 @@ function create(req, res, next) {
     comment.parentComment = parentCommentId;
   }
   comment.author = user._id;
+
   comment
     .save()
     .then((commentSaved) => {
@@ -150,7 +151,7 @@ function create(req, res, next) {
         ForumNotifications.sendReplyEmailNotificationEmail({
           parentCommentId,
           threadId: entityId,
-          userIdWhoReplied: user._id
+          userWhoReplied: user._id
         });
       }
       // TODO: result key is not consistent with other responses, consider changing this
@@ -159,7 +160,7 @@ function create(req, res, next) {
           case 'forumthread':
             ForumNotifications.sendForumNotificationEmail({
               threadId: entityId,
-              userIdWhoReplied: user._id
+              userWhoReplied: user._id
             });
             return ForumThread.increaseCommentCount(entityId).then(() =>
               res.status(201).json({ result: commentSaved }));
