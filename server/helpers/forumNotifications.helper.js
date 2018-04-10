@@ -10,7 +10,7 @@ function sendForumNotificationEmail({ threadId, userIdWhoReplied }) {
       .then((thread) => {
         const { email, _id } = thread.author;
         // Don't email if you are the author and replying to own stuff:
-        if (userIdWhoReplied === _id) return;
+        if (userIdWhoReplied.toString() === _id.toString()) return;
 
         const msg = {
           to: email,
@@ -34,7 +34,7 @@ function sendReplyEmailNotificationEmail({ parentCommentId, threadId, userIdWhoR
       .then((parentComment) => {
         const { email, _id } = parentComment.author;
         // Don't email if you are the author and replying to own stuff:
-        if (userIdWhoReplied === _id) return;
+        if (userIdWhoReplied.toString() === _id.toString()) return;
 
         const msg = {
           to: email,
