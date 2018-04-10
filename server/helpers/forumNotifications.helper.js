@@ -10,14 +10,15 @@ function sendForumNotificationEmail({ threadId, userIdWhoReplied }) {
       .then((thread) => {
         const { email, _id } = thread.author;
         // Don't email if you are the author and replying to own stuff:
+        console.log('---userIdWhoReplied', userIdWhoReplied, '_id', _id);
         if (userIdWhoReplied === _id) return;
 
         const msg = {
           to: email,
           from: 'no-reply@softwaredaily.com',
           subject: 'Someone commented on your thread @SoftwareDaily',
-          text: `Somoene commented in your thread: ${config.baseUrl}/${threadId}`,
-          html: `Checkout activity on your thread: <strong> <a href="${config.baseUrl}/${threadId}/"> here </a>.
+          text: `Somoene commented in your thread: ${config.baseUrl}/forum/${threadId}`,
+          html: `Checkout activity on your thread: <strong> <a href="${config.baseUrl}/forum/${threadId}/"> here </a>.
           <br /><br /> <a href="${config.baseUrl}/notification-settings/"> Unsubscribe </a>`
         };
         sgMail.send(msg);
@@ -34,14 +35,15 @@ function sendReplyEmailNotificationEmail({ parentCommentId, threadId, userIdWhoR
       .then((parentComment) => {
         const { email, _id } = parentComment.author;
         // Don't email if you are the author and replying to own stuff:
+        console.log('---userIdWhoReplied', userIdWhoReplied, '_id', _id);
         if (userIdWhoReplied === _id) return;
 
         const msg = {
           to: email,
           from: 'no-reply@softwaredaily.com',
           subject: 'Someone replied to you in the SoftwareDaily Forum',
-          text: `Somoene replied to your comment: ${config.baseUrl}/${threadId}`,
-          html: `Checkout activity on your comment: <strong> <a href="${config.baseUrl}/${threadId}/"> here </a>.
+          text: `Somoene replied to your comment: ${config.baseUrl}/forum/${threadId}`,
+          html: `Checkout activity on your comment: <strong> <a href="${config.baseUrl}/forum/${threadId}/"> here </a>.
           <br /><br /> <a href="${config.baseUrl}/notification-settings/"> Unsubscribe </a>`
         };
         sgMail.send(msg);
