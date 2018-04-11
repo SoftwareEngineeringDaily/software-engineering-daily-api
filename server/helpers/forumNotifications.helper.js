@@ -40,9 +40,7 @@ async function sendForumNotificationEmail({ threadId, userWhoReplied }) {
   }
 }
 
-// TODO: don't send if parentComment is owned by thread creator. To prevent
 // TODO: add date so it doesn't get minimized by google.
-// double emailing.
 async function sendReplyEmailNotificationEmail({ parentCommentId, threadId, userWhoReplied }) {
   // We need to get the info for the person who made the original comment:
   try {
@@ -53,6 +51,15 @@ async function sendReplyEmailNotificationEmail({ parentCommentId, threadId, user
     const { email, _id } = parentComment.author;
     if (userToEmail.emailNotiicationSettings &&
       userToEmail.emailNotiicationSettings.unsubscribedFromCommentReplies) return;
+
+    //  Don't send if parentComment is owned by thread creator. To prevent
+    // double emailing. Make sure thread notifications are turned on:
+    if (userToEmail.emailNotiicationSettings &&
+      !userToEmail.emailNotiicationSettings.unsubscribedFromThreads) {
+      const thread = await ForumThread.get(threadId);
+      if (thread.author._id.toString() === _id.toString()) return;
+    }
+
     // Don't email if you are the author and replying to own stuff:
     if (userIdWhoReplied.toString() === _id.toString()) return;
 
