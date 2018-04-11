@@ -4,7 +4,7 @@ import moment from 'moment';
 
 import Comment from '../models/comment.model';
 import ForumThread from '../models/forumThread.model';
-
+import ForumNotifications from '../helpers/forumNotifications.helper';
 /*
 * Load comment and append to req.
 */
@@ -142,14 +142,26 @@ function create(req, res, next) {
     comment.parentComment = parentCommentId;
   }
   comment.author = user._id;
+
   comment
     .save()
     .then((commentSaved) => {
+      if (parentCommentId) {
+        // TODO: don't email if you are the author and replying to own stuff:
+        ForumNotifications.sendReplyEmailNotificationEmail({
+          parentCommentId,
+          threadId: entityId,
+          userWhoReplied: user
+        });
+      }
       // TODO: result key is not consistent with other responses, consider changing this
       if (entityType) {
         switch (entityType.toLowerCase()) {
           case 'forumthread':
-            // TODO: should return here
+            ForumNotifications.sendForumNotificationEmail({
+              threadId: entityId,
+              userWhoReplied: user
+            });
             return ForumThread.increaseCommentCount(entityId).then(() =>
               res.status(201).json({ result: commentSaved }));
           default:
