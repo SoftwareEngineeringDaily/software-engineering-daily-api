@@ -150,6 +150,7 @@ function create(req, res, next) {
         // TODO: don't email if you are the author and replying to own stuff:
         ForumNotifications.sendReplyEmailNotificationEmail({
           parentCommentId,
+          content,
           threadId: entityId,
           userWhoReplied: user
         });
@@ -160,6 +161,7 @@ function create(req, res, next) {
           case 'forumthread':
             ForumNotifications.sendForumNotificationEmail({
               threadId: entityId,
+              content,
               userWhoReplied: user
             });
             return ForumThread.increaseCommentCount(entityId).then(() =>
