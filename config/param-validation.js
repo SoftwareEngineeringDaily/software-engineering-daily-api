@@ -23,6 +23,13 @@ export default {
     }
   },
 
+  updateEmailNotiicationSettings: {
+    body: {
+      unsubscribedFromThreads: Joi.boolean().required(),
+      unsubscribedFromCommentReplies: Joi.boolean().required(),
+    }
+  },
+
   regainPassword: {
     body: {
       resetUID: Joi.string().required(),
