@@ -14,7 +14,7 @@ function getUserDescription(userWhoReplied) {
   return userDesc;
 }
 // TODO: don't email if you are the author and replying to own stuff:
-async function sendForumNotificationEmail({ threadId, userWhoReplied }) {
+async function sendForumNotificationEmail({ threadId, content, userWhoReplied }) {
   try {
     const userIdWhoReplied = userWhoReplied._id;
     const userDesc = getUserDescription(userWhoReplied);
@@ -26,12 +26,17 @@ async function sendForumNotificationEmail({ threadId, userWhoReplied }) {
 
     // Don't email if you are the author and replying to own stuff:
     if (userIdWhoReplied.toString() === _id.toString()) return;
+    const contentSummary = content.substr(0, 50);
     const msg = {
       to: email,
       from: 'no-reply@softwaredaily.com',
       subject: 'Someone commented on your thread @SoftwareDaily',
       text: `${userDesc} commented in your thread: ${config.baseUrl}/forum/${threadId}`,
-      html: `${userDesc} replied to your thread, view thread: <strong> <a href="${config.baseUrl}/forum/${threadId}/"> here </a>.
+      html: `${userDesc} commented on your post.
+        <br />
+        <br />
+        "${contentSummary}..."
+         [<strong> <a href="${config.baseUrl}/forum/${threadId}/"> click to read more</a>]
       <br /><br /> <a href="${config.baseUrl}/notification-settings/"> Unsubscribe </a>`
     };
     sgMail.send(msg);
@@ -41,7 +46,9 @@ async function sendForumNotificationEmail({ threadId, userWhoReplied }) {
 }
 
 // TODO: add date so it doesn't get minimized by google.
-async function sendReplyEmailNotificationEmail({ parentCommentId, threadId, userWhoReplied }) {
+async function sendReplyEmailNotificationEmail({
+  parentCommentId, content, threadId, userWhoReplied
+}) {
   // We need to get the info for the person who made the original comment:
   try {
     const userIdWhoReplied = userWhoReplied._id;
@@ -63,12 +70,17 @@ async function sendReplyEmailNotificationEmail({ parentCommentId, threadId, user
     // Don't email if you are the author and replying to own stuff:
     if (userIdWhoReplied.toString() === _id.toString()) return;
 
+    const contentSummary = content.substr(0, 50);
     const msg = {
       to: email,
       from: 'no-reply@softwaredaily.com',
       subject: 'Someone replied to you in the SoftwareDaily Forum',
       text: `${userDesc} replied to your comment: ${config.baseUrl}/forum/${threadId}`,
-      html: `${userDesc} replied to your comment. View it: <strong> <a href="${config.baseUrl}/forum/${threadId}/"> here </a>.
+      html: `${userDesc} replied to your comment.
+        <br />
+        <br />
+        "${contentSummary}..."
+         [<strong> <a href="${config.baseUrl}/forum/${threadId}/"> click to read more</a>]
       <br /><br /> <a href="${config.baseUrl}/notification-settings/"> Unsubscribe </a>`
     };
     sgMail.send(msg);
