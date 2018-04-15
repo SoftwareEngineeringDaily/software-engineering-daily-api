@@ -7,9 +7,14 @@ export default {
       username: Joi.string().required(),
       name: Joi.string().required(),
       bio: Joi.string().allow(''),
+      about: Joi.string().allow(''),
+      github: Joi.string().allow(''),
+      linkedin: Joi.string().allow(''),
+      twitter: Joi.string().allow(''),
       website: Joi.string().allow(''),
       isAvatarSet: Joi.boolean().required(),
-      email: Joi.string().email().allow('')
+      email: Joi.string().email().allow(''),
+      publicEmail: Joi.string().email().allow('')
     },
     params: {
       userId: Joi.string().hex().required()
