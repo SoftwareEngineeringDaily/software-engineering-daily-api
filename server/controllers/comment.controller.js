@@ -149,27 +149,31 @@ function create(req, res, next) {
   comment
     .save()
     .then((commentSaved) => {
-      if (parentCommentId) {
-        // TODO: don't email if you are the author and replying to own stuff:
-        ForumNotifications.sendReplyEmailNotificationEmail({
-          parentCommentId,
-          content,
-          threadId: entityId,
-          userWhoReplied: user
-        });
-      }
-      if (mentions) {
-        ForumNotifications.sendMentionsEmailNotificationEmail({
-          parentCommentId,
-          content,
-          threadId: entityId,
-          usersMentioned: mentions
-        });
-      }
       // TODO: result key is not consistent with other responses, consider changing this
       if (entityType) {
         switch (entityType.toLowerCase()) {
           case 'forumthread':
+
+            // TODO: move these so we also email for posts:
+            if (parentCommentId) {
+              // TODO: don't email if you are the author and replying to own stuff:
+              ForumNotifications.sendReplyEmailNotificationEmail({
+                parentCommentId,
+                content,
+                threadId: entityId,
+                userWhoReplied: user
+              });
+            }
+
+            if (mentions) {
+              ForumNotifications.sendMentionsEmailNotificationEmail({
+                parentCommentId,
+                content,
+                threadId: entityId,
+                usersMentioned: mentions
+              });
+            }
+
             ForumNotifications.sendForumNotificationEmail({
               threadId: entityId,
               content,
