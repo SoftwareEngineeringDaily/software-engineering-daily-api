@@ -147,7 +147,6 @@ function list(req, res, next) {
     query.categories = newTags;
   }
 
-  console.log('get posts'); // eslint-disable-line
   Post.list(query)
     .then(posts => res.json(getAdFreePostsIfSubscribed(posts, req.fullUser, next)))
     .catch(e => next(e));
