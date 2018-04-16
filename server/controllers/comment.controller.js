@@ -3,6 +3,7 @@ import map from 'lodash/map';
 import moment from 'moment';
 
 import Comment from '../models/comment.model';
+import User from '../models/user.model';
 import ForumThread from '../models/forumThread.model';
 import ForumNotifications from '../helpers/forumNotifications.helper';
 /*
@@ -128,7 +129,7 @@ function update(req, res, next) {
  *         $ref: '#/responses/NotFound'
  */
 
-function create(req, res, next) {
+async function create(req, res, next) {
   const { entityId } = req.params;
   const { parentCommentId, mentions } = req.body;
   const { content, entityType } = req.body;
@@ -137,7 +138,26 @@ function create(req, res, next) {
   const comment = new Comment();
   comment.content = content;
   if (mentions) {
-    comment.mentions = mentions;
+    const mentionsUsers = [];
+
+    console.log('og mentions', mentions);
+    /* eslint-disable no-await-in-loop */
+    for (let ii = 0; ii < mentions.length; ii += 1) {
+      try {
+        const mention = mentions[ii];
+        const userMentioned = await User.get(mention);
+        console.log('::: user', userMentioned, '--', mention);
+        mentionsUsers.push(userMentioned);
+      } catch (e) {
+        console.log('e', e);
+      }
+    }
+    /* eslint-disable no-await-in-loop */
+
+    comment.mentions = mentionsUsers;
+    console.log('set mentions:::::::::::::::::::::', comment.mentions);
+  } else {
+    console.log('no *********** mentions', mentions);
   }
   comment.rootEntity = entityId;
   // If this is a child comment we need to assign it's parent
