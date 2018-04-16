@@ -130,12 +130,15 @@ function update(req, res, next) {
 
 function create(req, res, next) {
   const { entityId } = req.params;
-  const { parentCommentId } = req.body;
+  const { parentCommentId, mentions } = req.body;
   const { content, entityType } = req.body;
   const { user } = req;
 
   const comment = new Comment();
   comment.content = content;
+  if (mentions) {
+    comment.mentions = mentions;
+  }
   comment.rootEntity = entityId;
   // If this is a child comment we need to assign it's parent
   if (parentCommentId) {
@@ -153,6 +156,14 @@ function create(req, res, next) {
           content,
           threadId: entityId,
           userWhoReplied: user
+        });
+      }
+      if (mentions) {
+        ForumNotifications.sendMentionsEmailNotificationEmail({
+          parentCommentId,
+          content,
+          threadId: entityId,
+          usersMentioned: mentions
         });
       }
       // TODO: result key is not consistent with other responses, consider changing this

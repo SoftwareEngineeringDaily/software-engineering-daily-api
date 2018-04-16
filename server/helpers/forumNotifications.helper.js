@@ -13,6 +13,7 @@ function getUserDescription(userWhoReplied) {
   }
   return userDesc;
 }
+
 // TODO: don't email if you are the author and replying to own stuff:
 async function sendForumNotificationEmail({ threadId, content, userWhoReplied }) {
   try {
@@ -45,7 +46,6 @@ async function sendForumNotificationEmail({ threadId, content, userWhoReplied })
   }
 }
 
-// TODO: add date so it doesn't get minimized by google.
 async function sendReplyEmailNotificationEmail({
   parentCommentId, content, threadId, userWhoReplied
 }) {
@@ -89,4 +89,16 @@ async function sendReplyEmailNotificationEmail({
   }
 }
 
-export default { sendForumNotificationEmail, sendReplyEmailNotificationEmail };
+
+async function sendMentionsEmailNotificationEmail({
+  parentCommentId // , content, threadId, usersMentioned
+}) {
+  console.log('parentComment', parentCommentId);
+}
+
+
+export default {
+  sendForumNotificationEmail,
+  sendMentionsEmailNotificationEmail,
+  sendReplyEmailNotificationEmail
+};
