@@ -137,9 +137,8 @@ async function create(req, res, next) {
 
   const comment = new Comment();
   comment.content = content;
+  const usersMentioned = [];
   if (mentions) {
-    const mentionsUsers = [];
-
     // TODO: dont block on each mention:
     // https://eslint.org/docs/rules/no-await-in-loop
     /* eslint-disable no-await-in-loop */
@@ -147,13 +146,13 @@ async function create(req, res, next) {
       try {
         const mention = mentions[ii];
         const userMentioned = await User.get(mention);
-        mentionsUsers.push(userMentioned);
+        usersMentioned.push(userMentioned);
       } catch (e) {
         console.log('e', e);
       }
     }
     /* eslint-disable no-await-in-loop */
-    comment.mentions = mentionsUsers;
+    comment.mentions = usersMentioned;
   }
 
   comment.rootEntity = entityId;
@@ -188,7 +187,7 @@ async function create(req, res, next) {
                 parentCommentId,
                 content,
                 threadId: entityId,
-                usersMentioned: mentions
+                usersMentioned
               });
             }
 
