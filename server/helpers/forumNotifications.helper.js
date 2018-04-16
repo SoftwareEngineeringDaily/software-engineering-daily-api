@@ -1,3 +1,4 @@
+import each from 'lodash/each';
 import sgMail from './mail';
 import config from '../../config/config';
 import Comment from '../models/comment.model';
@@ -91,9 +92,31 @@ async function sendReplyNotificationEmail({
 
 
 async function sendMentionsNotificationEmail({
-  parentCommentId // , content, threadId, usersMentioned
+  content, threadId, userWhoReplied, usersMentioned
 }) {
-  console.log('parentComment', parentCommentId);
+  try {
+    const userDesc = getUserDescription(userWhoReplied);
+
+    const contentSummary = content.substr(0, 50);
+    each(usersMentioned, (mentionedUser) => {
+      const { email } = mentionedUser;
+      const msg = {
+        to: email,
+        from: 'no-reply@softwaredaily.com',
+        subject: 'Someone mentioned you in a thread @SoftwareDaily',
+        text: `${userDesc} mentioned you: ${config.baseUrl}/forum/${threadId}`,
+        html: `${userDesc} mentioned you.
+          <br />
+          <br />
+          "${contentSummary}..."
+           [<strong> <a href="${config.baseUrl}/forum/${threadId}/"> click to read more</a>]
+        <br /><br /> <a href="${config.baseUrl}/notification-settings/"> Unsubscribe </a>`
+      };
+      sgMail.send(msg);
+    });
+  } catch (e) {
+    console.log('Error emailing notification', e);
+  }
 }
 
 

@@ -187,6 +187,7 @@ async function create(req, res, next) {
                 parentCommentId,
                 content,
                 threadId: entityId,
+                userWhoReplied: user,
                 usersMentioned
               });
             }
