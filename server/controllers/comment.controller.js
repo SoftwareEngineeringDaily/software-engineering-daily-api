@@ -140,27 +140,22 @@ async function create(req, res, next) {
   if (mentions) {
     const mentionsUsers = [];
 
-    console.log('og mentions', mentions);
-    // TODO: dont block one each mention:
+    // TODO: dont block on each mention:
     // https://eslint.org/docs/rules/no-await-in-loop
     /* eslint-disable no-await-in-loop */
     for (let ii = 0; ii < mentions.length; ii += 1) {
       try {
         const mention = mentions[ii];
         const userMentioned = await User.get(mention);
-        console.log('::: user', userMentioned, '--', mention);
         mentionsUsers.push(userMentioned);
       } catch (e) {
         console.log('e', e);
       }
     }
     /* eslint-disable no-await-in-loop */
-
     comment.mentions = mentionsUsers;
-    console.log('set mentions:::::::::::::::::::::', comment.mentions);
-  } else {
-    console.log('no *********** mentions', mentions);
   }
+
   comment.rootEntity = entityId;
   // If this is a child comment we need to assign it's parent
   if (parentCommentId) {
