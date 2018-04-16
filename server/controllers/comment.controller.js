@@ -141,6 +141,8 @@ async function create(req, res, next) {
     const mentionsUsers = [];
 
     console.log('og mentions', mentions);
+    // TODO: dont block one each mention:
+    // https://eslint.org/docs/rules/no-await-in-loop
     /* eslint-disable no-await-in-loop */
     for (let ii = 0; ii < mentions.length; ii += 1) {
       try {
