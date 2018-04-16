@@ -46,7 +46,7 @@ async function sendForumNotificationEmail({ threadId, content, userWhoReplied })
   }
 }
 
-async function sendReplyEmailNotificationEmail({
+async function sendReplyNotificationEmail({
   parentCommentId, content, threadId, userWhoReplied
 }) {
   // We need to get the info for the person who made the original comment:
@@ -90,7 +90,7 @@ async function sendReplyEmailNotificationEmail({
 }
 
 
-async function sendMentionsEmailNotificationEmail({
+async function sendMentionsNotificationEmail({
   parentCommentId // , content, threadId, usersMentioned
 }) {
   console.log('parentComment', parentCommentId);
@@ -99,6 +99,6 @@ async function sendMentionsEmailNotificationEmail({
 
 export default {
   sendForumNotificationEmail,
-  sendMentionsEmailNotificationEmail,
-  sendReplyEmailNotificationEmail
+  sendMentionsNotificationEmail,
+  sendReplyNotificationEmail
 };
