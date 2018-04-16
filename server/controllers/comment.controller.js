@@ -3,6 +3,7 @@ import map from 'lodash/map';
 import moment from 'moment';
 
 import Comment from '../models/comment.model';
+import User from '../models/user.model';
 import ForumThread from '../models/forumThread.model';
 import ForumNotifications from '../helpers/forumNotifications.helper';
 /*
@@ -128,14 +129,32 @@ function update(req, res, next) {
  *         $ref: '#/responses/NotFound'
  */
 
-function create(req, res, next) {
+async function create(req, res, next) {
   const { entityId } = req.params;
-  const { parentCommentId } = req.body;
+  const { parentCommentId, mentions } = req.body;
   const { content, entityType } = req.body;
   const { user } = req;
 
   const comment = new Comment();
   comment.content = content;
+  const usersMentioned = [];
+  if (mentions) {
+    // TODO: dont block on each mention:
+    // https://eslint.org/docs/rules/no-await-in-loop
+    /* eslint-disable no-await-in-loop */
+    for (let ii = 0; ii < mentions.length; ii += 1) {
+      try {
+        const mention = mentions[ii];
+        const userMentioned = await User.get(mention);
+        usersMentioned.push(userMentioned);
+      } catch (e) {
+        console.log('e', e);
+      }
+    }
+    /* eslint-disable no-await-in-loop */
+    comment.mentions = usersMentioned;
+  }
+
   comment.rootEntity = entityId;
   // If this is a child comment we need to assign it's parent
   if (parentCommentId) {
@@ -146,19 +165,33 @@ function create(req, res, next) {
   comment
     .save()
     .then((commentSaved) => {
-      if (parentCommentId) {
-        // TODO: don't email if you are the author and replying to own stuff:
-        ForumNotifications.sendReplyEmailNotificationEmail({
-          parentCommentId,
-          content,
-          threadId: entityId,
-          userWhoReplied: user
-        });
-      }
       // TODO: result key is not consistent with other responses, consider changing this
       if (entityType) {
         switch (entityType.toLowerCase()) {
           case 'forumthread':
+
+            // TODO: move these so we also email for posts:
+            // get entity outside of this function and then pass down:
+            if (parentCommentId) {
+              // TODO: don't email if you are the author and replying to own stuff:
+              ForumNotifications.sendReplyNotificationEmail({
+                parentCommentId,
+                content,
+                threadId: entityId,
+                userWhoReplied: user
+              });
+            }
+
+            if (mentions) {
+              ForumNotifications.sendMentionsNotificationEmail({
+                parentCommentId,
+                content,
+                threadId: entityId,
+                userWhoReplied: user,
+                usersMentioned
+              });
+            }
+
             ForumNotifications.sendForumNotificationEmail({
               threadId: entityId,
               content,

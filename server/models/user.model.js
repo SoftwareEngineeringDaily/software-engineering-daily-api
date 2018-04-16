@@ -70,6 +70,10 @@ const UserSchema = new mongoose.Schema({
     unsubscribedFromCommentReplies: {
       type: Boolean,
       default: false
+    },
+    unsubscribedFromMentions: {
+      type: Boolean,
+      default: false
     }
   },
   signedupForNewsletter: {
