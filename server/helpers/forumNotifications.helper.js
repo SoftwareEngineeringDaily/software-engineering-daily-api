@@ -98,21 +98,26 @@ async function sendMentionsNotificationEmail({
     const userDesc = getUserDescription(userWhoReplied);
 
     const contentSummary = content.substr(0, 50);
-    each(usersMentioned, (mentionedUser) => {
-      const { email } = mentionedUser;
-      const msg = {
-        to: email,
-        from: 'no-reply@softwaredaily.com',
-        subject: 'Someone mentioned you in a thread @SoftwareDaily',
-        text: `${userDesc} mentioned you: ${config.baseUrl}/forum/${threadId}`,
-        html: `${userDesc} mentioned you.
+    each(usersMentioned, (userToEmail) => {
+      if (userToEmail.emailNotiicationSettings &&
+        userToEmail.emailNotiicationSettings.unsubscribedFromMentions) {
+        console.log('Unsubscribed from mentions', userToEmail);
+      } else {
+        const { email } = userToEmail;
+        const msg = {
+          to: email,
+          from: 'no-reply@softwaredaily.com',
+          subject: 'Someone mentioned you in a thread @SoftwareDaily',
+          text: `${userDesc} mentioned you: ${config.baseUrl}/forum/${threadId}`,
+          html: `${userDesc} mentioned you.
           <br />
           <br />
           "${contentSummary}..."
-           [<strong> <a href="${config.baseUrl}/forum/${threadId}/"> click to read more</a>]
-        <br /><br /> <a href="${config.baseUrl}/notification-settings/"> Unsubscribe </a>`
-      };
-      sgMail.send(msg);
+          [<strong> <a href="${config.baseUrl}/forum/${threadId}/"> click to read more</a>]
+          <br /><br /> <a href="${config.baseUrl}/notification-settings/"> Unsubscribe </a>`
+        };
+        sgMail.send(msg);
+      }
     });
   } catch (e) {
     console.log('Error emailing notification', e);
