@@ -155,9 +155,10 @@ function create(req, res, next) {
           case 'forumthread':
 
             // TODO: move these so we also email for posts:
+            // get entity outside of this function and then pass down:
             if (parentCommentId) {
               // TODO: don't email if you are the author and replying to own stuff:
-              ForumNotifications.sendReplyEmailNotificationEmail({
+              ForumNotifications.sendReplyNotificationEmail({
                 parentCommentId,
                 content,
                 threadId: entityId,
@@ -166,7 +167,7 @@ function create(req, res, next) {
             }
 
             if (mentions) {
-              ForumNotifications.sendMentionsEmailNotificationEmail({
+              ForumNotifications.sendMentionsNotificationEmail({
                 parentCommentId,
                 content,
                 threadId: entityId,
