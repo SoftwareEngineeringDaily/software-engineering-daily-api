@@ -89,11 +89,11 @@ async function idsToUsers(ids) {
   return users;
 }
 
-async function extractedNewMentions(comment, updatedMentions) {
+function extractedNewMentions(comment, updatedMentions) {
   const oldMentions = comment.mentions;
   if (!oldMentions) return updatedMentions;
   function getUserId(user) {
-    return user._id;
+    return user._id.toString();
   }
   const newlyAddedMentions = differenceBy(
     updatedMentions,
