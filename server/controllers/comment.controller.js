@@ -191,7 +191,7 @@ async function create(req, res, next) {
   comment.content = content;
   let usersMentioned = [];
   if (mentions) {
-    usersMentioned = idsToUsers(mentions);
+    usersMentioned = await idsToUsers(mentions);
     comment.mentions = usersMentioned;
   }
 
