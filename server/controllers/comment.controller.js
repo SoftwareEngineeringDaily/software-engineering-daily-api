@@ -209,12 +209,12 @@ async function create(req, res, next) {
       if (entityType) {
         switch (entityType.toLowerCase()) {
           case 'forumthread':
-
             // TODO: move these so we also email for posts:
             // get entity outside of this function and then pass down:
             if (parentCommentId) {
               // TODO: don't email if you are the author and replying to own stuff:
               ForumNotifications.sendReplyNotificationEmail({
+                parentCommentId,
                 content,
                 threadId: entityId,
                 userWhoReplied: user
@@ -223,7 +223,6 @@ async function create(req, res, next) {
 
             if (mentions) {
               ForumNotifications.sendMentionsNotificationEmail({
-                parentCommentId,
                 content,
                 threadId: entityId,
                 userWhoReplied: user,
