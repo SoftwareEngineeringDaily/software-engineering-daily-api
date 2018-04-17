@@ -1,5 +1,6 @@
 import Promise from 'bluebird';
 import map from 'lodash/map';
+import differenceBy from 'lodash/differenceBy';
 import moment from 'moment';
 
 import Comment from '../models/comment.model';
@@ -70,13 +71,64 @@ function remove(req, res, next) {
   return res.status(500).json({});
 }
 
-function update(req, res, next) {
+async function idsToUsers(ids) {
+  const users = [];
+  // TODO: dont block on each mention:
+  // https://eslint.org/docs/rules/no-await-in-loop
+  /* eslint-disable no-await-in-loop */
+  for (let ii = 0; ii < ids.length; ii += 1) {
+    try {
+      const id = ids[ii];
+      const user = await User.get(id);
+      users.push(user);
+    } catch (e) {
+      console.log('e.idsToUsers', e);
+    }
+  }
+  /* eslint-disable no-await-in-loop */
+  return users;
+}
+
+function extractedNewMentions(comment, updatedMentions) {
+  const oldMentions = comment.mentions;
+  if (!oldMentions) return updatedMentions;
+  function getUserId(user) {
+    return user._id.toString();
+  }
+  const newlyAddedMentions = differenceBy(
+    updatedMentions,
+    oldMentions,
+    getUserId
+  );
+  return newlyAddedMentions;
+}
+
+async function update(req, res, next) {
   const { comment, user } = req;
-  const { content } = req.body;
+  const { content, mentions } = req.body;
   if (comment && user) {
     if (comment.author._id.toString() !== user._id.toString()) {
       return res.status(401).json({ Error: 'Please login' });
     }
+
+    if (mentions) {
+      try {
+        const updatedMentions = await idsToUsers(mentions);
+        const usersWeShouldEmail = extractedNewMentions(comment, updatedMentions);
+        comment.mentions = updatedMentions;
+        ForumNotifications.sendMentionsNotificationEmail({
+          content,
+          threadId: comment.rootEntity,
+          userWhoReplied: user,
+          usersMentioned: usersWeShouldEmail
+        });
+      } catch (e) {
+        console.log('e', e);
+      }
+    } else {
+      comment.mentions = [];
+    }
+
     comment.content = content;
     comment.dateLastEdited = Date();
     return comment
@@ -137,21 +189,9 @@ async function create(req, res, next) {
 
   const comment = new Comment();
   comment.content = content;
-  const usersMentioned = [];
+  let usersMentioned = [];
   if (mentions) {
-    // TODO: dont block on each mention:
-    // https://eslint.org/docs/rules/no-await-in-loop
-    /* eslint-disable no-await-in-loop */
-    for (let ii = 0; ii < mentions.length; ii += 1) {
-      try {
-        const mention = mentions[ii];
-        const userMentioned = await User.get(mention);
-        usersMentioned.push(userMentioned);
-      } catch (e) {
-        console.log('e', e);
-      }
-    }
-    /* eslint-disable no-await-in-loop */
+    usersMentioned = await idsToUsers(mentions);
     comment.mentions = usersMentioned;
   }
 
@@ -175,7 +215,6 @@ async function create(req, res, next) {
             if (parentCommentId) {
               // TODO: don't email if you are the author and replying to own stuff:
               ForumNotifications.sendReplyNotificationEmail({
-                parentCommentId,
                 content,
                 threadId: entityId,
                 userWhoReplied: user
