@@ -78,9 +78,9 @@ async function idsToUsers(ids) {
   /* eslint-disable no-await-in-loop */
   for (let ii = 0; ii < ids.length; ii += 1) {
     try {
-      const mention = ids[ii];
-      const userMentioned = await User.get(mention);
-      users.push(userMentioned);
+      const id = ids[ii];
+      const user = await User.get(id);
+      users.push(user);
     } catch (e) {
       console.log('e.idsToUsers', e);
     }
