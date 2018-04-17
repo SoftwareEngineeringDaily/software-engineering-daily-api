@@ -89,8 +89,9 @@ async function idsToUsers(ids) {
   return users;
 }
 
-async function extratNewMentions(comment, updatedMentions) {
+async function extractedNewMentions(comment, updatedMentions) {
   const oldMentions = comment.mentions;
+  if (!oldMentions) return updatedMentions;
   function getUserId(user) {
     return user._id;
   }
@@ -113,13 +114,13 @@ async function update(req, res, next) {
     if (mentions) {
       try {
         const updatedMentions = await idsToUsers(mentions);
-        const usersToEmail = extratNewMentions(comment, updatedMentions);
+        const usersWeShouldEmail = extractedNewMentions(comment, updatedMentions);
         comment.mentions = updatedMentions;
         ForumNotifications.sendMentionsNotificationEmail({
           content,
           threadId: comment.rootEntity,
           userWhoReplied: user,
-          usersMentioned: usersToEmail
+          usersMentioned: usersWeShouldEmail
         });
       } catch (e) {
         console.log('e', e);
@@ -188,21 +189,9 @@ async function create(req, res, next) {
 
   const comment = new Comment();
   comment.content = content;
-  const usersMentioned = [];
+  let usersMentioned = [];
   if (mentions) {
-    // TODO: dont block on each mention:
-    // https://eslint.org/docs/rules/no-await-in-loop
-    /* eslint-disable no-await-in-loop */
-    for (let ii = 0; ii < mentions.length; ii += 1) {
-      try {
-        const mention = mentions[ii];
-        const userMentioned = await User.get(mention);
-        usersMentioned.push(userMentioned);
-      } catch (e) {
-        console.log('e', e);
-      }
-    }
-    /* eslint-disable no-await-in-loop */
+    usersMentioned = idsToUsers(mentions);
     comment.mentions = usersMentioned;
   }
 
