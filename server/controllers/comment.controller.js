@@ -1,5 +1,6 @@
 import Promise from 'bluebird';
 import map from 'lodash/map';
+import differenceBy from 'lodash/differenceBy';
 import moment from 'moment';
 
 import Comment from '../models/comment.model';
@@ -70,13 +71,63 @@ function remove(req, res, next) {
   return res.status(500).json({});
 }
 
-function update(req, res, next) {
+async function idsToUsers(ids) {
+  const users = [];
+  // TODO: dont block on each mention:
+  // https://eslint.org/docs/rules/no-await-in-loop
+  /* eslint-disable no-await-in-loop */
+  for (let ii = 0; ii < ids.length; ii += 1) {
+    try {
+      const mention = ids[ii];
+      const userMentioned = await User.get(mention);
+      users.push(userMentioned);
+    } catch (e) {
+      console.log('e.idsToUsers', e);
+    }
+  }
+  /* eslint-disable no-await-in-loop */
+  return users;
+}
+
+async function extratNewMentions(comment, updatedMentions) {
+  const oldMentions = comment.mentions;
+  function getUserId(user) {
+    return user._id;
+  }
+  const newlyAddedMentions = differenceBy(
+    updatedMentions,
+    oldMentions,
+    getUserId
+  );
+  return newlyAddedMentions;
+}
+
+async function update(req, res, next) {
   const { comment, user } = req;
-  const { content } = req.body;
+  const { content, mentions } = req.body;
   if (comment && user) {
     if (comment.author._id.toString() !== user._id.toString()) {
       return res.status(401).json({ Error: 'Please login' });
     }
+
+    if (mentions) {
+      try {
+        const updatedMentions = await idsToUsers(mentions);
+        const usersToEmail = extratNewMentions(comment, updatedMentions);
+        comment.mentions = updatedMentions;
+        ForumNotifications.sendMentionsNotificationEmail({
+          content,
+          threadId: comment.rootEntity,
+          userWhoReplied: user,
+          usersMentioned: usersToEmail
+        });
+      } catch (e) {
+        console.log('e', e);
+      }
+    } else {
+      comment.mentions = [];
+    }
+
     comment.content = content;
     comment.dateLastEdited = Date();
     return comment
@@ -175,7 +226,6 @@ async function create(req, res, next) {
             if (parentCommentId) {
               // TODO: don't email if you are the author and replying to own stuff:
               ForumNotifications.sendReplyNotificationEmail({
-                parentCommentId,
                 content,
                 threadId: entityId,
                 userWhoReplied: user
