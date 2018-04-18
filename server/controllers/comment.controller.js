@@ -1,8 +1,10 @@
 import Promise from 'bluebird';
 import map from 'lodash/map';
+import differenceBy from 'lodash/differenceBy';
 import moment from 'moment';
 
 import Comment from '../models/comment.model';
+import User from '../models/user.model';
 import ForumThread from '../models/forumThread.model';
 import ForumNotifications from '../helpers/forumNotifications.helper';
 /*
@@ -69,13 +71,64 @@ function remove(req, res, next) {
   return res.status(500).json({});
 }
 
-function update(req, res, next) {
+async function idsToUsers(ids) {
+  const users = [];
+  // TODO: dont block on each mention:
+  // https://eslint.org/docs/rules/no-await-in-loop
+  /* eslint-disable no-await-in-loop */
+  for (let ii = 0; ii < ids.length; ii += 1) {
+    try {
+      const id = ids[ii];
+      const user = await User.get(id);
+      users.push(user);
+    } catch (e) {
+      console.log('e.idsToUsers', e);
+    }
+  }
+  /* eslint-disable no-await-in-loop */
+  return users;
+}
+
+function extractedNewMentions(comment, updatedMentions) {
+  const oldMentions = comment.mentions;
+  if (!oldMentions) return updatedMentions;
+  function getUserId(user) {
+    return user._id.toString();
+  }
+  const newlyAddedMentions = differenceBy(
+    updatedMentions,
+    oldMentions,
+    getUserId
+  );
+  return newlyAddedMentions;
+}
+
+async function update(req, res, next) {
   const { comment, user } = req;
-  const { content } = req.body;
+  const { content, mentions } = req.body;
   if (comment && user) {
     if (comment.author._id.toString() !== user._id.toString()) {
       return res.status(401).json({ Error: 'Please login' });
     }
+
+    if (mentions) {
+      try {
+        const updatedMentions = await idsToUsers(mentions);
+        const usersWeShouldEmail = extractedNewMentions(comment, updatedMentions);
+        comment.mentions = updatedMentions;
+        ForumNotifications.sendMentionsNotificationEmail({
+          content,
+          threadId: comment.rootEntity,
+          userWhoReplied: user,
+          usersMentioned: usersWeShouldEmail
+        });
+      } catch (e) {
+        console.log('e', e);
+      }
+    } else {
+      comment.mentions = [];
+    }
+
     comment.content = content;
     comment.dateLastEdited = Date();
     return comment
@@ -128,14 +181,20 @@ function update(req, res, next) {
  *         $ref: '#/responses/NotFound'
  */
 
-function create(req, res, next) {
+async function create(req, res, next) {
   const { entityId } = req.params;
-  const { parentCommentId } = req.body;
+  const { parentCommentId, mentions } = req.body;
   const { content, entityType } = req.body;
   const { user } = req;
 
   const comment = new Comment();
   comment.content = content;
+  let usersMentioned = [];
+  if (mentions) {
+    usersMentioned = await idsToUsers(mentions);
+    comment.mentions = usersMentioned;
+  }
+
   comment.rootEntity = entityId;
   // If this is a child comment we need to assign it's parent
   if (parentCommentId) {
@@ -146,19 +205,32 @@ function create(req, res, next) {
   comment
     .save()
     .then((commentSaved) => {
-      if (parentCommentId) {
-        // TODO: don't email if you are the author and replying to own stuff:
-        ForumNotifications.sendReplyEmailNotificationEmail({
-          parentCommentId,
-          content,
-          threadId: entityId,
-          userWhoReplied: user
-        });
-      }
       // TODO: result key is not consistent with other responses, consider changing this
       if (entityType) {
         switch (entityType.toLowerCase()) {
           case 'forumthread':
+
+            // TODO: move these so we also email for posts:
+            // get entity outside of this function and then pass down:
+            if (parentCommentId) {
+              // TODO: don't email if you are the author and replying to own stuff:
+              ForumNotifications.sendReplyNotificationEmail({
+                content,
+                threadId: entityId,
+                userWhoReplied: user
+              });
+            }
+
+            if (mentions) {
+              ForumNotifications.sendMentionsNotificationEmail({
+                parentCommentId,
+                content,
+                threadId: entityId,
+                userWhoReplied: user,
+                usersMentioned
+              });
+            }
+
             ForumNotifications.sendForumNotificationEmail({
               threadId: entityId,
               content,

@@ -64,6 +64,10 @@ const CommentSchema = new Schema({
     type: Schema.Types.ObjectId // The entity that owns this comment
     // , ref: 'Post' | 'AMA'
   },
+  mentions: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }],
   author: {
     type: Schema.Types.ObjectId,
     ref: 'User',
@@ -115,7 +119,7 @@ CommentSchema.statics = {
   get(id) {
     return this.findById(id)
       .populate('author', '-password')
-      // .populate('rootEntity')
+      .populate('mentions')
       .exec()
       .then((comment) => {
         if (comment) {
@@ -172,6 +176,7 @@ CommentSchema.statics = {
   getTopLevelCommentsForItem(entityId) {
     return this.find({ rootEntity: entityId, parentComment: null })
       .sort({ dateCreated: -1 })
+      .populate('mentions')
       .populate('author', '-password');
   },
 
@@ -192,6 +197,7 @@ CommentSchema.statics = {
    */
   getNestedComments(parentCommentId) {
     return this.find({ parentComment: parentCommentId })
+      .populate('mentions')
       .populate('author', '-password')
       .lean(); // so not Mongoose objects
   },

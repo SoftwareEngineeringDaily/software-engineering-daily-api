@@ -5,7 +5,6 @@ import paramValidation from '../../config/param-validation';
 import userCtrl from '../controllers/user.controller';
 import loadFullUser from '../middleware/loadFullUser.middleware';
 import config from '../../config/config';
-import ensureIsAdmin from '../middleware/ensureIsAdmin.middleware';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
@@ -20,7 +19,6 @@ router.route('/search')
   .get(
     expressJwt({ secret: config.jwtSecret })
     , loadFullUser
-    , ensureIsAdmin
     , userCtrl.list
   );
 

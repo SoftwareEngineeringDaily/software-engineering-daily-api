@@ -1,3 +1,4 @@
+import each from 'lodash/each';
 import sgMail from './mail';
 import config from '../../config/config';
 import Comment from '../models/comment.model';
@@ -13,6 +14,7 @@ function getUserDescription(userWhoReplied) {
   }
   return userDesc;
 }
+
 // TODO: don't email if you are the author and replying to own stuff:
 async function sendForumNotificationEmail({ threadId, content, userWhoReplied }) {
   try {
@@ -45,8 +47,7 @@ async function sendForumNotificationEmail({ threadId, content, userWhoReplied })
   }
 }
 
-// TODO: add date so it doesn't get minimized by google.
-async function sendReplyEmailNotificationEmail({
+async function sendReplyNotificationEmail({
   parentCommentId, content, threadId, userWhoReplied
 }) {
   // We need to get the info for the person who made the original comment:
@@ -89,4 +90,43 @@ async function sendReplyEmailNotificationEmail({
   }
 }
 
-export default { sendForumNotificationEmail, sendReplyEmailNotificationEmail };
+
+async function sendMentionsNotificationEmail({
+  content, threadId, userWhoReplied, usersMentioned
+}) {
+  try {
+    const userDesc = getUserDescription(userWhoReplied);
+
+    const contentSummary = content.substr(0, 50);
+    each(usersMentioned, (userToEmail) => {
+      if (userToEmail.emailNotiicationSettings &&
+        userToEmail.emailNotiicationSettings.unsubscribedFromMentions) {
+        console.log('Unsubscribed from mentions', userToEmail);
+      } else {
+        const { email } = userToEmail;
+        const msg = {
+          to: email,
+          from: 'no-reply@softwaredaily.com',
+          subject: 'Someone mentioned you in a thread @SoftwareDaily',
+          text: `${userDesc} mentioned you: ${config.baseUrl}/forum/${threadId}`,
+          html: `${userDesc} mentioned you.
+          <br />
+          <br />
+          "${contentSummary}..."
+          [<strong> <a href="${config.baseUrl}/forum/${threadId}/"> click to read more</a>]
+          <br /><br /> <a href="${config.baseUrl}/notification-settings/"> Unsubscribe </a>`
+        };
+        sgMail.send(msg);
+      }
+    });
+  } catch (e) {
+    console.log('Error emailing notification', e);
+  }
+}
+
+
+export default {
+  sendForumNotificationEmail,
+  sendMentionsNotificationEmail,
+  sendReplyNotificationEmail
+};

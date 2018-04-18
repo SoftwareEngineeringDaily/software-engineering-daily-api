@@ -26,6 +26,7 @@ export default {
   updateEmailNotiicationSettings: {
     body: {
       unsubscribedFromThreads: Joi.boolean().required(),
+      unsubscribedFromMentions: Joi.boolean().required(),
       unsubscribedFromCommentReplies: Joi.boolean().required(),
     }
   },
