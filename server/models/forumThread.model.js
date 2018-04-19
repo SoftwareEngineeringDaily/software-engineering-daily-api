@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import moment from 'moment';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Vote from './vote.model';
@@ -58,13 +59,19 @@ ForumThreadSchema.statics = {
   },
 
   list({
-    user = null,
+    limit = 10,
+    lastActivityBefore = null,
+    user = null
   } = {}) {
     const query = {};
     query.deleted = false;
+    if (lastActivityBefore) query.dateLastAcitiy = { $lt: moment(lastActivityBefore).toDate() };
+    const limitOption = parseInt(limit, 10);
+
     return this.find(query)
       .populate('author', '-password')
       .sort({ dateLastAcitiy: -1 })
+      .limit(limitOption)
       .exec()
       .then((threadsFound) => {
         const threadsFoundProcessed = threadsFound.map((thread) => {
