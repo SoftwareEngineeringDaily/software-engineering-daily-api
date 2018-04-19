@@ -233,7 +233,8 @@ function register(req, res, next) {
           }
         });
         const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
-        return next(error);
+        console.log('newsletter error', error);
+        // return next(error); // This will prevent registration which we dont want
       });
       mailchimpReq.write(postData);
       mailchimpReq.end();
@@ -247,7 +248,8 @@ function register(req, res, next) {
       }
     });
     const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
-    return next(error);
+    console.log('newsletter error2', error);
+    // return next(error); // This will prevent registration which we dont want
   }
 
   User.findOne(userQuery)
