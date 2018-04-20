@@ -12,6 +12,14 @@ function load(req, res, next, id) {
 function list(req, res, next) {
   const query = {};
   if (req.user) query.user = req.user;
+
+  const {
+    limit = null,
+    lastActivityBefore = null
+  } = req.query;
+
+  if (limit) query.limit = limit;
+  if (lastActivityBefore) query.lastActivityBefore = lastActivityBefore;
   ForumThread.list(query)
     .then(threads => res.json(threads))
     .catch(e => next(e));
