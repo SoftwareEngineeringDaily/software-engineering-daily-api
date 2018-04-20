@@ -19,6 +19,10 @@ const ForumThreadSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  podcastEpisode: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Post'
+  },
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

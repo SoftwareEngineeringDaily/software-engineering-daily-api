@@ -62,6 +62,10 @@ const PostSchema = new mongoose.Schema({
   title: {
     rendered: String,
   },
+  thread: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ForumThread'
+  },
   content: {
     rendered: String,
   },
@@ -99,6 +103,7 @@ PostSchema.statics = {
    */
   get(id) {
     return this.findById(id)
+      .populate('thread')
       .exec()
       .then((post) => {
         if (post) {
