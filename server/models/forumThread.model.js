@@ -43,6 +43,7 @@ ForumThreadSchema.statics = {
   get(id) {
     return this.findById(id)
       .populate('author', '-password')
+      .populate('podcastEpisode')
       .exec()
       .then((thread) => {
         if (thread) {
@@ -74,6 +75,7 @@ ForumThreadSchema.statics = {
 
     return this.find(query)
       .populate('author', '-password')
+      .populate('podcastEpisode')
       .sort({ dateLastAcitiy: -1 })
       .limit(limitOption)
       .exec()
