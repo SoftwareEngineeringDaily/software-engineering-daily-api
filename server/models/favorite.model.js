@@ -96,10 +96,11 @@ FavoriteSchema.statics = {
         const postIds = bookmarks.map(bookmark => bookmark.postId);
         return Post.find({ _id: { $in: postIds } }, Post.standardSelectForFind)
           .sort({ date: -1 })
-          .lean() // return as plain object
+          // .lean() // returns as plain object, but this will remove default values which is bad
           .exec();
       }).then((posts) => {
-        const postsWithVotes = Post.addVotesForUserToPosts(posts, userId);
+        const _posts = posts.map(post => post.toObject());
+        const postsWithVotes = Post.addVotesForUserToPosts(_posts, userId);
         return postsWithVotes.map(post => Object.assign({}, post, { bookmarked: true }));
       });
   }
