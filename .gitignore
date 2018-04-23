@@ -56,3 +56,6 @@ node_modules
 
 # Redis Database File
 *.rdb
+
+# CI builds
+devops/dump
