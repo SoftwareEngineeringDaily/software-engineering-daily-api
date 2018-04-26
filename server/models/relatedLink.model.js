@@ -85,7 +85,7 @@ RelatedLinkSchema.statics = {
           links
         }));
       })
-      .then(({ links, votes }) => {
+      .then(({ links, votes = [] }) => {
         const voteMap = {};
         votes.forEach((vote) => {
           const voteKey = vote.entityId;
