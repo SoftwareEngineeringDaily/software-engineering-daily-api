@@ -21,7 +21,7 @@ while [[ $? -ne 0 && $COUNTER -lt 60 ]] ; do
 done
 
 # Restore from dump
-mongorestore --drop /home/dump
+mongorestore --db sedaily --quiet /home/dump
 
 # Keep container running
 tail -f /dev/null
