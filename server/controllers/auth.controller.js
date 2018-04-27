@@ -7,7 +7,7 @@ import APIError from '../helpers/APIError';
 import config from '../../config/config';
 import User from '../models/user.model';
 import { signS3 } from '../helpers/s3';
-import sendError from '../helpers/events.helper';
+import { sendError, ErrorType } from '../helpers/events.helper';
 
 const http = require('http'); // For mailchimp api call
 require('dotenv').config();
@@ -228,7 +228,8 @@ function register(req, res, next) {
         console.log(`mailchimp error: ${e}`);
         sendError({
           userName: username,
-          eventData: {
+          errorType: ErrorType.OTHER,
+          errorData: {
             message: e
           }
         });
@@ -243,7 +244,8 @@ function register(req, res, next) {
     console.log(`mailchimp error: ${e}`);
     sendError({
       userName: username,
-      eventData: {
+      errorType: ErrorType.OTHER,
+      errorData: {
         message: e
       }
     });
