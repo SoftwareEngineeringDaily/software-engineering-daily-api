@@ -327,5 +327,32 @@ describe('## Bookmark APIs', () => {
         })
         .catch(done);
     });
+    // as posts are "saved" from WordPress without Mongoose, they will not include defaults
+    // test to ensure the default is returned with query - see GitHub issue #199
+    it('should include Post score even if undefined', (done) => {
+      // let postIdNoScore;
+      const postNoScore = new Post();
+      postNoScore.score = undefined;
+      expect(postNoScore.toObject()).to.not.have.keys('score');
+      postNoScore.save().then(post => post._id).then((postIdNoScore) => {
+        request(app)
+          .post(`/api/posts/${postIdNoScore}/bookmark`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(httpStatus.OK)
+          .then(() =>
+            request(app)
+              .get('/api/users/me/bookmarked')
+              .set('Authorization', `Bearer ${userToken}`)
+              .expect(httpStatus.OK))
+          .then((res) => {
+            expect(res.body).to.be.an('array');
+            expect(res.body).to.have.lengthOf(1);
+            expect(res.body[0]._id).to.equal(`${postIdNoScore}`);
+            expect(res.body[0].score).to.equal(0);
+            done();
+          })
+          .catch(done);
+      });
+    });
   });
 });
