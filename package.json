@@ -1,139 +1,140 @@
 {
-  "name": "software-engineering-daily-api",
-  "version": "2.0.0",
-  "description": "A Boilerplate application for building REST APIs using express, mongoose in ES6 with code coverage",
-  "author": "Keith Holliday <keithrholliday@gmail.com>",
-  "main": "index.js",
-  "private": false,
-  "engines": {
-    "node": "6.11.1",
-    "npm": "5.5.1"
-  },
-  "scripts": {
-    "launch": "npm run build && node dist/index.js",
-    "start": "gulp serve",
-    "staging-deploy": "git push staging develop:master",
-    "deploy": "git push production master:master",
-    "start:debug": "cross-env DEBUG=software-engineering-daily-api:* npm run start",
-    "build": "gulp",
-    "lint": "esw *.js server config --color",
-    "lint:watch": "npm run lint -- --watch",
-    "precommit": "lint-staged",
-    "test": "cross-env NODE_ENV=test ./node_modules/.bin/mocha --ui bdd --reporter spec --colors --compilers js:babel-core/register --require babel-polyfill server/tests --recursive",
-    "test:watch": "npm run test -- --watch",
-    "test:coverage": "cross-env NODE_ENV=test ./node_modules/.bin/istanbul cover _mocha -- --ui bdd --reporter spec --colors --compilers js:babel-core/register --require babel-polyfill server/tests --recursive",
-    "test:check-coverage": "npm run test:coverage && istanbul check-coverage",
-    "report-coverage": "coveralls < ./coverage/lcov.info"
-  },
-  "lint-staged": {
-    "*.js": [
-      "eslint --fix",
-      "git add"
-    ]
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:thehollidayinn/software-engineering-daily-api.git"
-  },
-  "keywords": [
-    "express",
-    "node",
-    "node.js",
-    "mongodb",
-    "mongoose",
-    "es6",
-    "mocha",
-    "istanbul",
-    "REST",
-    "API",
-    "boilerplate"
-  ],
-  "dependencies": {
-    "@sendgrid/mail": "^6.1.4",
-    "aws-sdk": "^2.150.0",
-    "axios": "^0.17.1",
-    "babel-cli": "6.26.0",
-    "babel-core": "6.26.0",
-    "babel-plugin-add-module-exports": "0.2.1",
-    "babel-preset-es2015": "6.24.1",
-    "babel-preset-stage-2": "6.24.1",
-    "bcrypt-nodejs": "0.0.3",
-    "bluebird": "3.5.0",
-    "body-parser": "1.17.2",
-    "chai": "4.1.2",
-    "commitizen": "2.9.6",
-    "compression": "1.7.0",
-    "cookie-parser": "1.4.3",
-    "cors": "2.8.4",
-    "coveralls": "2.13.1",
-    "cross-env": "5.0.5",
-    "cz-conventional-changelog": "2.0.0",
-    "debug": "3.0.1",
-    "del": "3.0.0",
-    "dotenv": "4.0.0",
-    "eslint": "4.6.1",
-    "eslint-config-airbnb-base": "12.0.0",
-    "eslint-plugin-import": "2.7.0",
-    "eslint-watch": "3.1.2",
-    "express": "4.15.4",
-    "express-jwt": "5.3.0",
-    "express-validation": "1.0.2",
-    "express-winston": "2.4.0",
-    "gulp": "3.9.1",
-    "gulp-babel": "7.0.0",
-    "gulp-load-plugins": "1.5.0",
-    "gulp-newer": "1.3.0",
-    "gulp-nodemon": "2.2.1",
-    "gulp-sourcemaps": "2.6.1",
-    "gulp-util": "3.0.8",
-    "helmet": "3.8.1",
-    "http-status": "1.0.1",
-    "istanbul": "1.0.0-alpha.2",
-    "joi": "10.6.0",
-    "jsonwebtoken": "8.0.0",
-    "lodash": "4.17.4",
-    "method-override": "2.3.9",
-    "mocha": "3.5.0",
-    "moment": "2.18.1",
-    "mongoose": "4.11.10",
-    "morgan": "1.8.2",
-    "multer": "^1.3.0",
-    "passport": "0.4.0",
-    "passport-facebook-token": "3.3.0",
-    "raccoon": "0.2.8",
-    "randomstring": "^1.1.5",
-    "redis": "2.8.0",
-    "run-sequence": "2.1.0",
-    "sendgrid": "^5.2.3",
-    "stripe": "^5.3.0",
-    "supertest": "3.0.0",
-    "supertest-as-promised": "4.0.2",
-    "swagger-jsdoc": "^1.9.7",
-    "validate-commit-msg": "2.14.0",
-    "winston": "2.3.1"
-  },
-  "license": "MIT",
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
-  },
-  "babel": {
-    "presets": [
-      "es2015",
-      "stage-2"
+    "name": "software-engineering-daily-api",
+    "version": "2.0.0",
+    "description": "A Boilerplate application for building REST APIs using express, mongoose in ES6 with code coverage",
+    "author": "Keith Holliday <keithrholliday@gmail.com>",
+    "main": "index.js",
+    "private": false,
+    "engines": {
+        "node": "6.11.1",
+        "npm": "5.5.1"
+    },
+    "scripts": {
+        "launch": "npm run build && node dist/index.js",
+        "start": "gulp serve",
+        "seed": "md-seed run --dropdb",
+        "staging-deploy": "git push staging develop:master",
+        "deploy": "git push production master:master",
+        "start:debug": "cross-env DEBUG=software-engineering-daily-api:* npm run start",
+        "build": "gulp",
+        "lint": "esw *.js server config --color",
+        "lint:watch": "npm run lint -- --watch",
+        "precommit": "lint-staged",
+        "test": "cross-env NODE_ENV=test ./node_modules/.bin/mocha --ui bdd --reporter spec --colors --compilers js:babel-core/register --require babel-polyfill server/tests --recursive",
+        "test:watch": "npm run test -- --watch",
+        "test:coverage": "cross-env NODE_ENV=test ./node_modules/.bin/istanbul cover _mocha -- --ui bdd --reporter spec --colors --compilers js:babel-core/register --require babel-polyfill server/tests --recursive",
+        "test:check-coverage": "npm run test:coverage && istanbul check-coverage",
+        "report-coverage": "coveralls < ./coverage/lcov.info"
+    },
+    "lint-staged": {
+        "*.js": [
+            "eslint --fix",
+            "git add"
+        ]
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:thehollidayinn/software-engineering-daily-api.git"
+    },
+    "keywords": [
+        "express",
+        "node",
+        "node.js",
+        "mongodb",
+        "mongoose",
+        "es6",
+        "mocha",
+        "istanbul",
+        "REST",
+        "API",
+        "boilerplate"
     ],
-    "plugins": [
-      "add-module-exports"
-    ]
-  },
-  "devDependencies": {
-    "babel-polyfill": "^6.26.0",
-    "husky": "^0.14.3",
-    "lint-staged": "^6.0.0",
-    "minimist": "^1.2.0",
-    "sinon": "^4.2.2",
-    "sinon-mongoose": "^2.0.2",
-    "swagger-node-express": "^2.1.3"
-  }
+    "dependencies": {
+        "@sendgrid/mail": "^6.1.4",
+        "aws-sdk": "^2.150.0",
+        "axios": "^0.17.1",
+        "babel-cli": "6.26.0",
+        "babel-core": "6.26.0",
+        "babel-plugin-add-module-exports": "0.2.1",
+        "babel-preset-es2015": "6.24.1",
+        "babel-preset-stage-2": "6.24.1",
+        "bcrypt-nodejs": "0.0.3",
+        "bluebird": "3.5.0",
+        "body-parser": "1.17.2",
+        "chai": "4.1.2",
+        "commitizen": "2.9.6",
+        "compression": "1.7.0",
+        "cookie-parser": "1.4.3",
+        "cors": "2.8.4",
+        "coveralls": "2.13.1",
+        "cross-env": "5.0.5",
+        "cz-conventional-changelog": "2.0.0",
+        "debug": "3.0.1",
+        "del": "3.0.0",
+        "dotenv": "4.0.0",
+        "eslint": "4.6.1",
+        "eslint-config-airbnb-base": "12.0.0",
+        "eslint-plugin-import": "2.7.0",
+        "eslint-watch": "3.1.2",
+        "express": "4.15.4",
+        "express-jwt": "5.3.0",
+        "express-validation": "1.0.2",
+        "express-winston": "2.4.0",
+        "gulp": "3.9.1",
+        "gulp-babel": "7.0.0",
+        "gulp-load-plugins": "1.5.0",
+        "gulp-newer": "1.3.0",
+        "gulp-nodemon": "2.2.1",
+        "gulp-sourcemaps": "2.6.1",
+        "gulp-util": "3.0.8",
+        "helmet": "3.8.1",
+        "http-status": "1.0.1",
+        "istanbul": "1.0.0-alpha.2",
+        "joi": "10.6.0",
+        "jsonwebtoken": "8.0.0",
+        "lodash": "4.17.4",
+        "method-override": "2.3.9",
+        "mocha": "3.5.0",
+        "moment": "2.18.1",
+        "mongoose": "4.11.10",
+        "morgan": "1.8.2",
+        "multer": "^1.3.0",
+        "passport": "0.4.0",
+        "passport-facebook-token": "3.3.0",
+        "raccoon": "0.2.8",
+        "randomstring": "^1.1.5",
+        "redis": "2.8.0",
+        "run-sequence": "2.1.0",
+        "sendgrid": "^5.2.3",
+        "stripe": "^5.3.0",
+        "supertest": "3.0.0",
+        "supertest-as-promised": "4.0.2",
+        "swagger-jsdoc": "^1.9.7",
+        "validate-commit-msg": "2.14.0",
+        "winston": "2.3.1"
+    },
+    "license": "MIT",
+    "config": {
+        "commitizen": {
+            "path": "./node_modules/cz-conventional-changelog"
+        }
+    },
+    "babel": {
+        "presets": [
+            "es2015",
+            "stage-2"
+        ],
+        "plugins": [
+            "add-module-exports"
+        ]
+    },
+    "devDependencies": {
+        "babel-polyfill": "^6.26.0",
+        "husky": "^0.14.3",
+        "lint-staged": "^6.0.0",
+        "minimist": "^1.2.0",
+        "sinon": "^4.2.2",
+        "sinon-mongoose": "^2.0.2",
+        "swagger-node-express": "^2.1.3"
+    }
 }
