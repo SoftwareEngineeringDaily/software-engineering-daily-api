@@ -4,7 +4,7 @@ import Job from '../models/job.model';
 import APIError from '../helpers/APIError';
 import sgMail from '../helpers/mail';
 import transform from '../helpers/job.helper';
-import sendError from '../helpers/events.helper';
+import { sendError, ErrorType } from '../helpers/events.helper';
 
 require('babel-polyfill');
 
@@ -236,7 +236,8 @@ export default {
     } catch (err) {
       sendError({
         userName: req.user._id,
-        eventData: {
+        errorType: ErrorType.OTHER,
+        errorData: {
           message: err.message
         }
       });
