@@ -11,7 +11,7 @@ mongooseLib.Promise = global.Promise;
 export const mongoose = mongooseLib;
 
 // Export the mongodb url
-export const mongoURL = process.env.MONGO_HOST || 'mongodb://localhost:27017/sed-test';
+export const mongoURL = process.env.MONGO_HOST || 'mongodb://localhost:27017/sed';
 
 /*
   Seeders List

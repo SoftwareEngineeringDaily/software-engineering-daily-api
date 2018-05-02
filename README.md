@@ -12,6 +12,7 @@ The backend services and API for the Software Engineering Daily [Android](https:
   - Install and run a local mongo client
   - `cp .env.local_example .env`
   - `npm install` or `yarn install`
+  - `npm seed` or `yarn seed` to seed database with sample data
   - `npm start` or `yarn start`
   - check package.json for other builds
   - use curl or Postman to make requests
