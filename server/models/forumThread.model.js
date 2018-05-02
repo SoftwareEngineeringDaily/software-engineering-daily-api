@@ -81,7 +81,6 @@ ForumThreadSchema.statics = {
       .exec()
       .then((threadsFound) => {
         const threadsFoundProcessed = threadsFound.map((thread) => {
-          console.log('-');
           return Object.assign({}, thread.toObject());
         });
         if (!user) {

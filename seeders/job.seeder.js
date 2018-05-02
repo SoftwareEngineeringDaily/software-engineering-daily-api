@@ -1,6 +1,6 @@
 import { Seeder } from 'mongoose-data-seed';
 import Mongoose from 'mongoose';
-import Job from '../server/models/job.model';
+import Model from '../server/models/job.model';
 
 const userId = Mongoose.mongo.ObjectId('4eb6e7e7e9b7f4194e000001');
 const data = [{
@@ -28,11 +28,13 @@ const data = [{
 /* eslint-disable  class-methods-use-this */
 class JobSeeder extends Seeder {
   async shouldRun() {
-    return Job.count().exec().then(count => count === 0);
+    return Model.count()
+      .exec()
+      .then(count => count === 0);
   }
 
   async run() {
-    return Job.create(data);
+    return Model.create(data);
   }
 }
 
