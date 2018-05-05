@@ -25,3 +25,4 @@ mongorestore --db sed-test --quiet /home/dump
 
 # Keep container running
 tail -f /dev/null
+
