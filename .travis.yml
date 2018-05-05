@@ -11,6 +11,7 @@ git:
   depth: 3
 script:
   # - yarn test:check-coverage
-  - npm run test
+  #- npm run test
+  - echo $HELLO
 after_script:
   # - yarn report-coverage
