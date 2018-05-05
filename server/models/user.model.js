@@ -34,7 +34,19 @@ const UserSchema = new mongoose.Schema({
   bio: {
     type: String
   },
+  about: {
+    type: String
+  },
   website: {
+    type: String
+  },
+  linkedin: {
+    type: String
+  },
+  twitter: {
+    type: String
+  },
+  github: {
     type: String
   },
   verified: {
@@ -46,6 +58,9 @@ const UserSchema = new mongoose.Schema({
     default: false
   },
   email: {
+    type: String
+  },
+  publicEmail: {
     type: String
   },
   facebook: {
@@ -151,7 +166,7 @@ UserSchema.statics = {
   isValidHash: function validPassword({ original, hash }) {
     return bcrypt.compareSync(original, hash);
   },
-  updatableFields: ['username', 'website', 'bio', 'name', 'email']
+  updatableFields: ['username', 'website', 'bio', 'publicEmail', 'twitter', 'github', 'linkedin', 'about', 'name', 'email']
 };
 
 /**

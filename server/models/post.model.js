@@ -114,7 +114,7 @@ PostSchema.statics = {
       });
   },
   // standard list of fields to select for find Post queries
-  standardSelectForFind: 'content title date mp3 link score featuredImage upvoted downvoted tags categories',
+  standardSelectForFind: 'content title date mp3 link score featuredImage upvoted downvoted tags categories thread',
   /**
    * List posts in descending order of 'createdAt' timestamp.
    * @param {number} limit - Limit number of posts to be returned.
@@ -170,6 +170,7 @@ PostSchema.statics = {
       sort = { score: -1 };
     }
     const queryPromise = this.find(query, this.standardSelectForFind)
+      .populate('thread')
       .sort(sort)
       .limit(limitOption);
 
