@@ -1,9 +1,11 @@
 language: node_js
 node_js:
   - "6.11"
+sudo: required
 services:
   - mongodb
   - redis-server
+  - docker
 cache:
   directories:
   - node_modules
