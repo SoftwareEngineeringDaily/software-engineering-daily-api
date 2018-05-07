@@ -17,6 +17,7 @@ function buildApiImage {
 }
 
 # If not a CI build, don't build the Docker image
+echo $CI_BUILD
 if [ "$CI_BUILD" = 'true' ] ; then
-	echo 'Be careful not to fall off!'
+	echo 'Building API Docker image'
 fi
