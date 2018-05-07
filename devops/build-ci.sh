@@ -2,6 +2,7 @@
 # builds sedaiy-rest-api image for Continuous Integration (CI) purposes
 
 function buildApiImage {
+	echo 'Building API Docker image'
 	DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 	REPO_DIR=$(dirname $DIR)
 
@@ -19,5 +20,5 @@ function buildApiImage {
 # If not a CI build, don't build the Docker image
 echo $CI_BUILD
 if [ "$CI_BUILD" = true ] ; then
-	echo 'Building API Docker image'
+	buildApiImage
 fi
