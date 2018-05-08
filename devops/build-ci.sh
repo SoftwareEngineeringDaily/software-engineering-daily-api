@@ -18,7 +18,6 @@ function buildApiImage {
 }
 
 # If not a CI build, don't build the Docker image
-echo $CI_BUILD
 if [ "$CI_BUILD" = true ] ; then
 	buildApiImage
 fi
