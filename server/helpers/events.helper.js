@@ -1,13 +1,25 @@
 import axios from 'axios';
 import config from '../../config/config';
 
-export default function sendError({ userName, eventData }) {
+function sendError({ userName, errorData, errorType }) {
   return axios.post(`${config.eventStreamUrl}error`, {
     clientId: userName,
+    eventApiEnv: config.env === 'production' ? 'production' : 'test',
     deviceType: 'API',
+    errorType,
     errorTime: new Date().getTime(),
-    eventData
+    errorData
   })
     .then(response => response)
     .catch(error => error);
 }
+
+const ErrorType = {
+  AUTH: 'auth',
+  OTHER: 'other'
+};
+
+export default {
+  sendError,
+  ErrorType
+};
