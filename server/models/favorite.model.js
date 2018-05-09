@@ -95,6 +95,7 @@ FavoriteSchema.statics = {
         }
         const postIds = bookmarks.map(bookmark => bookmark.postId);
         return Post.find({ _id: { $in: postIds } }, Post.standardSelectForFind)
+          .populate('thread')
           .sort({ date: -1 })
           // .lean() // returns as plain object, but this will remove default values which is bad
           .exec();
