@@ -13,8 +13,10 @@ function buildApiImage {
 
 	rm $REPO_DIR/ci.Dockerfile
 
-	# docker login #must be part of organization
-	docker push softwaredaily/sedaily-rest-api	
+	# must be part the organization
+	echo $DOCKER_PASSWORD | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+	docker push softwaredaily/sedaily-rest-api
 }
 
 # If not a CI build, don't build the Docker image
