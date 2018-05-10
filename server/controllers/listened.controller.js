@@ -33,7 +33,7 @@ import Listened from '../models/listened.model';
  */
 
 function create(req, res, next) {
-  const { post } = req;
+  const { post } = req.body;
   const userId = req.user._id;
 
   // Get the item
