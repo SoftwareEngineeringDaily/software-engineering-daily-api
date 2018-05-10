@@ -16,4 +16,8 @@ router.route('/')
     , ctrl.create
   );
 
+
+router.route('/user/:userId')
+  .get(ctrl.listByUser);
+
 export default router;
