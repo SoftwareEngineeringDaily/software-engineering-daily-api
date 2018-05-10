@@ -6,8 +6,6 @@ import loadFullUser from '../middleware/loadFullUser.middleware';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
-router.use(expressJwt({ secret: config.jwtSecret }));
-
 router.route('/')
   .get(expressJwt({ secret: config.jwtSecret }), ctrl.listByUser)
   .post(
@@ -16,8 +14,10 @@ router.route('/')
     , ctrl.create
   );
 
-
 router.route('/user/:userId')
-  .get(ctrl.listByUser);
+  .get(
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
+    ctrl.listByUser
+  );
 
 export default router;
