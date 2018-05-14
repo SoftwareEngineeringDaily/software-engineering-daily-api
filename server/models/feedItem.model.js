@@ -19,25 +19,28 @@ FeedItemSchema.statics = {
     limit = 30,
     user = null
   } = {}) {
-    const query = {};
-    query.deleted = false;
+    // const query = {};
     const limitOption = parseInt(limit, 10);
 
-    return this.find(query)
-      .populate('user', '-password')
-      .populate('relatedLink')
+    return this.find()
+      // .populate('user', '-password')
+      // .populate('relatedLink')
       // .sort({ dateLastAcitiy: -1 })
       .limit(limitOption)
       .exec()
       .then((itemsFound) => {
+        console.log('items found', itemsFound);
         const foundProcessed = itemsFound.map((item) => {
           console.log('-');
           return Object.assign({}, item.toObject());
         });
         if (!user) {
+          console.log('no user-------------');
           return foundProcessed;
         }
-        return this.addVotesForUserToEntities(foundProcessed, user._id);
+        console.log('user-------------');
+        return foundProcessed;
+        // return this.addVotesForUserToEntities(foundProcessed, user._id);
       });
   },
 
