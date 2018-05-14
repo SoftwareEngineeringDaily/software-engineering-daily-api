@@ -12,7 +12,6 @@ async function list(req, res, next) {
     const items = await getLinks(req);
     // We get the most recent forum threads.
     // We comebine these:
-    console.log('items---------', items);
     res.json(items.concat(threads));
   } catch (e) {
     next(e);
@@ -20,7 +19,7 @@ async function list(req, res, next) {
 }
 async function getLinks(req) {
   const query = {};
-  // if (req.user) query.user = req.user;
+  if (req.user) query.user = req.user;
 
   const {
     limit = 15,

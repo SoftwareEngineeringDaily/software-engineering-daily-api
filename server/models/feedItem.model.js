@@ -19,26 +19,23 @@ FeedItemSchema.statics = {
     limit = 30,
     user = null
   } = {}) {
-    // const query = {};
+    const query = {};
+    if (user) query.user = user;
     const limitOption = parseInt(limit, 10);
 
-    return this.find()
-      // .populate('user', '-password')
-      // .populate('relatedLink')
-      // .sort({ dateLastAcitiy: -1 })
+    return this.find(query)
+      .populate('user', '-password')
+      .populate('relatedLink')
       .limit(limitOption)
       .exec()
       .then((itemsFound) => {
-        console.log('items found', itemsFound);
         const foundProcessed = itemsFound.map((item) => {
           console.log('-');
           return Object.assign({}, item.toObject());
         });
         if (!user) {
-          console.log('no user-------------');
           return foundProcessed;
         }
-        console.log('user-------------');
         return foundProcessed;
         // return this.addVotesForUserToEntities(foundProcessed, user._id);
       });
