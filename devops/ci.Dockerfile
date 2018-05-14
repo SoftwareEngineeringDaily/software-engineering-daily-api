@@ -16,8 +16,8 @@ RUN npm install --no-save --silent
 # copy all file from current dir to /app in container
 COPY . /app/
 
-# overwrite .env file with example
-COPY .env.docker_example /app/.env
+# overwrite .env file
+COPY /devops/.env.ci /app/.env
 
 # expose port 4040
 EXPOSE 4040
