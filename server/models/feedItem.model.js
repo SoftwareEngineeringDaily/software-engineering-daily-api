@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
+import Vote from './vote.model';
 
 const FeedItemSchema = new Schema({
   user: {
@@ -10,6 +11,68 @@ const FeedItemSchema = new Schema({
     ref: 'RelatedLink'
   }
 });
+
+FeedItemSchema.statics = {
+
+  // This doesn't paginate currently:
+  list({
+    limit = 30,
+    user = null
+  } = {}) {
+    const query = {};
+    query.deleted = false;
+    const limitOption = parseInt(limit, 10);
+
+    return this.find(query)
+      .populate('user', '-password')
+      .populate('relatedLink')
+      // .sort({ dateLastAcitiy: -1 })
+      .limit(limitOption)
+      .exec()
+      .then((itemsFound) => {
+        const foundProcessed = itemsFound.map((item) => {
+          console.log('-');
+          return Object.assign({}, item.toObject());
+        });
+        if (!user) {
+          return foundProcessed;
+        }
+        return this.addVotesForUserToEntities(foundProcessed, user._id);
+      });
+  },
+
+  addVotesForUserToEntities(items, userId) {
+    const ids = items.map((item) => { //eslint-disable-line
+      return item.relatedLink._id;
+    });
+    return Vote.find({
+      userId,
+      entityId: { $in: ids },
+    })
+      .exec()
+      .then((votes) => {
+        const voteMap = {};
+        for (let index in votes) { // eslint-disable-line
+          const vote = votes[index];
+          const voteKey = vote.entityId;
+          voteMap[voteKey] = vote;
+        }
+
+        const updatedEntities = [];
+        for (let index in items) { // eslint-disable-line
+          const currentItem = items[index];
+          const entity = currentItem.relatedLink;
+          const vote = voteMap[entity._id];
+          const updatedEntity = Vote.generateEntityVoteInfo(entity, vote);
+          currentItem.relatedLink = updatedEntity;
+          updatedEntities.push(currentItem);
+        }
+
+        return updatedEntities;
+      });
+  }
+
+};
 
 export default mongoose.model('FeedItem', FeedItemSchema);
 
