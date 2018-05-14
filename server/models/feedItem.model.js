@@ -16,19 +16,20 @@ FeedItemSchema.statics = {
 
   // This doesn't paginate currently:
   list({
-    limit = 30,
     user = null
   } = {}) {
-    const query = {};
-    if (user) query.user = user;
-    const limitOption = parseInt(limit, 10);
-
-    return this.find(query)
-      .populate('user', '-password')
-      .populate('relatedLink')
-      .limit(limitOption)
+    const query = { user: { $in: [mongoose.Types.ObjectId(user._id)] } };
+    console.log('query--------', query);
+    return this.aggregate([
+      { $match: query },
+      { $sample: { size: 3 } }
+    ])
+      // .populate('user', '-password')
+      // .populate('relatedLink')
+      // .limit(limitOption)
       .exec()
       .then((itemsFound) => {
+        console.log('********** items found', itemsFound);
         const foundProcessed = itemsFound.map((item) => {
           console.log('-');
           return Object.assign({}, item.toObject());
@@ -36,7 +37,6 @@ FeedItemSchema.statics = {
         if (!user) {
           return foundProcessed;
         }
-        // return foundProcessed;
         return this.addVotesForUserToEntities(foundProcessed, user._id);
       });
   },
