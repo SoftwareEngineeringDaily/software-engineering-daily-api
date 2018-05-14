@@ -1,0 +1,52 @@
+import mongoose, { Schema } from 'mongoose';
+
+const FeedItemSchema = new Schema({
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  relatedLink: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'RelatedLink'
+  }
+});
+
+export default mongoose.model('FeedItem', FeedItemSchema);
+
+// Can have the frontend interweave the form posts .. nope.catch((
+
+// APIs for each type and per user can return:
+// Should have each feed be made up of a few calls:
+
+// Feed is a mixture of things...
+
+
+// Feed item random
+
+// FeedGeneator fetches each related link for one user based on their listened
+// history. Can start with 100 / 30 max links.
+
+// Backend API adds the forum posts most recent so it's always new stuff in there
+// Random aggregate:
+// https://stackoverflow.com/questions/2824157/random-record-from-mongodb
+// https://stackoverflow.com/questions/13910751/random-sort-order
+
+/*
+db.articles.aggregate([
+    { $match : { topic : 3 } },
+    { $sample : { size: 3 } }
+])
+
+
+Cron Script - Steps:
+1) Give me all listens for user sorted by most recent.
+2) Collect all related links for those episodes.
+3) Remove all FeedItems for user
+3) Put new collection links (30) into FeedItem collection/table.
+
+API / Backend:
+1) Pull 15-30 random related links from feedItem
+2) Serve 10-15 latest active forum threads
+3) Mix and match and push to frontend
+
+*/

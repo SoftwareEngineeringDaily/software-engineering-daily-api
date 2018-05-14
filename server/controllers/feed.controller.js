@@ -1,64 +1,52 @@
-import httpStatus from 'http-status';
-import APIError from '../helpers/APIError';
-import Feed from '../models/feed.model';
-import RelatedLink from '../models/relatedLink.model';
+// import httpStatus from 'http-status';
+// import APIError from '../helpers/APIError';
+// import FeedItem from '../models/feedItem.model';
+import ForumThread from '../models/forumThread.model';
 
-function list(req, res, next) {
-  // If user is logged out, use a random feed
+async function list(req, res, next) {
+  // How about for logged out users?
+  // -- just get the most recent related links?
 
-  const query = req.user ? { user: req.user._id } : {};
+  const query = {};
+  if (req.user) query.user = req.user;
 
-  // eslint-disable-next-line
-  console.log('--------query', query);
-  Feed.findOne(query)
-    .exec()
-    .then((feed) => {
-      // If user is new and doesn't have a feed, use any feed:
-      if (feed == null) {
-        Feed.findOne()
-          .exec()
-          .then((randomFeed) => {
-            if (randomFeed) {
-              res.json(randomFeed.feedItems);
-            } else {
-              res.json([]);
-            }
-          })
-          .catch(() => {
-            const err = new APIError(
-              'Error fetching Jeffs feed',
-              httpStatus.INTERNAL_SERVER_ERROR,
-              true
-            ); //eslint-disable-line
-            return next(err);
-          });
-      } else {
-        res.json(feed.feedItems);
-      }
-    })
-    .catch(() => {
-      const err = new APIError('Error fetching user feed', httpStatus.INTERNAL_SERVER_ERROR, true); //eslint-disable-line
-      return next(err);
-    });
+  const {
+    limit = null,
+    lastActivityBefore = null
+  } = req.query;
+
+  if (limit) query.limit = limit;
+  if (lastActivityBefore) query.lastActivityBefore = lastActivityBefore;
+  try {
+    const threads = await ForumThread.list(query);
+    res.json(threads);
+  } catch (e) {
+    next(e);
+  }
+  // We get our feed Items for this user:
+
+  // We get the most recent forum threads.
 }
 
-function listProfileFeed(req, res, next) {
-  const { userId } = req.params;
-  RelatedLink.listProfileFeed({ userId })
-    .then((relatedLinks) => {
-      if (!relatedLinks) {
-        return res.json([]);
-      }
-      return res.json(relatedLinks);
-    })
-    .catch(() => {
-      const err = new APIError(
-        'Error fetching profile feed',
-        httpStatus.INTERNAL_SERVER_ERROR,
-        true
-      ); //eslint-disable-line
-      return next(err);
-    });
+async function listProfileFeed(req, res, next) {
+  // const { userId } = req.params;
+
+  const query = {};
+  if (req.user) query.user = req.user;
+
+  const {
+    limit = null,
+    lastActivityBefore = null
+  } = req.query;
+
+  if (limit) query.limit = limit;
+  if (lastActivityBefore) query.lastActivityBefore = lastActivityBefore;
+  try {
+    const threads = await ForumThread.list(query);
+    res.json(threads);
+  } catch (e) {
+    next(e);
+  }
 }
 
 export default { list, listProfileFeed };
