@@ -36,8 +36,8 @@ FeedItemSchema.statics = {
         if (!user) {
           return foundProcessed;
         }
-        return foundProcessed;
-        // return this.addVotesForUserToEntities(foundProcessed, user._id);
+        // return foundProcessed;
+        return this.addVotesForUserToEntities(foundProcessed, user._id);
       });
   },
 
