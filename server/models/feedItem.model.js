@@ -9,24 +9,23 @@ const FeedItemSchema = new Schema({
   relatedLink: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'RelatedLink'
+  },
+  randomOrder: {
+    type: Number,
+    default: 0
   }
 });
 
 FeedItemSchema.statics = {
-
   // This doesn't paginate currently:
   list({
     user = null
   } = {}) {
-    const query = { user: { $in: [mongoose.Types.ObjectId(user._id)] } };
-    console.log('query--------', query);
-    return this.aggregate([
-      { $match: query },
-      { $sample: { size: 3 } }
-    ])
-      // .populate('user', '-password')
-      // .populate('relatedLink')
-      // .limit(limitOption)
+    const query = { user };
+    return this.find(query)
+      .populate('user', '-password')
+      .populate('relatedLink')
+      .sort({ randomOrder: -1 })
       .exec()
       .then((itemsFound) => {
         console.log('********** items found', itemsFound);
