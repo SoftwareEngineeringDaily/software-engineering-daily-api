@@ -24,8 +24,9 @@ FeedItemSchema.statics = {
     const query = { user };
     return this.find(query)
       .populate('user', '-password')
-      .populate('relatedLink')
+      // Deep populate: https://github.com/Automattic/mongoose/issues/5696
       .populate({ path: 'relatedLink', populate: { path: 'author' } })
+      .populate({ path: 'relatedLink', populate: { path: 'post' } })
       .sort({ randomOrder: -1 })
       .exec()
       .then((itemsFound) => {
