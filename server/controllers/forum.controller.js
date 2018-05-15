@@ -1,4 +1,5 @@
 import ForumThread from '../models/forumThread.model';
+import { getThreads } from '../helpers/forum.helper';
 
 function load(req, res, next, id) {
   ForumThread.get(id)
@@ -9,20 +10,13 @@ function load(req, res, next, id) {
     .catch(e => next(e));
 }
 
-function list(req, res, next) {
-  const query = {};
-  if (req.user) query.user = req.user;
-
-  const {
-    limit = null,
-    lastActivityBefore = null
-  } = req.query;
-
-  if (limit) query.limit = limit;
-  if (lastActivityBefore) query.lastActivityBefore = lastActivityBefore;
-  ForumThread.list(query)
-    .then(threads => res.json(threads))
-    .catch(e => next(e));
+async function list(req, res, next) {
+  try {
+    const threads = await getThreads(req);
+    res.json(threads);
+  } catch (e) {
+    next(e);
+  }
 }
 
 function detail(req, res) {
