@@ -11,8 +11,10 @@ const envVarsSchema = Joi.object({
   BASE_URL: Joi.string()
     // .allow(['https://www.softwaredaily.com', 'http://localhost:4040'])
     .default('https://www.softwaredaily.com'),
-  EVENTS_API_BASE_URL: Joi.string().required(),
-  SEND_GRID_KEY: Joi.string().required(),
+  EVENTS_API_BASE_URL: Joi.string().required()
+    .description('Events API base url'),
+  SEND_GRID_KEY: Joi.string().required()
+    .description('Send grid public key'),
   PORT: Joi.number()
     .default(4040),
   MONGOOSE_DEBUG: Joi.boolean()
@@ -36,9 +38,17 @@ const envVarsSchema = Joi.object({
   FACEBOOK_SECRET: Joi.string().required()
     .description('Facebook application secret'),
   MAILCHIMP_KEY: Joi.string().required()
-    .description('Mailchimp API key'),
+    .description('Mailchimp API key with "-" delimited region'),
   MAILCHIMP_LIST_ID: Joi.string().required()
-    .description('Mailchimp list id')
+    .description('Mailchimp list id'),
+  STRIPE_PUBLIC_KEY: Joi.string().required()
+    .description('Stripe public key'),
+  STRIPE_SECRET_KEY: Joi.string().required()
+    .description('Stripe secret key'),
+  AWS_ACCESS_KEY_ID: Joi.string().required()
+    .description('AWS access key'),
+  AWS_SECRET_ACCESS_KEY: Joi.string().required()
+    .description('AWS secret key')
 }).unknown()
   .required();
 
@@ -68,6 +78,14 @@ const config = {
   mailchimp: {
     mailchimpKey: envVars.MAILCHIMP_KEY,
     mailchimpList: envVars.MAILCHIMP_LIST_ID
+  },
+  aws: {
+    accessKey: envVars.AWS_ACCESS_KEY_ID,
+    secretKey: envVars.AWS_SECRET_ACCESS_KEY
+  },
+  stripe: {
+    publicKey: envVars.STRIPE_PUBLIC_KEY,
+    secretKey: envVars.STRIPE_SECRET_KEY
   }
 };
 

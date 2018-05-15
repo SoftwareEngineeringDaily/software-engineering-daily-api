@@ -1,6 +1,6 @@
-require('dotenv').config();
-// const stripePublicKey = process.env.STRIPE_PUBLIC_KEY
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+import config from '../../config/config';
+
+const stripeSecretKey = config.stripe.secretKey;
 const stripe = require('stripe')(stripeSecretKey);
 
 export default stripe;
