@@ -48,15 +48,6 @@ function interweaveArrays(a1, a2) {
     console.log('');
     return a != null;
   });
-
-  /*
-
-  return array1.map(function(v,i) {
-    return [v, array2[i]];
-  }).reduce(function(a,b) { return a.concat(b); }).filter(function(a) {
-    return  a != null;
-  });
-   */
 }
 
 async function listProfileFeed(/* req, res, next */) {

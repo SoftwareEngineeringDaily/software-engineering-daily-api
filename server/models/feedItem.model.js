@@ -27,11 +27,10 @@ FeedItemSchema.statics = {
       // Deep populate: https://github.com/Automattic/mongoose/issues/5696
       .populate({ path: 'relatedLink', populate: { path: 'author' } })
       .populate({ path: 'relatedLink', populate: { path: 'post' } })
-      .populate({ path: 'relatedLink', populate: { path: 'post', populate: { path: 'thread' } } })
+    // .populate({ path: 'relatedLink', populate: { path: 'post', populate: { path: 'thread' } } })
       .sort({ randomOrder: -1 })
       .exec()
       .then((itemsFound) => {
-        console.log('********** items found', itemsFound);
         const foundProcessed = itemsFound.map((item) => {
           console.log('-');
           return Object.assign({}, item.toObject());
