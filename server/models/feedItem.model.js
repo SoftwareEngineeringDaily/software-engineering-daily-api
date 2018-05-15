@@ -27,6 +27,7 @@ FeedItemSchema.statics = {
       // Deep populate: https://github.com/Automattic/mongoose/issues/5696
       .populate({ path: 'relatedLink', populate: { path: 'author' } })
       .populate({ path: 'relatedLink', populate: { path: 'post' } })
+      .populate({ path: 'relatedLink', populate: { path: 'post', populate: { path: 'thread' } } })
       .sort({ randomOrder: -1 })
       .exec()
       .then((itemsFound) => {
