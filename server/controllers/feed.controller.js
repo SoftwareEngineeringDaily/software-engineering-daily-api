@@ -12,7 +12,8 @@ async function list(req, res, next) {
     const items = await getLinks(req);
     // We get the most recent forum threads.
     // We comebine these:
-    res.json(items.concat(threads));
+    // res.json(items.concat(threads));
+    res.json(interweaveArrays(threads, items));
   } catch (e) {
     next(e);
   }
@@ -30,6 +31,33 @@ async function getLinks(req) {
   return items;
 }
 
+
+function interweaveArrays(a1, a2) {
+  let array1 = [];
+  let array2 = [];
+  if (a1.length > a2.length) {
+    array1 = a1;
+    array2 = a2;
+  } else {
+    array1 = a2;
+    array2 = a1;
+  }
+  return array1.map((v, i) =>
+    [v, array2[i]]).reduce((a, b) =>
+    a.concat(b)).filter((a) => {
+    console.log('');
+    return a != null;
+  });
+
+  /*
+
+  return array1.map(function(v,i) {
+    return [v, array2[i]];
+  }).reduce(function(a,b) { return a.concat(b); }).filter(function(a) {
+    return  a != null;
+  });
+   */
+}
 
 async function listProfileFeed(/* req, res, next */) {
   // const { userId } = req.params;
