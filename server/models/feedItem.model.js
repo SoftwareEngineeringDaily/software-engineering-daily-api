@@ -25,6 +25,7 @@ FeedItemSchema.statics = {
     return this.find(query)
       .populate('user', '-password')
       .populate('relatedLink')
+      .populate({ path: 'relatedLink', populate: { path: 'author' } })
       .sort({ randomOrder: -1 })
       .exec()
       .then((itemsFound) => {
