@@ -10,7 +10,7 @@ The backend services and API for the Software Engineering Daily [Android](https:
 ### *[More details here...](https://softwareengineeringdaily.github.io/Backend/gettingstarted/)
   - Install and run a local redis client
   - Install and run a local mongo client
-  - `cp .env.local_example .env`
+  - `cp .env.example .env`
   - `npm install` or `yarn install`
   - `npm start` or `yarn start`
   - check package.json for other builds
@@ -18,6 +18,6 @@ The backend services and API for the Software Engineering Daily [Android](https:
   - view swagger api docs at HOST/api/docs
 
 ## Using Docker
-  - `cp .env.docker_example .env`
+  - `cp .env.example .env`, replace `localhost` with `mongo` and `redis` as per comments
   - Run `docker-compose up`
   - If dependencies are updated in package.json, run `docker-compose down` and then `docker-compose up --build`. This will remove the old container and rebuild the API image which installs the new dependencies.

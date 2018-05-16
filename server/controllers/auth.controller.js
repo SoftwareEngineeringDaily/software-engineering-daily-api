@@ -10,7 +10,6 @@ import { signS3 } from '../helpers/s3';
 import { sendError, ErrorType } from '../helpers/events.helper';
 
 const http = require('http'); // For mailchimp api call
-require('dotenv').config();
 
 /**
  * @swagger
