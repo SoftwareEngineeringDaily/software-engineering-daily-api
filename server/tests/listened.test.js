@@ -114,7 +114,7 @@ describe('## Listened APIs', () => {
         .then((res) => {
           const item = res.body;
           expect(item).to.have.lengthOf(1);
-          expect(String(item[0].postId)).to.equal(String(postId));
+          expect(String(item[0].postId._id)).to.equal(String(postId));
           expect(String(item[0].userId)).to.equal(String(userId));
           expect(res.body).to.exist; //eslint-disable-line
           done();

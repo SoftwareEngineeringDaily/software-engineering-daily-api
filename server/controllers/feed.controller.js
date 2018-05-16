@@ -9,7 +9,12 @@ async function list(req, res, next) {
   try {
     // We get our feed Items for this user:
     const threads = await getThreads(req);
-    const items = await getLinks(req);
+
+    const {
+      lastActivityBefore = null
+    } = req.query;
+    // This is to paginate forum threads which does not apply to items
+    const items = lastActivityBefore ? [] : await getLinks(req);
     // We get the most recent forum threads.
     // We comebine these:
     // res.json(items.concat(threads));
