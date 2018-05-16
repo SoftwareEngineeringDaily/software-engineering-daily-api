@@ -99,7 +99,8 @@ function listByPost(req, res, next) {
 
 function listByUser(req, res, next) {
   const { limit = 50, skip = 0 } = req.query;
-  Listened.listByUser({ limit, skip }, req.user._id)
+  const userId = req.params.userId ? req.params.userId : req.user._id;
+  Listened.listByUser({ limit, skip }, userId)
     .then(favorites => res.json(favorites))
     .catch(e => next(e));
 }
