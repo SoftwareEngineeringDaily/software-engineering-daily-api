@@ -5,9 +5,13 @@ import config from '../../config/config';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
-router.use(expressJwt({ secret: config.jwtSecret }));
-
 router.route('/')
   .get(expressJwt({ secret: config.jwtSecret }), ctrl.listByUser);
+
+router.route('/user/:userId')
+  .get(
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
+    ctrl.listByUser
+  );
 
 export default router;
