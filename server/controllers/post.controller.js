@@ -185,7 +185,7 @@ function recommendations(req, res, next) {
           //eslint-disable-line
           mongoose.Types.ObjectId(rec) //eslint-disable-line
       ); //eslint-disable-line
-      return Post.find({ _id: { $in: ids } }).lean();
+      return Post.find({ _id: { $in: ids } }).populate('thread').lean();
     })
     .then(posts =>
       //eslint-disable-line
