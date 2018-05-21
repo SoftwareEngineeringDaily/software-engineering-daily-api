@@ -1,6 +1,6 @@
 import raccoon from 'raccoon';
 import mongoose from 'mongoose';
-import map from 'lodash/map';
+
 import Post from '../models/post.model';
 import {
   getAdFreeSinglePostIfSubscribed,
@@ -185,16 +185,11 @@ function recommendations(req, res, next) {
           //eslint-disable-line
           mongoose.Types.ObjectId(rec) //eslint-disable-line
       ); //eslint-disable-line
-      return Post.find({ _id: { $in: ids } }).populate('thread');
+      return Post.find({ _id: { $in: ids } }).populate('thread').lean();
     })
-    .then((posts) => {
+    .then(posts =>
       //eslint-disable-line
-      const _posts = map(posts, (post) => {
-        console.log('flatten');
-        return post.toObject();
-      });
-      return res.json(getAdFreePostsIfSubscribed(_posts, req.fullUser, next));
-    })
+      res.json(getAdFreePostsIfSubscribed(posts, req.fullUser, next)))
     .catch((e) => {
       next(e);
     });
