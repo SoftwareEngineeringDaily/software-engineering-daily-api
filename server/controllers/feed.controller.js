@@ -28,7 +28,7 @@ async function getLinks(req) {
   if (req.user) query.user = req.user;
 
   const {
-    limit = 15,
+    limit = 10,
   } = req.query;
 
   query.limit = limit;

@@ -19,9 +19,12 @@ const FeedItemSchema = new Schema({
 FeedItemSchema.statics = {
   // This doesn't paginate currently:
   list({
+    limit = 10,
     user = null
   } = {}) {
     const query = { user };
+    const limitOption = parseInt(limit, 10);
+
     return this.find(query)
       .populate('user', '-password')
       // Deep populate: https://github.com/Automattic/mongoose/issues/5696
@@ -29,6 +32,7 @@ FeedItemSchema.statics = {
       .populate({ path: 'relatedLink', populate: { path: 'post' } })
     // .populate({ path: 'relatedLink', populate: { path: 'post', populate: { path: 'thread' } } })
       .sort({ randomOrder: -1 })
+      .limit(limitOption)
       .exec()
       .then((itemsFound) => {
         const foundProcessed = itemsFound.map((item) => {
