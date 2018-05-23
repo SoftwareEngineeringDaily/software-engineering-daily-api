@@ -28,12 +28,10 @@ async function getLinks(req) {
   if (req.user) query.user = req.user;
 
   const {
-    limit = 15,
+    limit = 10,
   } = req.query;
 
   query.limit = limit;
-  console.log('query---', query);
-  if (req.user == null) return [];
   const items = await FeedItem.list(query);
   return items;
 }
