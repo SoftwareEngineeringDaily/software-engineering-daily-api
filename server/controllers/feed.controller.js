@@ -32,6 +32,8 @@ async function getLinks(req) {
   } = req.query;
 
   query.limit = limit;
+  console.log('query---', query);
+  if (req.user == null) return [];
   const items = await FeedItem.list(query);
   return items;
 }
