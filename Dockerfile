@@ -1,5 +1,5 @@
 # take default image of node boron i.e  node 6.x
-FROM node:6.10.1
+FROM node:6.11.1
 
 MAINTAINER Kunal Kapadia <kunalkapadia12@gmail.com>
 
