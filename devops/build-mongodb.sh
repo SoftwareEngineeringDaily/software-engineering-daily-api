@@ -1,16 +1,12 @@
 #!/bin/bash
 
-MONGO_DB="heroku_j871nx6h"
+. test.sh
 
-# download the latest backup from MongoDB
-curl -Ls -O https://s3-us-west-2.amazonaws.com/sedaily-mongo-backup/$MONGO_DB.tar.gz
+docker run --rm -v "`pwd`/backup:/opt/backup" mongo:3.4.10 bash -c "mongodump --host $MONGO_HOST --username $MONGO_USER --password $MONGO_PASS --port $MONGO_PORT -d $MONGO_DB --out /opt/backup"
 
-# unpack and move the dump to the right directory
-tar -zxf $MONGO_DB.tar.gz
 mkdir dump/
-mv $MONGO_DB/* dump/
-rmdir $MONGO_DB
-rm $MONGO_DB.tar.gz
+mv backup/$MONGO_DB/* dump/
+rm -rf $MONGO_DB
 
 docker build -f mongo.Dockerfile -t softwaredaily/sedaily-mongo . --no-cache
 
