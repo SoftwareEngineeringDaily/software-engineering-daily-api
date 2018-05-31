@@ -20,9 +20,11 @@ while [[ $? -ne 0 && $COUNTER -lt 60 ]] ; do
     grep -q 'waiting for connections on port' /var/log/mongodb.log
 done
 
-# Restore from dump
-mongorestore --db sed-test --quiet /home/dump
 
+# Restore from dump
+echo "Restoring database from dump..."
+mongorestore --db sedaily --quiet /home/dump
+
+echo "Mongo restore finished!"
 # Keep container running
 tail -f /dev/null
-

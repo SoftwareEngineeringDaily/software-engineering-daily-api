@@ -14,6 +14,6 @@ git:
 script:
   # - yarn test:check-coverage
   #- npm run test
-  - ./devops/build-ci.sh
+  - ./devops/build-api.sh
 after_script:
   # - yarn report-coverage
