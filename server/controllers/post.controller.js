@@ -1,5 +1,4 @@
-import raccoon from 'raccoon';
-import mongoose from 'mongoose';
+// import mongoose from 'mongoose';
 
 import Post from '../models/post.model';
 import {
@@ -176,8 +175,10 @@ function list(req, res, next) {
  *       $ref: '#/responses/NotFound'
  */
 
-function recommendations(req, res, next) {
-  const numberOfRecommendations = 10;
+function recommendations(req, res) {
+  // const numberOfRecommendations = 10;
+  res.json([]);
+  /*
   raccoon
     .recommendFor(req.user._id.toString(), numberOfRecommendations)
     .then((recommendationsFound) => {
@@ -185,7 +186,7 @@ function recommendations(req, res, next) {
           //eslint-disable-line
           mongoose.Types.ObjectId(rec) //eslint-disable-line
       ); //eslint-disable-line
-      return Post.find({ _id: { $in: ids } }).lean();
+      return Post.find({ _id: { $in: ids } }).populate('thread').lean();
     })
     .then(posts =>
       //eslint-disable-line
@@ -193,25 +194,30 @@ function recommendations(req, res, next) {
     .catch((e) => {
       next(e);
     });
+    */
 }
 
 function upvote(req, res, next) {
+  /*
   const userIdString = req.user._id.toString();
   const postIdString = req.post._id.toString();
   if (req.liked) {
-    raccoon.liked(userIdString, postIdString);
+    // raccoon.liked(userIdString, postIdString);
   } else if (req.unliked) {
-    raccoon.unliked(userIdString, postIdString);
+    // raccoon.unliked(userIdString, postIdString);
   }
+  */
   next();
 }
 
 function downvote(req, res, next) {
+  /*
   if (req.undisliked) {
-    raccoon.undisliked(req.user._id.toString(), req.post._id.toString());
+    // raccoon.undisliked(req.user._id.toString(), req.post._id.toString());
   } else if (req.disliked) {
-    raccoon.disliked(req.user._id.toString(), req.post._id.toString());
+    // raccoon.disliked(req.user._id.toString(), req.post._id.toString());
   }
+  */
   next();
 }
 

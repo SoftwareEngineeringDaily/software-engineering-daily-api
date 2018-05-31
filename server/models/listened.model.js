@@ -92,6 +92,7 @@ ListenedSchema.statics = {
    */
   listByUser({ skip = 0, limit = 50 } = {}, userId) {
     return this.find({ userId })
+      .populate('postId')
       .sort({ createdAt: -1 })
       .skip(+skip)
       .limit(+limit)
