@@ -2,6 +2,7 @@ import Promise from 'bluebird';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
+import Vote from './vote.model';
 
 /**
  * @swagger
@@ -83,6 +84,58 @@ ListenedSchema.statics = {
       .exec();
   },
 
+  // TODO: move to a third party library and refactor post.model.js to also
+  // use this in place of addVotesForUserToPosts;
+  getUserVoteInfoForPosts(posts, userId) {
+    const postIds = posts.map((post) => { //eslint-disable-line
+      return post._id;
+    });
+    return Vote.find({
+      $or: [
+        {
+          userId,
+          postId: { $in: postIds },
+        }, {
+          userId,
+          entityId: { $in: postIds },
+        },
+      ]
+    })
+      .exec()
+      .then((votes) => {
+        const voteMap = {};
+        for (let index in votes) { // eslint-disable-line
+          const vote = votes[index];
+          const voteKey = vote.postId ? vote.postId : vote.entityId;
+          voteMap[voteKey] = vote;
+        }
+
+        const updatedPosts = [];
+        for (let index in posts) { // eslint-disable-line
+          const post = {};
+          post.upvoted = false;
+          post.downvoted = false;
+
+          if (!voteMap[post._id]) {
+            updatedPosts.push(post);
+            continue; // eslint-disable-line
+          }
+
+          if (voteMap[post._id].direction === 'upvote' && voteMap[post._id].active) {
+            post.upvoted = true;
+          }
+
+          if (voteMap[post._id].direction === 'downvote' && voteMap[post._id].active) {
+            post.downvoted = true;
+          }
+
+          updatedPosts.push(post);
+        }
+
+        return updatedPosts;
+      });
+  },
+
   /**
    * List listened items by User in descending order of 'createdAt' timestamp.
    * @param {number} skip - Number of favorites to be skipped.
@@ -90,13 +143,25 @@ ListenedSchema.statics = {
    * @param {number} userId - The post ID.
    * @returns {Promise<ListenedSchema[]>}
    */
+
   listByUser({ skip = 0, limit = 50 } = {}, userId) {
     return this.find({ userId })
       .populate('postId')
       .sort({ createdAt: -1 })
       .skip(+skip)
       .limit(+limit)
-      .exec();
+      .lean()
+      .exec()
+      .then((listens) => {
+        /* eslint-disable no-param-reassign */
+        const posts = listens.map(listenEntry => listenEntry.postId);
+        return this.getUserVoteInfoForPosts(posts, userId).then((postsVoteInfo) => {
+          for (let ii = 0; ii < listens.length; ii += 1) {
+            listens[ii].postId = { ...{}, ...listens[ii].postId, ...postsVoteInfo[ii] };
+          }
+          return listens;
+        });
+      });
   }
 };
 
