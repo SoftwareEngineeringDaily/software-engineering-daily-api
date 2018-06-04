@@ -150,16 +150,18 @@ ListenedSchema.statics = {
       .sort({ createdAt: -1 })
       .skip(+skip)
       .limit(+limit)
-      .lean()
       .exec()
       .then((listens) => {
         /* eslint-disable no-param-reassign */
         const posts = listens.map(listenEntry => listenEntry.postId);
         return this.getUserVoteInfoForPosts(posts, userId).then((postsVoteInfo) => {
+          const newListens = [];
           for (let ii = 0; ii < listens.length; ii += 1) {
-            listens[ii].postId = { ...{}, ...listens[ii].postId, ...postsVoteInfo[ii] };
+            const editableListen = listens[ii].toObject();
+            editableListen.postId = { ...{}, ...editableListen.postId, ...postsVoteInfo[ii] };
+            newListens.push(editableListen);
           }
-          return listens;
+          return newListens;
         });
       });
   }
