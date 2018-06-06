@@ -50,6 +50,7 @@
   ],
   "dependencies": {
     "@sendgrid/mail": "^6.1.4",
+    "airbrake-js": "^1.1.2",
     "aws-sdk": "^2.150.0",
     "axios": "^0.17.1",
     "babel-cli": "6.26.0",

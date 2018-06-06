@@ -2,6 +2,10 @@
 import mongoose from 'mongoose';
 import util from 'util';
 
+import AirbrakeClient from 'airbrake-js';
+import makeErrorHandler from 'airbrake-js/dist/instrumentation/express';
+
+
 // config should be imported before importing any other file
 import config from './config/config';
 import app from './config/express';
@@ -40,6 +44,13 @@ if (config.MONGOOSE_DEBUG) {
 // module.parent check is required to support mocha watch
 // src: https://github.com/mochajs/mocha/issues/1912
 if (!module.parent) {
+  const airbrake = new AirbrakeClient({
+    projectId: 186736,
+    projectKey: 'ebfbb905ffdbcd115abddd5895cc13c7'
+  });
+
+  app.use(makeErrorHandler(airbrake));
+
   // listen on port config.port
   app.listen(config.port, () => {
     console.info(`server started on port ${config.port} (${config.env})`); // eslint-disable-line no-console
