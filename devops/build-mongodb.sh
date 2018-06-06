@@ -2,9 +2,7 @@
 
 DOCKER_IMAGE="softwaredaily/sedaily-mongo:develop"
 
-docker run --rm -v "`pwd`/backup:/opt/backup" mongo:3.4.10 bash -c "mongodump --host $MONGO_HOST --username $MONGO_USER --password $MONGO_PASS --port $MONGO_PORT -d $MONGO_DB --out /opt/backup"
-ls -l
-ls -l backup
+docker run --rm -v "`pwd`/backup:/opt/backup" mongo:3.4.10 bash -c "mongodump --host $MONGO_HOST --username $MONGO_USER --password $MONGO_PASS --port $MONGO_PORT -d $MONGO_DB --out /opt/backup; chown -R 1000 /opt/backup"
 mkdir dump/
 mv backup/$MONGO_DB/* dump/
 rm -rf $MONGO_DB
