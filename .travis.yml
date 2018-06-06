@@ -11,9 +11,18 @@ cache:
   - node_modules
 git:
   depth: 3
-script:
+stages:
+  - test
+  - name: deploy
+    if: branch = ci-build
+
+jobs:
+  include:
+    - stage: test
+      script: echo 'testing stage'
+    - stage: deploy
+      script: echo 'deploy stage'
+#script:
   # - yarn test:check-coverage
   #- npm run test
-  - ./devops/build-api.sh
-after_script:
-  # - yarn report-coverage
+#  - ./devops/build-api.sh
