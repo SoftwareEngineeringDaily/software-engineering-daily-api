@@ -15,11 +15,12 @@ git:
 jobs:
   include:
     - if: branch = develop
-      script: echo 'this is develop branch'
+      script:
+        - ./devops/build-api.sh
     - if: branch = ci-build
       script: 
         - ./devops/build-api.sh
-        #- ./devops/build-mongo.sh
+        - cd devops; ./build-mongo.sh
 #script:
   # - yarn test:check-coverage
   #- npm run test
