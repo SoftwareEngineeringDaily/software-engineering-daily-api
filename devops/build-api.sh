@@ -1,25 +1,20 @@
 #!/bin/bash
 # builds sedaiy-rest-api image for Continuous Integration (CI) purposes
 
-function buildApiImage {
-	echo 'Building API Docker image'
-	DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-	REPO_DIR=$(dirname $DIR)
+echo 'Building API Docker image'
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+REPO_DIR=$(dirname $DIR)
 
-	# copy docker file to repo root
-	cp $DIR/ci.Dockerfile $REPO_DIR/ci.Dockerfile
+DOCKER_IMAGE="softwaredaily/sedaily-rest-api:develop"
 
-	docker build -f $REPO_DIR/ci.Dockerfile -t softwaredaily/sedaily-rest-api $REPO_DIR --no-cache
+# copy docker file to repo root
+cp $DIR/ci.Dockerfile $REPO_DIR/ci.Dockerfile
 
-	rm $REPO_DIR/ci.Dockerfile
+docker build -f $REPO_DIR/ci.Dockerfile -t $DOCKER_IMAGE $REPO_DIR #--no-cache
 
-	# must be part the organization
-	#echo $DOCKER_PASSWORD | docker login -u "$DOCKER_USERNAME" --password-stdin
+rm $REPO_DIR/ci.Dockerfile
 
-	#docker push softwaredaily/sedaily-rest-api
-}
+# must be part the organization
+echo $DOCKER_PASSWORD | docker login -u "$DOCKER_USERNAME" --password-stdin
 
-# If not a CI build, don't build the Docker image
-if [ "$CI_BUILD" = true ] ; then
-	buildApiImage
-fi
+docker push $DOCKER_IMAGE

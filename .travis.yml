@@ -17,7 +17,9 @@ jobs:
     - if: branch = develop
       script: echo 'this is develop branch'
     - if: branch = ci-build
-      script: echo 'this is ci-build branch'
+      script: 
+        - ./devops/build-api.sh
+        #- ./devops/build-mongo.sh
 #script:
   # - yarn test:check-coverage
   #- npm run test
