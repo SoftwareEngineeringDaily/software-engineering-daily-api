@@ -19,8 +19,8 @@ jobs:
         - ./devops/build-api.sh
     - if: branch = ci-build
       script: 
-        - ./devops/build-api.sh
-        - cd devops; ./build-mongo.sh
+        #- ./devops/build-api.sh
+        - cd devops; ./build-mongodb.sh
 #script:
   # - yarn test:check-coverage
   #- npm run test
