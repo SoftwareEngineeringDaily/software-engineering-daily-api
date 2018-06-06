@@ -1,6 +1,12 @@
 #!/bin/bash
 
-DOCKER_IMAGE="softwaredaily/sedaily-mongo:develop"
+if [[ -z $1 ]]; then
+	TAG="develop"
+else
+	TAG=$1
+fi
+
+DOCKER_IMAGE="softwaredaily/sedaily-mongo:$TAG"
 
 mongodump --host $MONGO_HOST --username $MONGO_USER --password $MONGO_PASS --port $MONGO_PORT -d $MONGO_DB --out ./backup
 

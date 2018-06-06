@@ -14,14 +14,9 @@ git:
 
 jobs:
   include:
-    - if: branch = develop
-      script:
-        - ./devops/build-api.sh
+    - script:
+      - npm run test
     - if: branch = ci-build
       script: 
-        #- ./devops/build-api.sh
+        - ./devops/build-api.sh
         - cd devops; ./build-mongodb.sh
-#script:
-  # - yarn test:check-coverage
-  #- npm run test
-#  - ./devops/build-api.sh
