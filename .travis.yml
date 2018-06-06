@@ -11,17 +11,13 @@ cache:
   - node_modules
 git:
   depth: 3
-stages:
-  - test
-  - name: deploy
-    if: branch = ci-build
 
 jobs:
   include:
-    - stage: test
-      script: echo 'testing stage'
-    - stage: deploy
-      script: echo 'deploy stage'
+    - if: branch = develop
+      script: echo 'this is develop branch'
+    - if: branch = ci-build
+      script: echo 'this is ci-build branch'
 #script:
   # - yarn test:check-coverage
   #- npm run test
