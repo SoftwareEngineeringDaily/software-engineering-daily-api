@@ -16,7 +16,7 @@ jobs:
   include:
     - script:
       - npm run test
-    - if: branch = ci-build
+    - if: branch = develop
       script: 
         - ./devops/build-api.sh
         - cd devops; ./build-mongodb.sh
