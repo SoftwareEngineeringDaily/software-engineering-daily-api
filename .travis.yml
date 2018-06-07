@@ -19,4 +19,4 @@ jobs:
     - if: branch = ci-build
       script: 
         - ./devops/build-api.sh
-        - cd devops; ./build-mongodb.sh
+        #- cd devops; ./build-mongodb.sh
