@@ -35,9 +35,7 @@ services:
       - mongo
       - redis
   mongo:
-    #image: "mongo:3.4.10"
-    build:
-      context: devops
+    image: "mongo:3.4.10"
     container_name: sedaily-mongo
     ports:
       - "27017:27017"
