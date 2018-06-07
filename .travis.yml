@@ -11,16 +11,16 @@ cache:
   - node_modules
 git:
   depth: 3
-
+stages:
+  - test
+  - name: docker
+    if: (branch = develop) OR (branch = ci-build)
 jobs:
   include:
-    - script:
-      - npm run test
-    - if: branch = develop
-      script: 
-        - ./devops/build-api.sh
-        - cd devops; ./build-mongodb.sh
-    - if: branch = ci-build
+    - stage: test
+      script:
+        - npm run test
+    - stage: docker
       script: 
         - ./devops/build-api.sh
         - cd devops; ./build-mongodb.sh
