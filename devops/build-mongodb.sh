@@ -5,7 +5,6 @@ if [[ -z $1 ]]; then
 else
 	TAG=$1
 fi
-. vars.sh
 
 DOCKER_IMAGE="softwaredaily/sedaily-mongo:$TAG"
 
