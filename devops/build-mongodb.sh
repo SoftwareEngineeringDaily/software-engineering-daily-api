@@ -5,10 +5,13 @@ if [[ -z $1 ]]; then
 else
 	TAG=$1
 fi
+. vars.sh
 
 DOCKER_IMAGE="softwaredaily/sedaily-mongo:$TAG"
 
-mongodump --host $MONGO_CI_HOST --username $MONGO_CI_USER --password $MONGO_CI_PASS --port $MONGO_CI_PORT -d $MONGO_CI_DB --out ./backup
+mongodump --host $MONGO_CI_HOST --port $MONGO_CI_PORT --username $MONGO_CI_USER --password $MONGO_CI_PASS -d $MONGO_CI_DB --excludeCollection users --out ./backup
+
+mongodump --host $MONGO_CI_HOST --username $MONGO_CI_USER --password $MONGO_CI_PASS --port $MONGO_CI_PORT -d $MONGO_CI_DB --collection users --query '{ email: { $eq: "forum_admin@softwaredaily.com" } }' --out ./backup
 
 mkdir dump/
 mv backup/$MONGO_CI_DB/* dump/
