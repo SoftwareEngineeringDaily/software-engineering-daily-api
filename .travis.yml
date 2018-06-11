@@ -1,16 +1,26 @@
 language: node_js
 node_js:
   - "6.11"
+sudo: required
 services:
   - mongodb
   - redis-server
+  - docker
 cache:
   directories:
   - node_modules
 git:
   depth: 3
-script:
-  # - yarn test:check-coverage
-  - npm run test
-after_script:
-  # - yarn report-coverage
+stages:
+  - test
+  - name: docker
+    if: (branch = develop) OR (branch = ci-build)
+jobs:
+  include:
+    - stage: test
+      script:
+        - npm run test
+    - stage: docker
+      script: 
+        - ./devops/build-api.sh
+        - cd devops; ./build-mongodb.sh
