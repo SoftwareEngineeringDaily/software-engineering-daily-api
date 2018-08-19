@@ -47,7 +47,7 @@ FeedItemSchema.statics = {
   },
 
   addVotesForUserToEntities(items, userId) {
-    const ids = items.map((item) => { //eslint-disable-line
+    const ids = items.map((item) => {
       return item.relatedLink._id;
     });
     return Vote.find({

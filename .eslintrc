@@ -30,7 +30,8 @@
     ],
     "no-underscore-dangle": [
       0
-    ]
+    ],
+    "arrow-body-style":"off"
   },
   "env": {
     "node": true,
