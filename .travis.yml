@@ -14,7 +14,7 @@ git:
 stages:
   - test
   - name: docker
-    if: (branch = develop) OR (branch = ci-build)
+    if: (branch = develop AND type = push) OR (branch = ci-build)
 jobs:
   include:
     - stage: test
