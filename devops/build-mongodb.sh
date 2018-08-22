@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ -f .env ]; then
+	echo ".env file found in devops directory. Using testing environment variables..."
+	source .env
+fi
+
 if [[ -z $1 ]]; then
 	TAG="develop"
 else
