@@ -31,4 +31,7 @@ router
 
 router.route('/facebook/token').post(passport.authenticate('facebook-token'), authCtrl.socialAuth);
 
+router.route('/recaptcha')
+  .post(authCtrl.recaptcha);
+
 export default router;
