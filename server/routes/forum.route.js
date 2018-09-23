@@ -4,7 +4,6 @@ import forumCtrl from '../controllers/forum.controller';
 import transferField from '../middleware/transferField';
 import config from '../../config/config';
 import loadFullUser from '../middleware/loadFullUser.middleware';
-import validateRecaptcha from '../middleware/validateRecaptcha.middleware';
 import voteCtrl from '../controllers/vote.controller';
 
 const router = express.Router(); // eslint-disable-line new-cap
@@ -17,7 +16,6 @@ router.route('/')
   )
   .post(
     expressJwt({ secret: config.jwtSecret, credentialsRequired: true })
-    , validateRecaptcha
     , loadFullUser
     , forumCtrl.create
   );
