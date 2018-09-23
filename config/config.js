@@ -38,7 +38,11 @@ const envVarsSchema = Joi.object({
   MAILCHIMP_KEY: Joi.string().required()
     .description('Mailchimp API key'),
   MAILCHIMP_LIST_ID: Joi.string().required()
-    .description('Mailchimp list id')
+    .description('Mailchimp list id'),
+  RECAPTCHA_SITE_KEY: Joi.string().required()
+    .description('Recaptcha site key'),
+  RECAPTCHA_SECRET_KEY: Joi.string().required()
+    .description('Recaptcha secret key')
 }).unknown()
   .required();
 
@@ -68,6 +72,10 @@ const config = {
   mailchimp: {
     mailchimpKey: envVars.MAILCHIMP_KEY,
     mailchimpList: envVars.MAILCHIMP_LIST_ID
+  },
+  recaptcha: {
+    siteKey: envVars.RECAPTCHA_SITE_KEY,
+    secretKey: envVars.RECAPTCHA_SECRET_KEY
   }
 };
 
