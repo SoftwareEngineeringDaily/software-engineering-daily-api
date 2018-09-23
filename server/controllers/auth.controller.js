@@ -3,6 +3,7 @@ import FacebookTokenStrategy from 'passport-facebook-token';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import httpStatus from 'http-status';
+import ReCAPTCHA from 'recaptcha2';
 import APIError from '../helpers/APIError';
 import config from '../../config/config';
 import User from '../models/user.model';
@@ -11,6 +12,11 @@ import { sendError, ErrorType } from '../helpers/events.helper';
 
 const http = require('http'); // For mailchimp api call
 require('dotenv').config();
+
+const reCaptcha = new ReCAPTCHA({
+  siteKey: config.recaptcha.siteKey,
+  secretKey: config.recaptcha.secretKey
+});
 
 /**
  * @swagger
@@ -341,6 +347,18 @@ function getRandomNumber(req, res) {
   });
 }
 
+function validateRecaptcha(req, res) {
+  const { recaptchaResponse } = req.body;
+  reCaptcha.validate(recaptchaResponse)
+    .then(() => res.status(200).json({
+      formSubmit: true
+    }))
+    .catch(errorCodes => res.status(401).json({
+      formSubmit: false,
+      errors: reCaptcha.translateErrors(errorCodes)
+    }));
+}
+
 export default {
   login,
   loginWithEmail,
@@ -348,5 +366,6 @@ export default {
   register,
   socialAuth,
   signS3,
-  signS3AvatarUpload
+  signS3AvatarUpload,
+  validateRecaptcha
 };
