@@ -3,12 +3,6 @@
   "scripts": {
   },
   "env": {
-    "NODE_ENV": {
-      "required": true
-    },
-    "PORT": {
-      "required": true
-    },
     "JWT_SECRET": {
       "required": true
     },
@@ -18,16 +12,10 @@
     "MONGO_HOST_TEST": {
       "required": true
     },
-    "MONGO_PORT": {
-      "required": true
-    },
     "RACCOON_REDIS_URL": {
       "required": true
     },
     "RACCOON_REDIS_PORT": {
-      "required": true
-    },
-    "DEBUG": {
       "required": true
     },
     "FACEBOOK_ID": {
