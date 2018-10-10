@@ -99,7 +99,7 @@ function login(req, res, next) {
   const { password } = req.body;
 
   User.findOne({
-    $or: [{ username }, { email: username }]
+    $or: [{ username }, { email: new RegExp(username, 'i') }]
   })
     .exec()
     .then((user) => {
@@ -125,7 +125,7 @@ function loginWithEmail(req, res, next) {
   const { email } = req.body;
   const { password } = req.body;
 
-  User.findOne({ email })
+  User.findOne({ email: new RegExp(email, 'i') })
     .exec()
     .then((user) => {
       if (!user) return res.status(404).json({ message: 'User not found.' });
