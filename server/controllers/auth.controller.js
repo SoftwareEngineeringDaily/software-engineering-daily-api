@@ -184,7 +184,6 @@ function register(req, res, next) {
   const { username } = req.body;
   const { password } = req.body;
   const newsletterSignup = req.body.newsletter;
-
   if (!username) {
     let err = new APIError('Username is required to register.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
     return next(err);
@@ -201,7 +200,7 @@ function register(req, res, next) {
   };
 
   const queryIfEmailMissing = {
-    $or: [{ username }, { email: new RegExp(username, REGEX_CASE_INSENSITIVE_MOD) }]
+    $or: [{ username }, { email: username }]
   };
 
   // We do this so people can't share an email on either field, username or email:
