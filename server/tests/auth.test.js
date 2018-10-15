@@ -48,6 +48,11 @@ describe('## Auth APIs', () => {
     password: 'express'
   };
 
+  const validUserCredentialsWithUppercase = {
+    username: 'React',
+    password: 'express'
+  };
+
   const invalidUserCredentials = {
     username: 'react',
   };
@@ -55,6 +60,14 @@ describe('## Auth APIs', () => {
   const invalidLogin = {
     username: 'react',
     password: 'wrong',
+  };
+
+  // case insensitive check: lowercase email already registered - with unique username
+  const invalidRegisterWithEmailUppercaseUniqueUsername = {
+    username: 'react3',
+    email: 'React2@email.com',
+    name: 'Software Dev',
+    password: 'express'
   };
 
   let jwtToken;
@@ -93,7 +106,7 @@ describe('## Auth APIs', () => {
     });
   });
 
-  // loginWithEmailWithUppercase
+  // loginWithEmailWithUppercase CASE INSENSITIVE
   describe('# POST /api/auth/register * CASE INSENSITIVE * (with email & name)', () => {
     it('should get valid JWT token', (done) => {
       request(app)
@@ -191,6 +204,7 @@ describe('## Auth APIs', () => {
     });
   });
 
+  // CASE INSENSITIVE
   describe('# POST /api/auth/register * CASE INSENSITIVE * (+ login with email field as username) ', () => {
     it('should get valid JWT token', (done) => {
       request(app)
@@ -270,6 +284,43 @@ describe('## Auth APIs', () => {
         })
         .catch(done);
     });
+
+    it('should return User already exists error (same valid credentials)', (done) => {
+      request(app)
+        .post('/api/auth/register')
+        .send(validUserCredentialsWithEmail)
+        .expect(httpStatus.CREATED)
+        .then((res) => {  //eslint-disable-line
+          return request(app)
+            .post('/api/auth/register')
+            .send(validUserCredentialsWithEmail)
+            .expect(httpStatus.UNAUTHORIZED);
+        })
+        .then((res) => {
+          expect(res.body.message).to.equal('User already exists.');
+          done();
+        })
+        .catch(done);
+    });
+
+    // CASE INSENSITIVE - lowercase email already registered - with unique username
+    it('should return User already exists error - changing email case should not create new user', (done) => {
+      request(app)
+        .post('/api/auth/register')
+        .send(validUserCredentialsWithEmail)
+        .expect(httpStatus.CREATED)
+        .then((res) => {  //eslint-disable-line
+          return request(app)
+            .post('/api/auth/register')
+            .send(invalidRegisterWithEmailUppercaseUniqueUsername)
+            .expect(httpStatus.UNAUTHORIZED);
+        })
+        .then((res) => {
+          expect(res.body.message).to.equal('User already exists.');
+          done();
+        })
+        .catch(done);
+    });
   });
 
   describe('# POST /api/auth/login', () => {
@@ -303,7 +354,7 @@ describe('## Auth APIs', () => {
         .catch(done);
     });
 
-    it('should get valid JWT token', (done) => {
+    it('should get valid JWT token - successful login', (done) => {
       request(app)
         .post('/api/auth/register')
         .send(validUserCredentials)
@@ -312,6 +363,30 @@ describe('## Auth APIs', () => {
           return request(app)
             .post('/api/auth/login')
             .send(validUserCredentials)
+            .expect(httpStatus.OK);
+        })
+        .then((res) => {
+          expect(res.body).to.have.property('token');
+          jwt.verify(res.body.token, config.jwtSecret, (err, decoded) => {
+            expect(err).to.not.be.ok; // eslint-disable-line no-unused-expressions
+            expect(decoded.username).to.equal(validUserCredentials.username);
+            jwtToken = `Bearer ${res.body.token}`;
+            done();
+          });
+        })
+        .catch(done);
+    });
+
+    // CASE INSENSITIVE
+    it('should get valid JWT token - CASE INSENSITIVE successful login', (done) => {
+      request(app)
+        .post('/api/auth/register')
+        .send(validUserCredentials)
+        .expect(httpStatus.CREATED)
+        .then((res) => {  //eslint-disable-line
+          return request(app)
+            .post('/api/auth/login')
+            .send(validUserCredentialsWithUppercase)
             .expect(httpStatus.OK);
         })
         .then((res) => {
