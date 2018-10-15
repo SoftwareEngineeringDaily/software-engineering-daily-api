@@ -101,7 +101,10 @@ function login(req, res, next) {
   const { password } = req.body;
 
   User.findOne({
-    $or: [{ username }, { email: new RegExp(username, REGEX_CASE_INSENSITIVE_MOD) }]
+    $or: [
+      { username: new RegExp(username, REGEX_CASE_INSENSITIVE_MOD) }, 
+      { email: new RegExp(username, REGEX_CASE_INSENSITIVE_MOD) }
+    ]
   })
     .exec()
     .then((user) => {
