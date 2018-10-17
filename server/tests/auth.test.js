@@ -70,6 +70,12 @@ describe('## Auth APIs', () => {
     password: 'express'
   };
 
+  const invalidRegisterAddEmailCapitalizedUsername = {
+    username: 'React',
+    email: 'react@email.com',
+    password: 'express'
+  };
+
   let jwtToken;
 
   afterEach((done) => {
@@ -321,6 +327,24 @@ describe('## Auth APIs', () => {
         })
         .catch(done);
     });
+
+    it('should return User already exists error - register without email - reregister with email and  capitalized username', (done) => {
+      request(app)
+        .post('/api/auth/register')
+        .send(validUserCredentials)
+        .expect(httpStatus.CREATED)
+        .then((res) => {  //eslint-disable-line
+          return request(app)
+            .post('/api/auth/register')
+            .send(invalidRegisterAddEmailCapitalizedUsername)
+            .expect(httpStatus.UNAUTHORIZED);
+        })
+        .then((res) => {
+          expect(res.body.message).to.equal('User already exists.');
+          done();
+        })
+        .catch(done);
+    });
   });
 
   describe('# POST /api/auth/login', () => {
@@ -384,8 +408,6 @@ describe('## Auth APIs', () => {
         .send(validUserCredentials)
         .expect(httpStatus.CREATED)
         .then((res) => {  //eslint-disable-line
-          console.log('CASE INS - res:', res.body);
-
           return request(app)
             .post('/api/auth/login')
             .send(validUserCredentialsWithUppercase)
@@ -394,7 +416,6 @@ describe('## Auth APIs', () => {
         .then((res) => {
           expect(res.body).to.have.property('token');
           jwt.verify(res.body.token, config.jwtSecret, (err, decoded) => {
-            console.log('JWT', decoded.username, validUserCredentials.username);
             expect(err).to.not.be.ok; // eslint-disable-line no-unused-expressions
             expect(decoded.username).to.equal(validUserCredentials.username);
             jwtToken = `Bearer ${res.body.token}`;

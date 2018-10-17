@@ -99,7 +99,6 @@ passport.use(new FacebookTokenStrategy(
 function login(req, res, next) {
   const { username } = req.body;
   const { password } = req.body;
-
   User.findOne({
     $or: [
       { username: new RegExp(username, REGEX_CASE_INSENSITIVE_MOD) },
@@ -108,7 +107,6 @@ function login(req, res, next) {
   })
     .exec()
     .then((user) => {
-      console.log('user login func', !!user);
       if (!user) return res.status(404).json({ message: 'User not found.' });
 
       if (!user.validPassword(password)) {
@@ -197,14 +195,19 @@ function register(req, res, next) {
     let err = new APIError('Password is required to register.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
     return next(err);
   }
-
   const { email } = req.body;
   const queryIfEmail = {
-    $or: [{ username }, { email: new RegExp(email, REGEX_CASE_INSENSITIVE_MOD) }]
+    $or: [
+      { username: new RegExp(username, REGEX_CASE_INSENSITIVE_MOD) },
+      { email: new RegExp(email, REGEX_CASE_INSENSITIVE_MOD) }
+    ]
   };
 
   const queryIfEmailMissing = {
-    $or: [{ username }, { email: username }]
+    $or: [
+      { username: new RegExp(username, REGEX_CASE_INSENSITIVE_MOD) },
+      { email: username }
+    ]
   };
 
   // We do this so people can't share an email on either field, username or email:
