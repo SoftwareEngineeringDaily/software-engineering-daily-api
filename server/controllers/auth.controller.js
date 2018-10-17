@@ -18,6 +18,8 @@ const reCaptcha = new ReCAPTCHA({
   secretKey: config.recaptcha.secretKey
 });
 
+const REGEX_CASE_INSENSITIVE_MOD = 'i';
+
 /**
  * @swagger
  * tags:
@@ -97,9 +99,11 @@ passport.use(new FacebookTokenStrategy(
 function login(req, res, next) {
   const { username } = req.body;
   const { password } = req.body;
-
   User.findOne({
-    $or: [{ username }, { email: username }]
+    $or: [
+      { username: new RegExp(username, REGEX_CASE_INSENSITIVE_MOD) },
+      { email: new RegExp(username, REGEX_CASE_INSENSITIVE_MOD) }
+    ]
   })
     .exec()
     .then((user) => {
@@ -125,7 +129,7 @@ function loginWithEmail(req, res, next) {
   const { email } = req.body;
   const { password } = req.body;
 
-  User.findOne({ email })
+  User.findOne({ email: new RegExp(email, REGEX_CASE_INSENSITIVE_MOD) })
     .exec()
     .then((user) => {
       if (!user) return res.status(404).json({ message: 'User not found.' });
@@ -182,7 +186,6 @@ function register(req, res, next) {
   const { username } = req.body;
   const { password } = req.body;
   const newsletterSignup = req.body.newsletter;
-
   if (!username) {
     let err = new APIError('Username is required to register.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
     return next(err);
@@ -192,14 +195,19 @@ function register(req, res, next) {
     let err = new APIError('Password is required to register.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
     return next(err);
   }
-
   const { email } = req.body;
   const queryIfEmail = {
-    $or: [{ username }, { email }]
+    $or: [
+      { username: new RegExp(username, REGEX_CASE_INSENSITIVE_MOD) },
+      { email: new RegExp(email, REGEX_CASE_INSENSITIVE_MOD) }
+    ]
   };
 
   const queryIfEmailMissing = {
-    $or: [{ username }, { email: username }]
+    $or: [
+      { username: new RegExp(username, REGEX_CASE_INSENSITIVE_MOD) },
+      { email: username }
+    ]
   };
 
   // We do this so people can't share an email on either field, username or email:

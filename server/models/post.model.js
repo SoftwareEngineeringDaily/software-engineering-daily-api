@@ -114,7 +114,7 @@ PostSchema.statics = {
       });
   },
   // standard list of fields to select for find Post queries
-  standardSelectForFind: 'content title date mp3 link score featuredImage upvoted downvoted tags categories thread',
+  standardSelectForFind: 'content title date mp3 link score featuredImage upvoted downvoted tags categories thread excerpt',
   /**
    * List posts in descending order of 'createdAt' timestamp.
    * @param {number} limit - Limit number of posts to be returned.
