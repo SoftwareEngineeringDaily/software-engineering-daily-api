@@ -463,9 +463,6 @@ describe('## Auth APIs', () => {
     });
   });
 
-  // case insensitive login
-
-
   xdescribe('# GET /api/auth/:socialNetwork', () => {
     it('should return bad request error', () => {
       // call /api/auth/twitter
