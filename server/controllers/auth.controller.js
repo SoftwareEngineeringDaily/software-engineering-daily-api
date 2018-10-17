@@ -102,12 +102,13 @@ function login(req, res, next) {
 
   User.findOne({
     $or: [
-      { username: new RegExp(username, REGEX_CASE_INSENSITIVE_MOD) }, 
+      { username: new RegExp(username, REGEX_CASE_INSENSITIVE_MOD) },
       { email: new RegExp(username, REGEX_CASE_INSENSITIVE_MOD) }
     ]
   })
     .exec()
     .then((user) => {
+      console.log('user login func', !!user);
       if (!user) return res.status(404).json({ message: 'User not found.' });
 
       if (!user.validPassword(password)) {

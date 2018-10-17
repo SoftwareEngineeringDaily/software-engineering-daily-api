@@ -384,6 +384,8 @@ describe('## Auth APIs', () => {
         .send(validUserCredentials)
         .expect(httpStatus.CREATED)
         .then((res) => {  //eslint-disable-line
+          console.log('CASE INS - res:', res.body);
+
           return request(app)
             .post('/api/auth/login')
             .send(validUserCredentialsWithUppercase)
@@ -392,6 +394,7 @@ describe('## Auth APIs', () => {
         .then((res) => {
           expect(res.body).to.have.property('token');
           jwt.verify(res.body.token, config.jwtSecret, (err, decoded) => {
+            console.log('JWT', decoded.username, validUserCredentials.username);
             expect(err).to.not.be.ok; // eslint-disable-line no-unused-expressions
             expect(decoded.username).to.equal(validUserCredentials.username);
             jwtToken = `Bearer ${res.body.token}`;
