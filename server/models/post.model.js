@@ -69,7 +69,8 @@ const PostSchema = new mongoose.Schema({
   content: {
     rendered: String,
   },
-  date: { type: Date, default: Date.now }
+  date: { type: Date, default: Date.now },
+  transcriptUrl: { type: String, default: '' }
 });
 
 /**
