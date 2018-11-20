@@ -115,7 +115,7 @@ PostSchema.statics = {
       });
   },
   // standard list of fields to select for find Post queries
-  standardSelectForFind: 'content title date mp3 link score featuredImage upvoted downvoted tags categories thread excerpt',
+  standardSelectForFind: 'content title date mp3 link score featuredImage upvoted downvoted tags categories thread excerpt transcriptUrl',
   /**
    * List posts in descending order of 'createdAt' timestamp.
    * @param {number} limit - Limit number of posts to be returned.
@@ -124,6 +124,7 @@ PostSchema.statics = {
    * @param {list} tags - List of Tags Ids
    * @param {list} categories - List of Categories
    * @param {string} search - Post Title to search
+   * @param {string} transcripts - Get posts with or without transcripts
    * @returns {Promise<Post[]>}
    */
   list({
@@ -134,7 +135,8 @@ PostSchema.statics = {
     type = null,
     tags = [],
     categories = [],
-    search = null
+    search = null,
+    transcripts = null
   } = {}) {
     const query = {};
     // @TODO use
@@ -161,6 +163,12 @@ PostSchema.statics = {
       // contentSearch['content.rendered'] = { $regex: new RegExp(`${search}`, 'i') };
 
       query.$or = [titleSearch];
+    }
+
+    if (transcripts === 'true') {
+      query.transcriptUrl = { $exists: true };
+    } else if (transcripts === 'false') {
+      query.transcriptUrl = { $exists: false };
     }
 
     const limitOption = parseInt(limit, 10);
