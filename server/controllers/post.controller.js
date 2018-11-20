@@ -82,6 +82,13 @@ function get(req, res, next) {
  *         required: false
  *         description: The date/time the episode was created after
  *       - in: query
+ *         name: transcripts
+ *         type: boolean
+ *         required: false
+ *         description: |
+ *            Using true returns posts with a transcriptUrl field,
+ *            using false returns posts without
+ *       - in: query
  *         name: type
  *         type: string
  *         required: false
@@ -117,7 +124,8 @@ function list(req, res, next) {
     type = null,
     tags = null,
     categories = null,
-    search = null
+    search = null,
+    transcripts = null
   } = req.query;
 
   const query = {};
@@ -127,6 +135,8 @@ function list(req, res, next) {
   if (type) query.type = type;
   if (req.user) query.user = req.user;
   if (search) query.search = search;
+  if (transcripts) query.transcripts = transcripts;
+
 
   if (tags) {
     query.tags = tags.split(',');
