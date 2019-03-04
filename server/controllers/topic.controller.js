@@ -1,4 +1,7 @@
 import Topic from '../models/topic.model';
+import Post from '../models/post.model';
+
+const { ObjectId } = require('mongodb');
 
 /**
  * @swagger
@@ -22,6 +25,17 @@ function create(req, res, next) {
   const topic = new Topic();
   topic.name = req.body.name;
 
+  try {
+    if (req.body.post_id) {
+      Post.findByIdAndUpdate(req.body.post_id, { $push: { topics: topic._id } }, async (err) => {
+        if (err) {
+          throw err;
+        }
+      });
+    }
+  } catch (e) {
+    throw e;
+  }
   topic
     .save()
     .then((topicSaved) => {
@@ -42,9 +56,16 @@ function index(req, res) {
 }
 
 function show(req, res) {
-  Topic.findById(req.params.id, (err, topic) => {
+  Topic.findById(req.params.id, async (err, topic) => {
     if (err) return;
-    res.send(topic);
+
+    const posts = await Post.find({ topics: { $in: [ObjectId(req.params.id)] } });
+
+    const body = {
+      topic,
+      posts
+    };
+    res.send(body);
   });
 }
 
