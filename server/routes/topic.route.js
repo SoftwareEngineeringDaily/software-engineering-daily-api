@@ -21,4 +21,7 @@ router.route('/:id')
   .put(topicCtrl.update)
   .delete(topicCtrl.deleteTopic);
 
+router.route('/addTopicToUser')
+  .post(topicCtrl.addTopicToUser);
+
 export default router;

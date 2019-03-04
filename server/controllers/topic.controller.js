@@ -91,6 +91,27 @@ async function deleteTopic(req, res) {
   }
 }
 
+async function addTopicToUser(req, res) {
+  const { user } = req.body;
+  const { topic } = req.body;
+
+  try {
+    if (user) {
+      const userById = await User.findById(user.id);
+      if (userById.topics.includes(ObjectId(topic.id))) {
+        User.findByIdAndUpdate(user.id, { $push: { topics: topic.id } }, async (err) => {
+          if (err) return;
+          res.send('Topic added.');
+        });
+      } else {
+        res.send('Topic already added.');
+      }
+    }
+  } catch (e) {
+    res.status(400).send('error');
+  }
+}
+
 /**
   * @swagger
   * /topics:
@@ -169,5 +190,6 @@ export default {
   index,
   show,
   update,
-  deleteTopic
+  deleteTopic,
+  addTopicToUser
 };
