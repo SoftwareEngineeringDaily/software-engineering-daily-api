@@ -1,5 +1,6 @@
 import Topic from '../models/topic.model';
 import Post from '../models/post.model';
+import User from '../models/user.model';
 
 const { ObjectId } = require('mongodb');
 
@@ -76,9 +77,11 @@ function update(req, res) {
   });
 }
 
-function deleteTopic(req, res) {
-  const { user } = req;
-  if (user && user.admin) {
+async function deleteTopic(req, res) {
+  const { user } = req.body;
+  const userById = await User.findOne({ _id: [user.id] });
+
+  if (userById && userById.isAdmin) {
     Topic.findByIdAndUpdate(req.params.id, { $set: { status: 'deleted' } }, (err) => {
       if (err) return;
       res.send('Topic deleted.');
@@ -87,7 +90,6 @@ function deleteTopic(req, res) {
     res.send('Only admin can delete topic.');
   }
 }
-
 
 /**
   * @swagger
@@ -148,7 +150,7 @@ function deleteTopic(req, res) {
   *             $ref: '#/definitions/Post'
   *   delete:
   *     summary: Delete topic
-  *     description: Delete topic by id.
+  *     description: Delete topic by id. Need user.id in req.body to check if the user is an admin.
   *     tags: [topic]
   *     security:
   *       - Token: []
