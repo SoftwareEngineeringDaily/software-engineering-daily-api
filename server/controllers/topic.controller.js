@@ -77,10 +77,15 @@ function update(req, res) {
 }
 
 function deleteTopic(req, res) {
-  Topic.findByIdAndUpdate(req.params.id, { $set: { status: 'deleted' } }, (err) => {
-    if (err) return;
-    res.send('Topic deleted.');
-  });
+  const { user } = req;
+  if (user && user.admin) {
+    Topic.findByIdAndUpdate(req.params.id, { $set: { status: 'deleted' } }, (err) => {
+      if (err) return;
+      res.send('Topic deleted.');
+    });
+  } else {
+    res.send('Only admin can delete topic.');
+  }
 }
 
 
