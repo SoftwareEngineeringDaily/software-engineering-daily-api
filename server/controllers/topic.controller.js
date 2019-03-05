@@ -143,7 +143,22 @@ async function addTopicToUser(req, res) {
   *             $ref: '#/definitions/Post'
   *   get:
   *     summary: Get topics index
-  *     description: Get list of topics.
+  *     description: Get list of topics. If user_id exist in query params return topics by user_id.
+  *     tags: [topic]
+  *     security:
+  *       - Token: []
+  *     responses:
+  *       '200':
+  *         description: successful operation
+  *         schema:
+  *           type: array
+  *           items:
+  *             $ref: '#/definitions/Post'
+  *
+  * /topics/addTopicToUser:
+  *   post:
+  *     summary: Add topic to user
+  *     description: Adds topic to topics array at user document.
   *     tags: [topic]
   *     security:
   *       - Token: []
