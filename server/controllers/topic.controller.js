@@ -45,15 +45,28 @@ function create(req, res, next) {
     .catch(err => next(err));
 }
 
-function index(req, res) {
-  Topic.find()
-    .then((topics) => {
-      res.send(topics);
-    }).catch((err) => {
-      res.status(500).send({
-        message: err.message || 'Some error occurred while retrieving topics.'
+async function index(req, res) {
+  if (req.query.user_id) {
+    const user = await User.findById(req.query.user_id);
+
+    Topic.find({ _id: { $in: user.topics } })
+      .then((topics) => {
+        res.send(topics);
+      }).catch((err) => {
+        res.status(500).send({
+          message: err.message || 'Some error occurred while retrieving topics.'
+        });
       });
-    });
+  } else {
+    Topic.find()
+      .then((topics) => {
+        res.send(topics);
+      }).catch((err) => {
+        res.status(500).send({
+          message: err.message || 'Some error occurred while retrieving topics.'
+        });
+      });
+  }
 }
 
 function show(req, res) {
@@ -98,13 +111,13 @@ async function addTopicToUser(req, res) {
   try {
     if (user) {
       const userById = await User.findById(user.id);
-      if (userById.topics.includes(ObjectId(topic.id))) {
-        User.findByIdAndUpdate(user.id, { $push: { topics: topic.id } }, async (err) => {
+      if (userById.topics.includes(topic.id)) {
+        res.send('Topic already added.');
+      } else {
+        User.findByIdAndUpdate(user.id, { $push: { topics: topic.id } }, (err) => {
           if (err) return;
           res.send('Topic added.');
         });
-      } else {
-        res.send('Topic already added.');
       }
     }
   } catch (e) {
