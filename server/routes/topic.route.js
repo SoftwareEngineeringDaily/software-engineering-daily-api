@@ -17,4 +17,7 @@ router.route('/:id')
 router.route('/addTopicToUser')
   .post(expressJwt({ secret: config.jwtSecret }), topicCtrl.addTopicToUser);
 
+router.route('/addTopicsToPost')
+  .post(expressJwt({ secret: config.jwtSecret }), topicCtrl.addTopicsToPost);
+
 export default router;

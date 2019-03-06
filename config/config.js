@@ -9,7 +9,7 @@ const envVarsSchema = Joi.object({
     .allow(['development', 'production', 'test', 'provision'])
     .default('development'),
   BASE_URL: Joi.string()
-    .allow(['https://www.softwaredaily.com', 'http://localhost:4040'])
+    // .allow(['https://www.softwaredaily.com', 'http://localhost:4040'])
     .default('https://www.softwaredaily.com'),
   EVENTS_API_BASE_URL: Joi.string().required(),
   SEND_GRID_KEY: Joi.string().required(),

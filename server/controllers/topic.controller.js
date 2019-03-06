@@ -105,10 +105,10 @@ async function deleteTopic(req, res) {
 }
 
 async function addTopicToUser(req, res) {
-  const { user } = req.body;
-  const { topic } = req.body;
-
   try {
+    const { user } = req.body;
+    const { topic } = req.body;
+
     if (user) {
       const userById = await User.findById(user.id);
       if (userById.topics.includes(topic.id)) {
@@ -122,6 +122,41 @@ async function addTopicToUser(req, res) {
     }
   } catch (e) {
     res.status(400).send('error');
+  }
+}
+
+async function addTopicsToPost(req, res) {
+  try {
+    const { postId } = req.body;
+    const { topics } = req.body;
+
+    if (postId) {
+      const post = await Post.findById(postId);
+
+      if (post.topics && post.topics !== []) {
+        const filteredTopics = [];
+        topics.map((t) => {
+          if (!post.topics.includes(t)) {
+            filteredTopics.push(t);
+          }
+          return filteredTopics;
+        });
+
+        Post.findByIdAndUpdate(postId, { $push: { topics: { $each: filteredTopics } } }, (err) => {
+          if (err) return;
+          res.send('Topic added.');
+        });
+      } else {
+        Post.findByIdAndUpdate(postId, { $push: { topics } }, (err) => {
+          if (err) return;
+          res.send('Topic added.');
+        });
+      }
+    } else {
+      res.status(400).send('post_id is necessary.');
+    }
+  } catch (e) {
+    res.status(400).send(e);
   }
 }
 
@@ -219,5 +254,6 @@ export default {
   show,
   update,
   deleteTopic,
-  addTopicToUser
+  addTopicToUser,
+  addTopicsToPost
 };
