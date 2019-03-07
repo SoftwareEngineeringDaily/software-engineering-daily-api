@@ -5,7 +5,7 @@ const TopicSchema = new mongoose.Schema({
   id: String,
   name: String,
   slug: String,
-  post_count: { type: Number, default: 0 },
+  postCount: { type: Number, default: 0 },
   status: { type: String, default: 'active' }
 });
 

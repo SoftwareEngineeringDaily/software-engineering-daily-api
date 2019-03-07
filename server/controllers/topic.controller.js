@@ -27,8 +27,10 @@ function create(req, res, next) {
   topic.name = req.body.name;
 
   try {
-    if (req.body.post_id) {
-      Post.findByIdAndUpdate(req.body.post_id, { $push: { topics: topic._id } }, async (err) => {
+    if (req.body.postId) {
+      topic.postCount = 1;
+      const topicId = topic._id.toString();
+      Post.findByIdAndUpdate(req.body.postId, { $push: { topics: topicId } }, async (err) => {
         if (err) {
           throw err;
         }
@@ -133,25 +135,32 @@ async function addTopicsToPost(req, res) {
     if (postId) {
       const post = await Post.findById(postId);
 
-      if (post.topics && post.topics !== []) {
-        const filteredTopics = [];
-        topics.map((t) => {
-          if (!post.topics.includes(t)) {
-            filteredTopics.push(t);
+      const filteredTopics = [];
+      topics.map((t) => {
+        if (!post.topics.includes(t)) {
+          filteredTopics.push(t);
+        }
+        return filteredTopics;
+      });
+      Post.findByIdAndUpdate(
+        postId,
+        {
+          $push: {
+            topics: { $each: filteredTopics }
           }
-          return filteredTopics;
-        });
-
-        Post.findByIdAndUpdate(postId, { $push: { topics: { $each: filteredTopics } } }, (err) => {
+        }, async (err) => {
           if (err) return;
+          filteredTopics.map((topicId) => {
+            Topic.findByIdAndUpdate(topicId, {
+              $inc: { postCount: 1 }
+            }, (error) => {
+              if (error) throw error;
+            });
+            return true;
+          });
           res.send('Topic added.');
-        });
-      } else {
-        Post.findByIdAndUpdate(postId, { $push: { topics } }, (err) => {
-          if (err) return;
-          res.send('Topic added.');
-        });
-      }
+        }
+      );
     } else {
       res.status(400).send('post_id is necessary.');
     }

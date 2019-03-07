@@ -7,7 +7,7 @@ const router = express.Router(); // eslint-disable-line new-cap
 
 router.route('/')
   .get(expressJwt({ secret: config.jwtSecret }), topicCtrl.index)
-  .post(expressJwt({ secret: config.jwtSecret }), topicCtrl.create);
+  .post(topicCtrl.create);
 
 router.route('/:id')
   .get(expressJwt({ secret: config.jwtSecret }), topicCtrl.show)
