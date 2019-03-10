@@ -14,6 +14,7 @@ import subscriptionRoutes from './subscription.route';
 import forumRoutes from './forum.route';
 import listenedRoutes from './listened.route';
 import tagsRoutes from './tag.route';
+import topicRoutes from './topic.route';
 // import userRoutes from './user.route';
 
 const router = express.Router(); // eslint-disable-line new-cap
@@ -57,5 +58,6 @@ router.use('/users', userRoutes);
 router.use('/subscription', subscriptionRoutes);
 router.use('/feed', feedRoutes);
 router.use('/auth', authRoutes);
+router.use('/topics', topicRoutes);
 
 export default router;
