@@ -71,6 +71,18 @@ async function index(req, res) {
   }
 }
 
+function mostPopular(req, res) {
+  Topic.find().sort({ postCount: -1 }).limit(10)
+    .then((topics) => {
+      res.send(topics);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || 'Some error occurred while retrieving topics.'
+      });
+    });
+}
+
 function show(req, res) {
   Topic.findById(req.params.id, async (err, topic) => {
     if (err) return;
@@ -260,6 +272,7 @@ async function addTopicsToPost(req, res) {
 export default {
   create,
   index,
+  mostPopular,
   show,
   update,
   deleteTopic,

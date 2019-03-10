@@ -5,13 +5,16 @@ import config from '../../config/config';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
+router.route('/mostPopular')
+  .get(topicCtrl.mostPopular);
+
 router.route('/')
-  .get(expressJwt({ secret: config.jwtSecret }), topicCtrl.index)
-  .post(topicCtrl.create);
+  .get(topicCtrl.index)
+  .post(expressJwt({ secret: config.jwtSecret }), topicCtrl.create);
 
 router.route('/:id')
-  .get(expressJwt({ secret: config.jwtSecret }), topicCtrl.show)
-  .put(expressJwt({ secret: config.jwtSecret }), topicCtrl.update)
+  .get(topicCtrl.show)
+  .put(topicCtrl.update)
   .delete(expressJwt({ secret: config.jwtSecret }), topicCtrl.deleteTopic);
 
 router.route('/addTopicToUser')
@@ -19,5 +22,6 @@ router.route('/addTopicToUser')
 
 router.route('/addTopicsToPost')
   .post(expressJwt({ secret: config.jwtSecret }), topicCtrl.addTopicsToPost);
+
 
 export default router;
