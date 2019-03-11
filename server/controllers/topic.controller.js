@@ -129,21 +129,45 @@ async function deleteTopic(req, res) {
   }
 }
 
-async function addTopicToUser(req, res) {
+async function addTopicsToUser(req, res) {
   try {
-    const { user } = req.body;
-    const { topic } = req.body;
+    // const { user } = req.body;
+    // const { topic } = req.body;
+    const { topics } = req.body;
+    const { userId } = req.body;
 
-    if (user) {
-      const userById = await User.findById(user.id);
-      if (userById.topics.includes(topic.id)) {
-        res.send('Topic already added.');
-      } else {
-        User.findByIdAndUpdate(user.id, { $push: { topics: topic.id } }, (err) => {
+    if (userId) {
+      const user = await User.findById(userId);
+
+      const filteredTopics = [];
+      topics.map((t) => {
+        if (!user.topics.includes(t)) {
+          filteredTopics.push(t);
+        }
+        return filteredTopics;
+      });
+      User.findByIdAndUpdate(
+        userId,
+        {
+          $push: {
+            topics: { $each: filteredTopics }
+          }
+        }, async (err) => {
           if (err) return;
           res.send('Topic added.');
-        });
-      }
+        }
+      );
+
+
+      // const userById = await User.findById(user.id);
+      // if (userById.topics.includes(topic.id)) {
+      //   res.send('Topic already added.');
+      // } else {
+      //   User.findByIdAndUpdate(user.id, { $push: { topics: topic.id } }, (err) => {
+      //     if (err) return;
+      //     res.send('Topic added.');
+      //   });
+      // }
     }
   } catch (e) {
     res.status(400).send('error');
@@ -287,6 +311,6 @@ export default {
   show,
   update,
   deleteTopic,
-  addTopicToUser,
+  addTopicsToUser,
   addTopicsToPost
 };

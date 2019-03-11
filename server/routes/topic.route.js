@@ -20,7 +20,7 @@ router.route('/:id')
   .put(expressJwt({ secret: config.jwtSecret }), topicCtrl.update)
   .delete(expressJwt({ secret: config.jwtSecret }), topicCtrl.deleteTopic);
 
-router.route('/addTopicToUser')
-  .post(expressJwt({ secret: config.jwtSecret }), topicCtrl.addTopicToUser);
+router.route('/addTopicsToUser')
+  .post(topicCtrl.addTopicsToUser);
 
 export default router;
