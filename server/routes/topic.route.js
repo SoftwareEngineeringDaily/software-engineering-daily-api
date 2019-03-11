@@ -13,7 +13,7 @@ router.route('/addTopicsToPost')
 
 router.route('/')
   .get(topicCtrl.index)
-  .post(expressJwt({ secret: config.jwtSecret }), topicCtrl.create);
+  .post(topicCtrl.create);
 
 router.route('/:id')
   .get(topicCtrl.show)

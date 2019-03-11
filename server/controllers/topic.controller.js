@@ -2,8 +2,6 @@ import Topic from '../models/topic.model';
 import Post from '../models/post.model';
 import User from '../models/user.model';
 
-const { ObjectId } = require('mongodb');
-
 /**
  * @swagger
  * tags:
@@ -22,36 +20,33 @@ const { ObjectId } = require('mongodb');
  *     type: string
  */
 
-function create(req, res, next) {
+async function create(req, res) {
   const topic = new Topic();
   topic.name = req.body.name;
 
-  try {
-    if (req.body.postId) {
-      topic.postCount = 1;
-      const topicId = topic._id.toString();
-      Post.findByIdAndUpdate(req.body.postId, { $push: { topics: topicId } }, async (err) => {
-        if (err) {
-          throw err;
-        }
-      });
-    }
-  } catch (e) {
-    throw e;
+  if (req.body.postId) {
+    topic.postCount = 1;
+    const topicId = topic._id.toString();
+    Post.findByIdAndUpdate(req.body.postId, { $push: { topics: topicId } }, async (err) => {
+      if (err) {
+        throw err;
+      }
+    });
   }
+
   topic
     .save()
     .then((topicSaved) => {
       res.status(201).json(topicSaved);
     })
-    .catch(err => next(err));
+    .catch(err => res.status(422).json(err.errmsg));
 }
 
 async function index(req, res) {
   if (req.query.userId) {
     const user = await User.findById(req.query.userId);
 
-    Topic.find({ _id: { $in: user.topics } })
+    Topic.find({ _id: { $in: user.topics }, status: 'active' })
       .then((topics) => {
         res.send(topics);
       }).catch((err) => {
@@ -62,7 +57,7 @@ async function index(req, res) {
   } else if (req.query.postId) {
     const post = await Post.findById(req.query.postId);
 
-    Topic.find({ _id: { $in: post.topics } })
+    Topic.find({ _id: { $in: post.topics }, status: 'active' })
       .then((topics) => {
         res.send(topics);
       }).catch((err) => {
@@ -71,7 +66,7 @@ async function index(req, res) {
         });
       });
   } else {
-    Topic.find()
+    Topic.find({ status: 'active' })
       .then((topics) => {
         res.send(topics);
       }).catch((err) => {
@@ -98,8 +93,7 @@ function show(req, res) {
   Topic.findById(req.params.id, async (err, topic) => {
     if (err) return;
 
-    const posts = await Post.find({ topics: { $in: [ObjectId(req.params.id)] } });
-
+    const posts = await Post.find({ topics: { $in: [req.params.id] } });
     const body = {
       topic,
       posts
@@ -131,8 +125,6 @@ async function deleteTopic(req, res) {
 
 async function addTopicsToUser(req, res) {
   try {
-    // const { user } = req.body;
-    // const { topic } = req.body;
     const { topics } = req.body;
     const { userId } = req.body;
 
@@ -157,17 +149,6 @@ async function addTopicsToUser(req, res) {
           res.send('Topic added.');
         }
       );
-
-
-      // const userById = await User.findById(user.id);
-      // if (userById.topics.includes(topic.id)) {
-      //   res.send('Topic already added.');
-      // } else {
-      //   User.findByIdAndUpdate(user.id, { $push: { topics: topic.id } }, (err) => {
-      //     if (err) return;
-      //     res.send('Topic added.');
-      //   });
-      // }
     }
   } catch (e) {
     res.status(400).send('error');
@@ -209,7 +190,7 @@ async function addTopicsToPost(req, res) {
         }
       );
     } else {
-      res.status(400).send('post_id is necessary.');
+      res.status(400).send('postId is necessary.');
     }
   } catch (e) {
     res.status(400).send(e);
