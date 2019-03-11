@@ -48,10 +48,21 @@ function create(req, res, next) {
 }
 
 async function index(req, res) {
-  if (req.query.user_id) {
-    const user = await User.findById(req.query.user_id);
+  if (req.query.userId) {
+    const user = await User.findById(req.query.userId);
 
     Topic.find({ _id: { $in: user.topics } })
+      .then((topics) => {
+        res.send(topics);
+      }).catch((err) => {
+        res.status(500).send({
+          message: err.message || 'Some error occurred while retrieving topics.'
+        });
+      });
+  } else if (req.query.postId) {
+    const post = await Post.findById(req.query.postId);
+
+    Topic.find({ _id: { $in: post.topics } })
       .then((topics) => {
         res.send(topics);
       }).catch((err) => {
