@@ -78,7 +78,7 @@ async function index(req, res) {
 }
 
 function mostPopular(req, res) {
-  Topic.find().sort({ postCount: -1 }).limit(10)
+  Topic.find({ status: 'active' }).sort({ postCount: -1 }).limit(10)
     .then((topics) => {
       res.send(topics);
     })
