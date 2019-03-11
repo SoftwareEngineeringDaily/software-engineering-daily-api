@@ -170,17 +170,36 @@ async function addTopicsToPost(req, res) {
         }
         return filteredTopics;
       });
+
+      const removeTopics = [];
+      post.topics.map((t) => {
+        if (!topics.includes(t)) {
+          removeTopics.push(t);
+        }
+        return removeTopics;
+      });
       Post.findByIdAndUpdate(
         postId,
         {
           $push: {
             topics: { $each: filteredTopics }
+          },
+          $pull: {
+            topics: { $each: removeTopics }
           }
         }, async (err) => {
           if (err) return;
           filteredTopics.map((topicId) => {
             Topic.findByIdAndUpdate(topicId, {
               $inc: { postCount: 1 }
+            }, (error) => {
+              if (error) throw error;
+            });
+            return true;
+          });
+          removeTopics.map((topicId) => {
+            Topic.findByIdAndUpdate(topicId, {
+              $inc: { postCount: -1 }
             }, (error) => {
               if (error) throw error;
             });
