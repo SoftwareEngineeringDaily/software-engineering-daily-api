@@ -9,7 +9,7 @@ router.route('/mostPopular')
   .get(topicCtrl.mostPopular);
 
 router.route('/addTopicsToPost')
-  .post(expressJwt({ secret: config.jwtSecret }), topicCtrl.addTopicsToPost);
+  .post(topicCtrl.addTopicsToPost);
 
 router.route('/')
   .get(topicCtrl.index)

@@ -183,9 +183,6 @@ async function addTopicsToPost(req, res) {
         {
           $push: {
             topics: { $each: filteredTopics }
-          },
-          $pull: {
-            topics: { $each: removeTopics }
           }
         }, async (err) => {
           if (err) return;
@@ -197,14 +194,24 @@ async function addTopicsToPost(req, res) {
             });
             return true;
           });
-          removeTopics.map((topicId) => {
-            Topic.findByIdAndUpdate(topicId, {
-              $inc: { postCount: -1 }
-            }, (error) => {
-              if (error) throw error;
-            });
-            return true;
-          });
+          Post.findByIdAndUpdate(
+            postId,
+            {
+              $pull: {
+                topics: { $in: removeTopics }
+              }
+            }, async (error) => {
+              if (error) return;
+              filteredTopics.map((topicId) => {
+                Topic.findByIdAndUpdate(topicId, {
+                  $inc: { postCount: -1 }
+                }, (removeTopicError) => {
+                  if (removeTopicError) throw removeTopicError;
+                });
+                return true;
+              });
+            }
+          );
           res.send('Topic added.');
         }
       );
