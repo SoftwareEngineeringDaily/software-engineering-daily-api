@@ -202,7 +202,7 @@ async function addTopicsToPost(req, res) {
               }
             }, async (error) => {
               if (error) return;
-              filteredTopics.map((topicId) => {
+              removeTopics.map((topicId) => {
                 Topic.findByIdAndUpdate(topicId, {
                   $inc: { postCount: -1 }
                 }, (removeTopicError) => {
