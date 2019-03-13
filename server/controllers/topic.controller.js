@@ -138,6 +138,13 @@ async function addTopicsToUser(req, res) {
         }
         return filteredTopics;
       });
+      const removeTopics = [];
+      user.topics.map((t) => {
+        if (!topics.includes(t)) {
+          removeTopics.push(t);
+        }
+        return removeTopics;
+      });
       User.findByIdAndUpdate(
         userId,
         {
@@ -146,7 +153,17 @@ async function addTopicsToUser(req, res) {
           }
         }, async (err) => {
           if (err) return;
-          res.send('Topic added.');
+          User.findByIdAndUpdate(
+            userId,
+            {
+              $pull: {
+                topics: { $in: removeTopics }
+              }
+            }, async (error) => {
+              if (error) return;
+              res.send('Topic added.');
+            }
+          );
         }
       );
     }
