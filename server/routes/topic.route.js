@@ -15,7 +15,7 @@ router.route('/')
   .get(topicCtrl.index)
   .post(topicCtrl.create);
 
-router.route('/:id')
+router.route('/:slug')
   .get(topicCtrl.show)
   .put(expressJwt({ secret: config.jwtSecret }), topicCtrl.update)
   .delete(expressJwt({ secret: config.jwtSecret }), topicCtrl.deleteTopic);
