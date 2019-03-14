@@ -5,6 +5,10 @@ import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Vote from './vote.model';
 
+const slug = require('mongoose-slug-generator');
+
+mongoose.plugin(slug);
+
 /**
  * @swagger
  * definitions:
@@ -71,7 +75,8 @@ const PostSchema = new mongoose.Schema({
   },
   date: { type: Date, default: Date.now },
   transcriptUrl: { type: String, default: '' },
-  topics: Array
+  topics: Array,
+  slug: { type: String, slug: 'name', unique: true },
 });
 
 /**
