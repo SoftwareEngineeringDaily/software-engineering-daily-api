@@ -77,9 +77,9 @@ async function index(req, res) {
   }
 }
 
-function searchTopic(req, res) {
+function searchTopics(req, res) {
   const { search } = req.query;
-  Topic.find({ name: { $regex: RegExp(`^.*${search}.*$`), $options: 'i' } })
+  Topic.find({ name: { $regex: RegExp(`^.*${search}.*$`), $options: 'i' }, status: 'active' })
     .then((topics) => {
       res.send(topics);
     }).catch((err) => {
@@ -348,5 +348,5 @@ export default {
   deleteTopic,
   addTopicsToUser,
   addTopicsToPost,
-  searchTopic
+  searchTopics
 };

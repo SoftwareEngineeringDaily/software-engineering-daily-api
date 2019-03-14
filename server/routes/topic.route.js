@@ -18,8 +18,8 @@ router.route('/')
 router.route('/addTopicsToUser')
   .post(topicCtrl.addTopicsToUser);
 
-router.route('/searchTopic')
-  .get(topicCtrl.searchTopic);
+router.route('/searchTopics')
+  .get(topicCtrl.searchTopics);
 
 router.route('/:slug')
   .get(topicCtrl.show)
