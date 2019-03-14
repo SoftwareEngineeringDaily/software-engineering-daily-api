@@ -92,7 +92,7 @@ function mostPopular(req, res) {
 function show(req, res) {
   Topic.find({ slug: req.params.slug }, async (err, topic) => {
     if (err) return;
-    const posts = await Post.find({ topics: { $in: [topic[0]._id] } });
+    const posts = await Post.find({ topics: { $in: [topic[0]._id.toString()] } });
     const body = {
       topic,
       posts

@@ -136,6 +136,7 @@ PostSchema.statics = {
     type = null,
     tags = [],
     categories = [],
+    topic = null,
     search = null,
     transcripts = null
   } = {}) {
@@ -152,6 +153,7 @@ PostSchema.statics = {
 
     if (tags.length > 0) query.tags = { $all: tags };
     if (categories.length > 0) query.categories = { $all: categories };
+    if (topic) query.topics = { $in: topic };
     if (search) {
       const titleSearch = {};
       const searchWords = search.split(' ').join('|');

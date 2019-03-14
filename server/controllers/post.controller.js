@@ -125,7 +125,8 @@ function list(req, res, next) {
     tags = null,
     categories = null,
     search = null,
-    transcripts = null
+    transcripts = null,
+    topic = null
   } = req.query;
 
   const query = {};
@@ -156,6 +157,9 @@ function list(req, res, next) {
     query.categories = newTags;
   }
 
+  if (topic) {
+    query.topic = [topic];
+  }
   Post.list(query)
     .then(posts => res.json(getAdFreePostsIfSubscribed(posts, req.fullUser, next)))
     .catch(e => next(e));
