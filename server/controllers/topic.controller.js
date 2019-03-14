@@ -77,6 +77,18 @@ async function index(req, res) {
   }
 }
 
+function searchTopic(req, res) {
+  const { search } = req.query;
+  Topic.find({ name: { $regex: RegExp(`^.*${search}.*$`), $options: 'i' } })
+    .then((topics) => {
+      res.send(topics);
+    }).catch((err) => {
+      res.status(500).send({
+        message: err.message || 'Some error occurred while retrieving topics.'
+      });
+    });
+}
+
 function mostPopular(req, res) {
   Topic.find({ status: 'active' }).sort({ postCount: -1 }).limit(10)
     .then((topics) => {
@@ -335,5 +347,6 @@ export default {
   update,
   deleteTopic,
   addTopicsToUser,
-  addTopicsToPost
+  addTopicsToPost,
+  searchTopic
 };

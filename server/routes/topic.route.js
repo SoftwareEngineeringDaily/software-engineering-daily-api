@@ -15,12 +15,16 @@ router.route('/')
   .get(topicCtrl.index)
   .post(topicCtrl.create);
 
+router.route('/addTopicsToUser')
+  .post(topicCtrl.addTopicsToUser);
+
+router.route('/searchTopic')
+  .get(topicCtrl.searchTopic);
+
 router.route('/:slug')
   .get(topicCtrl.show)
   .put(expressJwt({ secret: config.jwtSecret }), topicCtrl.update)
   .delete(expressJwt({ secret: config.jwtSecret }), topicCtrl.deleteTopic);
 
-router.route('/addTopicsToUser')
-  .post(topicCtrl.addTopicsToUser);
 
 export default router;
