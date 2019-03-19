@@ -2,8 +2,6 @@ import Topic from '../models/topic.model';
 import Post from '../models/post.model';
 import User from '../models/user.model';
 
-const { ObjectId } = require('mongodb');
-
 /**
  * @swagger
  * tags:
@@ -22,36 +20,44 @@ const { ObjectId } = require('mongodb');
  *     type: string
  */
 
-function create(req, res, next) {
+async function create(req, res) {
   const topic = new Topic();
   topic.name = req.body.name;
 
-  try {
-    if (req.body.postId) {
-      topic.postCount = 1;
-      const topicId = topic._id.toString();
-      Post.findByIdAndUpdate(req.body.postId, { $push: { topics: topicId } }, async (err) => {
-        if (err) {
-          throw err;
-        }
-      });
-    }
-  } catch (e) {
-    throw e;
+  if (req.body.postId) {
+    topic.postCount = 1;
+    const topicId = topic._id.toString();
+    Post.findByIdAndUpdate(req.body.postId, { $push: { topics: topicId } }, async (err) => {
+      if (err) {
+        throw err;
+      }
+    });
   }
+
   topic
     .save()
     .then((topicSaved) => {
       res.status(201).json(topicSaved);
     })
-    .catch(err => next(err));
+    .catch(err => res.status(422).json(err.errmsg));
 }
 
 async function index(req, res) {
-  if (req.query.user_id) {
-    const user = await User.findById(req.query.user_id);
+  if (req.query.userId) {
+    const user = await User.findById(req.query.userId);
 
-    Topic.find({ _id: { $in: user.topics } })
+    Topic.find({ _id: { $in: user.topics }, status: 'active' })
+      .then((topics) => {
+        res.send(topics);
+      }).catch((err) => {
+        res.status(500).send({
+          message: err.message || 'Some error occurred while retrieving topics.'
+        });
+      });
+  } else if (req.query.postId) {
+    const post = await Post.findById(req.query.postId);
+
+    Topic.find({ _id: { $in: post.topics }, status: 'active' })
       .then((topics) => {
         res.send(topics);
       }).catch((err) => {
@@ -60,7 +66,7 @@ async function index(req, res) {
         });
       });
   } else {
-    Topic.find()
+    Topic.find({ status: 'active' })
       .then((topics) => {
         res.send(topics);
       }).catch((err) => {
@@ -71,8 +77,20 @@ async function index(req, res) {
   }
 }
 
+function searchTopics(req, res) {
+  const { search } = req.query;
+  Topic.find({ name: { $regex: RegExp(`^.*${search}.*$`), $options: 'i' }, status: 'active' })
+    .then((topics) => {
+      res.send(topics);
+    }).catch((err) => {
+      res.status(500).send({
+        message: err.message || 'Some error occurred while retrieving topics.'
+      });
+    });
+}
+
 function mostPopular(req, res) {
-  Topic.find().sort({ postCount: -1 }).limit(10)
+  Topic.find({ status: 'active' }).sort({ postCount: -1 }).limit(10)
     .then((topics) => {
       res.send(topics);
     })
@@ -84,11 +102,9 @@ function mostPopular(req, res) {
 }
 
 function show(req, res) {
-  Topic.findById(req.params.id, async (err, topic) => {
+  Topic.find({ slug: req.params.slug }, async (err, topic) => {
     if (err) return;
-
-    const posts = await Post.find({ topics: { $in: [ObjectId(req.params.id)] } });
-
+    const posts = await Post.find({ topics: { $in: [topic[0]._id.toString()] } });
     const body = {
       topic,
       posts
@@ -118,21 +134,49 @@ async function deleteTopic(req, res) {
   }
 }
 
-async function addTopicToUser(req, res) {
+async function addTopicsToUser(req, res) {
   try {
-    const { user } = req.body;
-    const { topic } = req.body;
+    const { topics } = req.body;
+    const { userId } = req.body;
 
-    if (user) {
-      const userById = await User.findById(user.id);
-      if (userById.topics.includes(topic.id)) {
-        res.send('Topic already added.');
-      } else {
-        User.findByIdAndUpdate(user.id, { $push: { topics: topic.id } }, (err) => {
+    if (userId) {
+      const user = await User.findById(userId);
+
+      const filteredTopics = [];
+      topics.map((t) => {
+        if (!user.topics.includes(t)) {
+          filteredTopics.push(t);
+        }
+        return filteredTopics;
+      });
+      const removeTopics = [];
+      user.topics.map((t) => {
+        if (!topics.includes(t)) {
+          removeTopics.push(t);
+        }
+        return removeTopics;
+      });
+      User.findByIdAndUpdate(
+        userId,
+        {
+          $push: {
+            topics: { $each: filteredTopics }
+          }
+        }, async (err) => {
           if (err) return;
-          res.send('Topic added.');
-        });
-      }
+          User.findByIdAndUpdate(
+            userId,
+            {
+              $pull: {
+                topics: { $in: removeTopics }
+              }
+            }, async (error) => {
+              if (error) return;
+              res.send('Topic added.');
+            }
+          );
+        }
+      );
     }
   } catch (e) {
     res.status(400).send('error');
@@ -154,6 +198,14 @@ async function addTopicsToPost(req, res) {
         }
         return filteredTopics;
       });
+
+      const removeTopics = [];
+      post.topics.map((t) => {
+        if (!topics.includes(t)) {
+          removeTopics.push(t);
+        }
+        return removeTopics;
+      });
       Post.findByIdAndUpdate(
         postId,
         {
@@ -170,11 +222,29 @@ async function addTopicsToPost(req, res) {
             });
             return true;
           });
+          Post.findByIdAndUpdate(
+            postId,
+            {
+              $pull: {
+                topics: { $in: removeTopics }
+              }
+            }, async (error) => {
+              if (error) return;
+              removeTopics.map((topicId) => {
+                Topic.findByIdAndUpdate(topicId, {
+                  $inc: { postCount: -1 }
+                }, (removeTopicError) => {
+                  if (removeTopicError) throw removeTopicError;
+                });
+                return true;
+              });
+            }
+          );
           res.send('Topic added.');
         }
       );
     } else {
-      res.status(400).send('post_id is necessary.');
+      res.status(400).send('postId is necessary.');
     }
   } catch (e) {
     res.status(400).send(e);
@@ -276,6 +346,7 @@ export default {
   show,
   update,
   deleteTopic,
-  addTopicToUser,
-  addTopicsToPost
+  addTopicsToUser,
+  addTopicsToPost,
+  searchTopics
 };

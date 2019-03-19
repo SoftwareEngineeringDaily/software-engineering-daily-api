@@ -1,13 +1,19 @@
 import mongoose from 'mongoose';
 
+const slug = require('mongoose-slug-generator');
+
+mongoose.plugin(slug);
+
 // Create schema
 const TopicSchema = new mongoose.Schema({
-  id: String,
-  name: String,
-  slug: String,
+  name: {
+    type: String,
+    unique: true
+  },
+  slug: { type: String, slug: 'name', unique: true },
   postCount: { type: Number, default: 0 },
   status: { type: String, default: 'active' }
 });
 
 // Export the model
-export default mongoose.model('Topic', TopicSchema);
+module.exports = mongoose.model('Topic', TopicSchema);

@@ -5,6 +5,10 @@ import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Vote from './vote.model';
 
+const slug = require('mongoose-slug-generator');
+
+mongoose.plugin(slug);
+
 /**
  * @swagger
  * definitions:
@@ -71,7 +75,8 @@ const PostSchema = new mongoose.Schema({
   },
   date: { type: Date, default: Date.now },
   transcriptUrl: { type: String, default: '' },
-  topics: Array
+  topics: Array,
+  slug: { type: String, slug: 'name', unique: true },
 });
 
 /**
@@ -116,7 +121,7 @@ PostSchema.statics = {
       });
   },
   // standard list of fields to select for find Post queries
-  standardSelectForFind: 'content title date mp3 link score featuredImage upvoted downvoted tags categories thread excerpt transcriptUrl',
+  standardSelectForFind: 'content title date mp3 link score featuredImage guestImage upvoted downvoted tags categories thread excerpt transcriptUrl topics',
   /**
    * List posts in descending order of 'createdAt' timestamp.
    * @param {number} limit - Limit number of posts to be returned.
@@ -136,6 +141,7 @@ PostSchema.statics = {
     type = null,
     tags = [],
     categories = [],
+    topic = null,
     search = null,
     transcripts = null
   } = {}) {
@@ -152,6 +158,7 @@ PostSchema.statics = {
 
     if (tags.length > 0) query.tags = { $all: tags };
     if (categories.length > 0) query.categories = { $all: categories };
+    if (topic) query.topics = { $in: topic };
     if (search) {
       const titleSearch = {};
       const searchWords = search.split(' ').join('|');
