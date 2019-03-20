@@ -19,7 +19,7 @@
     "lint": "esw *.js server config --color",
     "lint:watch": "npm run lint -- --watch",
     "precommit": "lint-staged",
-    "test": "cross-env NODE_ENV=test ./node_modules/.bin/mocha --ui bdd --reporter spec --colors --compilers js:babel-core/register --require babel-polyfill server/tests --recursive",
+    "test": "cross-env NODE_ENV=test ./node_modules/.bin/mocha --grep '## Topic APIs' --ui bdd --reporter spec --colors --compilers js:babel-core/register --require babel-polyfill server/tests --recursive",
     "test:watch": "npm run test -- --watch",
     "test:coverage": "cross-env NODE_ENV=test ./node_modules/.bin/istanbul cover _mocha -- --ui bdd --reporter spec --colors --compilers js:babel-core/register --require babel-polyfill server/tests --recursive",
     "test:check-coverage": "npm run test:coverage && istanbul check-coverage",

@@ -109,22 +109,14 @@ function show(req, res) {
     const {
       limit = null,
       createdAtBefore = null,
-      createdAfter = null,
-      // type = null,
-      // tags = null,
-      // categories = null,
-      // search = null,
-      // transcripts = null
+      createdAfter = null
     } = req.query;
 
     const query = {};
     if (limit) query.limit = limit;
     if (createdAtBefore) query.createdAtBefore = createdAtBefore;
     if (createdAfter) query.createdAfter = createdAfter;
-    // if (type) query.type = type;
-    // if (req.user) query.user = req.user;
-    // if (search) query.search = search;
-    // if (transcripts) query.transcripts = transcripts;
+    if (topic) query.topic = [topic[0]._id.toString()];
 
     const posts = await Post.list(query);
 
