@@ -38,6 +38,8 @@ describe('## Vote APIs', () => {
         expect(res.body).to.have.property('token');
         userToken = res.body.token;
         const post = new Post();
+        post.name = 'post name';
+        post.slug = 'post-name';
         return post.save();
       })
       .then((post) => {
@@ -81,6 +83,8 @@ describe('## Vote APIs', () => {
           expect(res.body).to.have.property('token');
           user2 = res.body.token;
           const postnew = new Post();
+          postnew.name = 'New post name';
+          postnew.slug = 'new-post-name';
           return postnew.save();
         })
         .then((post) => {
