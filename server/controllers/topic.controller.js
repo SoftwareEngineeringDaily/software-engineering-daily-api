@@ -104,7 +104,30 @@ function mostPopular(req, res) {
 function show(req, res) {
   Topic.find({ slug: req.params.slug }, async (err, topic) => {
     if (err) return;
-    const posts = await Post.find({ topics: { $in: [topic[0]._id.toString()] } });
+    // const posts = await Post.find({ topics: { $in: [topic[0]._id.toString()] } });
+
+    const {
+      limit = null,
+      createdAtBefore = null,
+      createdAfter = null,
+      // type = null,
+      // tags = null,
+      // categories = null,
+      // search = null,
+      // transcripts = null
+    } = req.query;
+
+    const query = {};
+    if (limit) query.limit = limit;
+    if (createdAtBefore) query.createdAtBefore = createdAtBefore;
+    if (createdAfter) query.createdAfter = createdAfter;
+    // if (type) query.type = type;
+    // if (req.user) query.user = req.user;
+    // if (search) query.search = search;
+    // if (transcripts) query.transcripts = transcripts;
+
+    const posts = await Post.list(query);
+
     const body = {
       topic,
       posts
