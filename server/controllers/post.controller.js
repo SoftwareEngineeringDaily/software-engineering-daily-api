@@ -54,6 +54,7 @@ function load(req, res, next, id) {
 
 function get(req, res, next) {
   // Load ad free version of podcast episode if subscrbied:
+
   return res.json(getAdFreeSinglePostIfSubscribed(req.post.toObject(), req.fullUser, next));
 }
 
@@ -125,7 +126,8 @@ function list(req, res, next) {
     tags = null,
     categories = null,
     search = null,
-    transcripts = null
+    transcripts = null,
+    topic = null
   } = req.query;
 
   const query = {};
@@ -156,6 +158,9 @@ function list(req, res, next) {
     query.categories = newTags;
   }
 
+  if (topic) {
+    query.topic = [topic];
+  }
   Post.list(query)
     .then(posts => res.json(getAdFreePostsIfSubscribed(posts, req.fullUser, next)))
     .catch(e => next(e));

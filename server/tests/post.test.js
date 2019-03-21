@@ -13,6 +13,10 @@ function saveMongoArrayPromise(model, dataArray) {
   return Promise.all(dataArray.map(data => model(data).save()));
 }
 
+function getRandomNumber() {
+  return Math.floor(Math.random() * 10000);
+}
+
 /**
  * root level hooks
  */
@@ -63,11 +67,22 @@ describe('## Post APIs', () => {
 
     let firstSet = [];
     const limitNum = 5;
+
+    const postsArray = [];
+    for (let i = 0; i < limitNum; i += 1) {
+      postsArray.push({
+        date: moment().subtract(1, 'minutes'),
+        name: `Posts should get all posts ${getRandomNumber()}`,
+        slug: `posts-should-get-all-posts-${getRandomNumber()}`
+      });
+    }
+
     it('should get all posts', (done) => {
       const postsArrayPromise = saveMongoArrayPromise(
         Post,
-        new Array(limitNum).fill({}).concat(new Array(limitNum).fill({ date: moment().subtract(1, 'minutes') }))
+        postsArray
       );
+
       postsArrayPromise
         .then((postFound) => { //eslint-disable-line
           return request(app)
@@ -85,7 +100,8 @@ describe('## Post APIs', () => {
     });
 
     it('should get all posts (with limit and skip)', (done) => {
-      const createdAtBefore = firstSet[firstSet.length - 1].date;
+      const createdAtBeforeNotFormatted = moment(firstSet[0].date).add(1, 'minutes');
+      const createdAtBefore = moment(createdAtBeforeNotFormatted, moment.ISO_8601).format();
       request(app)
         .get('/api/posts')
         .query({ limit: limitNum, createdAtBefore })
@@ -93,7 +109,7 @@ describe('## Post APIs', () => {
         .then((res) => {
           expect(res.body).to.be.an('array');
           expect(res.body).to.have.lengthOf(limitNum);
-          expect(res.body).to.not.eql(firstSet);
+          expect(res.body).to.eql(firstSet);
           done();
         })
         .catch(done);

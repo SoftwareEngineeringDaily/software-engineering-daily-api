@@ -332,6 +332,8 @@ describe('## Bookmark APIs', () => {
     it('should include Post score even if undefined', (done) => {
       // let postIdNoScore;
       const postNoScore = new Post();
+      postNoScore.name = 'Bookmark no score test name';
+      postNoScore.slug = 'bookmark-no-score-test-name';
       postNoScore.score = undefined;
       expect(postNoScore.toObject()).to.not.have.keys('score');
       postNoScore.save().then(post => post._id).then((postIdNoScore) => {
