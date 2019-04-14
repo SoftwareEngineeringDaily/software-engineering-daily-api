@@ -8,7 +8,6 @@ import APIError from '../helpers/APIError';
 import config from '../../config/config';
 import User from '../models/user.model';
 import { signS3 } from '../helpers/s3';
-import { sendError, ErrorType } from '../helpers/events.helper';
 
 const http = require('http'); // For mailchimp api call
 require('dotenv').config();
@@ -240,13 +239,6 @@ function register(req, res, next) {
       });
       mailchimpReq.on('error', (e) => {
         console.log(`mailchimp error: ${e}`);
-        sendError({
-          userName: username,
-          errorType: ErrorType.OTHER,
-          errorData: {
-            message: e
-          }
-        });
         const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
         console.log('newsletter error', error);
         // return next(error); // This will prevent registration which we dont want
@@ -256,13 +248,6 @@ function register(req, res, next) {
     }
   } catch (e) {
     console.log(`mailchimp error: ${e}`);
-    sendError({
-      userName: username,
-      errorType: ErrorType.OTHER,
-      errorData: {
-        message: e
-      }
-    });
     const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
     console.log('newsletter error2', error);
     // return next(error); // This will prevent registration which we dont want
