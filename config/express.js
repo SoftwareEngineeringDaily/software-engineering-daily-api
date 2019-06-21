@@ -66,7 +66,9 @@ app.use((err, req, res, next) => {
   return next(err);
 });
 
-app.use('/', express.static(`${__dirname}/front-dist`));
+if (process.env.FEATURE_SERVE_FRONT === true) {
+  app.use('/', express.static(`${__dirname}/front-dist`));
+}
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
