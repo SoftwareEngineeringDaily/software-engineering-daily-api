@@ -18,6 +18,9 @@
     "AWS_SECRET_ACCESS_KEY": {
       "required": true
     },
+    "AWS_PROFILE_PIC_BUCKET_NAME": {
+      "required": true
+    },
     "STRIPE_PUBLIC_KEY": {
       "required": true
     },
