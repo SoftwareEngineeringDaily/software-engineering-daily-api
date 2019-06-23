@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import FacebookTokenStrategy from 'passport-facebook-token';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import httpStatus from 'http-status';
@@ -35,38 +34,6 @@ passport.deserializeUser((id, done) => {
     done(err, user);
   });
 });
-
-// TODO: add swagger doc
-
-passport.use(new FacebookTokenStrategy(
-  {
-    clientID: config.facebook.clientID,
-    clientSecret: config.facebook.clientSecret
-  },
-  (accessToken, refreshToken, profile, done) => {
-    const username = profile.emails[0].value || profile.id;
-    User.findOne({ username })
-      .exec()
-      .then((user) => {
-        if (!user) {
-          const newUser = new User();
-          newUser.username = username;
-          newUser.facebook = {
-            email: profile.emails[0].value,
-            name: `${profile.name.givenName} ${profile.name.familyName}`,
-            id: profile.id,
-            token: accessToken
-          };
-          return newUser.save().then(userSaved => done(null, userSaved));
-        }
-        return done(null, user);
-      })
-      .catch((err) => {
-          err = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
-        return done(err);
-      });
-  }
-));
 
 /**
  * @swagger

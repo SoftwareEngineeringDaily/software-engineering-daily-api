@@ -31,10 +31,6 @@ const envVarsSchema = Joi.object({
     .description('Mongo DB test host url'),
   MONGO_PORT: Joi.number()
     .default(27017),
-  FACEBOOK_ID: Joi.string().required()
-    .description('Facbook application id'),
-  FACEBOOK_SECRET: Joi.string().required()
-    .description('Facebook application secret'),
   MAILCHIMP_KEY: Joi.string().required()
     .description('Mailchimp API key'),
   MAILCHIMP_LIST_ID: Joi.string().required()
@@ -64,10 +60,6 @@ const config = {
     host: envVars.MONGO_HOST,
     test: envVars.MONGO_HOST_TEST,
     port: envVars.MONGO_PORT
-  },
-  facebook: {
-    clientID: envVars.FACEBOOK_ID,
-    clientSecret: envVars.FACEBOOK_SECRET
   },
   mailchimp: {
     mailchimpKey: envVars.MAILCHIMP_KEY,
