@@ -279,7 +279,7 @@ function signS3AvatarUpload(req, res, next) {
       return next(error);
     }
   };
-  signS3('sd-profile-pictures', fileType, newFileName, cbSuccess, cbError);
+  signS3(config.aws.profilePicBucketName, fileType, newFileName, cbSuccess, cbError);
 }
 
 /**
