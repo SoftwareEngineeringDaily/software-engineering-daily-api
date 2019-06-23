@@ -2,6 +2,7 @@ import httpStatus from 'http-status';
 import Company from '../models/company.model';
 import APIError from '../helpers/APIError';
 import { signS3 } from '../helpers/s3';
+import config from '../../config/config';
 
 export default {
   list: async (req, res, next) => {
@@ -60,7 +61,7 @@ export default {
         return next(error);
       }
     };
-    signS3('sd-profile-pictures', fileType, newFileName, cbSuccess, cbError);
+    signS3(config.aws.profilePicBucketName, fileType, newFileName, cbSuccess, cbError);
   },
   update: async (req, res, next) => {
     try {
