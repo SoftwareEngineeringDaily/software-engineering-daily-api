@@ -38,7 +38,9 @@ const envVarsSchema = Joi.object({
   RECAPTCHA_SITE_KEY: Joi.string().required()
     .description('Recaptcha site key'),
   RECAPTCHA_SECRET_KEY: Joi.string().required()
-    .description('Recaptcha secret key')
+    .description('Recaptcha secret key'),
+  AWS_PROFILE_PIC_BUCKET_NAME: Joi.string().required()
+    .description('S3 bucket for storing profile pictures')
 }).unknown()
   .required();
 
@@ -68,6 +70,9 @@ const config = {
   recaptcha: {
     siteKey: envVars.RECAPTCHA_SITE_KEY,
     secretKey: envVars.RECAPTCHA_SECRET_KEY
+  },
+  aws: {
+    profilePicBucketName: envVars.AWS_PROFILE_PIC_BUCKET_NAME
   }
 };
 
