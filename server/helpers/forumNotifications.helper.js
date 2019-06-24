@@ -31,8 +31,8 @@ async function sendForumNotificationEmail({ threadId, content, userWhoReplied })
     const contentSummary = content.substr(0, 50);
     const msg = {
       to: email,
-      from: 'no-reply@softwaredaily.com',
-      subject: 'Someone commented on your thread @SoftwareDaily',
+      from: config.email.fromAddress,
+      subject: 'Someone commented on your thread',
       text: `${userDesc} commented in your thread: ${config.baseUrl}/forum/${threadId}`,
       html: `${userDesc} commented on your post.
         <br />
@@ -74,8 +74,8 @@ async function sendReplyNotificationEmail({
     const contentSummary = content.substr(0, 50);
     const msg = {
       to: email,
-      from: 'no-reply@softwaredaily.com',
-      subject: 'Someone replied to you in the SoftwareDaily Forum',
+      from: config.email.fromAddress,
+      subject: 'Someone replied to you in the Forum',
       text: `${userDesc} replied to your comment: ${config.baseUrl}/forum/${threadId}`,
       html: `${userDesc} replied to your comment.
         <br />
@@ -106,8 +106,8 @@ async function sendMentionsNotificationEmail({
         const { email } = userToEmail;
         const msg = {
           to: email,
-          from: 'no-reply@softwaredaily.com',
-          subject: 'Someone mentioned you in a thread @SoftwareDaily',
+          from: config.email.fromAddress,
+          subject: 'Someone mentioned you in a thread',
           text: `${userDesc} mentioned you: ${config.baseUrl}/forum/${threadId}`,
           html: `${userDesc} mentioned you.
           <br />

@@ -191,48 +191,17 @@ function list(req, res, next) {
  */
 
 function recommendations(req, res) {
-  // const numberOfRecommendations = 10;
+  // Raccoon recommendations were removed, so we return empty list for now
   res.json([]);
-  /*
-  raccoon
-    .recommendFor(req.user._id.toString(), numberOfRecommendations)
-    .then((recommendationsFound) => {
-      const ids = recommendationsFound.map(rec =>
-          //eslint-disable-line
-          mongoose.Types.ObjectId(rec) //eslint-disable-line
-      ); //eslint-disable-line
-      return Post.find({ _id: { $in: ids } }).populate('thread').lean();
-    })
-    .then(posts =>
-      //eslint-disable-line
-      res.json(getAdFreePostsIfSubscribed(posts, req.fullUser, next)))
-    .catch((e) => {
-      next(e);
-    });
-    */
 }
 
 function upvote(req, res, next) {
-  /*
-  const userIdString = req.user._id.toString();
-  const postIdString = req.post._id.toString();
-  if (req.liked) {
-    // raccoon.liked(userIdString, postIdString);
-  } else if (req.unliked) {
-    // raccoon.unliked(userIdString, postIdString);
-  }
-  */
+  // Raccoon recommendations were removed, vote logic moved to vote controller
   next();
 }
 
 function downvote(req, res, next) {
-  /*
-  if (req.undisliked) {
-    // raccoon.undisliked(req.user._id.toString(), req.post._id.toString());
-  } else if (req.disliked) {
-    // raccoon.disliked(req.user._id.toString(), req.post._id.toString());
-  }
-  */
+  // Raccoon recommendations were removed, vote logic moved to vote controller
   next();
 }
 

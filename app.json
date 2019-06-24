@@ -47,6 +47,9 @@
     },
     "RECAPTCHA_SECRET_KEY": {
       "required": true
+    },
+    "EMAIL_FROM_ADDRESS": {
+      "required": true
     }
   },
   "formation": {
