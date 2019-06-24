@@ -4,6 +4,7 @@ import Job from '../models/job.model';
 import APIError from '../helpers/APIError';
 import sgMail from '../helpers/mail';
 import transform from '../helpers/job.helper';
+import config from '../../config/config';
 
 require('babel-polyfill');
 
@@ -217,7 +218,7 @@ export default {
 
       const msg = {
         to: job.applicationEmailAddress,
-        from: 'no-reply@softwaredaily.com',
+        from: config.email.fromAddress,
         subject: `Job Application : ${job.title}`,
         text: req.body.coveringLetter,
         attachments: [
