@@ -185,7 +185,7 @@ function requestPasswordReset(req, res, next) {
         // TODO: throttle how many emails we send to same email per time.
         const msg = {
           to: email,
-          from: 'no-reply@softwaredaily.com',
+          from: config.email.fromAddress,
           subject: 'Password reset email',
           text: `Reset your password here ${config.baseUrl}/#/regain-account/${secretKey}/${
             resetPass._id

@@ -9,7 +9,6 @@ const envVarsSchema = Joi.object({
     .allow(['development', 'production', 'test', 'provision'])
     .default('development'),
   BASE_URL: Joi.string()
-    // .allow(['https://www.softwaredaily.com', 'http://localhost:4040'])
     .default('https://www.softwaredaily.com'),
   EVENTS_API_BASE_URL: Joi.string().required(),
   SEND_GRID_KEY: Joi.string().required(),
@@ -40,7 +39,9 @@ const envVarsSchema = Joi.object({
   RECAPTCHA_SECRET_KEY: Joi.string().required()
     .description('Recaptcha secret key'),
   AWS_PROFILE_PIC_BUCKET_NAME: Joi.string().required()
-    .description('S3 bucket for storing profile pictures')
+    .description('S3 bucket for storing profile pictures'),
+  EMAIL_FROM_ADDRESS: Joi.string().required()
+    .description('Email address listed in FROM section of emails')
 }).unknown()
   .required();
 
@@ -73,6 +74,9 @@ const config = {
   },
   aws: {
     profilePicBucketName: envVars.AWS_PROFILE_PIC_BUCKET_NAME
+  },
+  email: {
+    fromAddress: envVars.EMAIL_FROM_ADDRESS
   }
 };
 
