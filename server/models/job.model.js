@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
+import config from '../../config/config';
 
 /**
  * @swagger
@@ -114,4 +115,4 @@ const JobSchema = new mongoose.Schema({
   }
 });
 
-export default mongoose.model('Job', JobSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Job`, JobSchema);

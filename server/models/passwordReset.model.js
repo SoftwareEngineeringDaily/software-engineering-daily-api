@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import config from '../../config/config';
 
 const PasswordResetSchema = new mongoose.Schema({
   userId: {
@@ -34,4 +35,4 @@ PasswordResetSchema.statics = {
   }
 };
 
-export default mongoose.model('PasswordReset', PasswordResetSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}PasswordReset`, PasswordResetSchema);

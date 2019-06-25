@@ -4,6 +4,7 @@ import moment from 'moment';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Vote from './vote.model';
+import config from '../../config/config';
 
 const slug = require('mongoose-slug-generator');
 
@@ -272,4 +273,4 @@ PostSchema.statics = {
 
 PostSchema.index({ 'title.rendered': 'text', 'content.rendered': 'text' });
 
-export default mongoose.model('Post', PostSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Post`, PostSchema);

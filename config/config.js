@@ -30,6 +30,8 @@ const envVarsSchema = Joi.object({
     .description('Mongo DB test host url'),
   MONGO_PORT: Joi.number()
     .default(27017),
+  MONGO_COLLECTION_PREFIX: Joi.string().default('')
+    .description('Prefix used in all collection names'),
   MAILCHIMP_KEY: Joi.string().required()
     .description('Mailchimp API key'),
   MAILCHIMP_LIST_ID: Joi.string().required()
@@ -62,7 +64,8 @@ const config = {
   mongo: {
     host: envVars.MONGO_HOST,
     test: envVars.MONGO_HOST_TEST,
-    port: envVars.MONGO_PORT
+    port: envVars.MONGO_PORT,
+    collectionPrefix: envVars.MONGO_COLLECTION_PREFIX ? `${envVars.MONGO_COLLECTION_PREFIX}-` : ''
   },
   mailchimp: {
     mailchimpKey: envVars.MAILCHIMP_KEY,

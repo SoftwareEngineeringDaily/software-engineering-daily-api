@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
+import config from '../../config/config';
 
 const feedItemSchema = new Schema(); // TODO: replace with proper import
 const FeedSchema = new Schema({
@@ -9,4 +10,4 @@ const FeedSchema = new Schema({
   feedItems: [feedItemSchema]
 });
 
-export default mongoose.model('Feed', FeedSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Feed`, FeedSchema);

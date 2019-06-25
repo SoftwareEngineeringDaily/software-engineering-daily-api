@@ -2,6 +2,7 @@ import Promise from 'bluebird';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
+import config from '../../config/config';
 
 /**
  * @swagger
@@ -100,4 +101,4 @@ ListenedSchema.statics = {
   }
 };
 
-export default mongoose.model('Listened', ListenedSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Listened`, ListenedSchema);

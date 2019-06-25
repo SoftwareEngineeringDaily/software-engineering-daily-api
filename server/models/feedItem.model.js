@@ -1,5 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import Vote from './vote.model';
+import config from '../../config/config';
 
 const FeedItemSchema = new Schema({
   user: {
@@ -79,7 +80,7 @@ FeedItemSchema.statics = {
 
 };
 
-export default mongoose.model('FeedItem', FeedItemSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}FeedItem`, FeedItemSchema);
 
 // Can have the frontend interweave the form posts .. nope.catch((
 

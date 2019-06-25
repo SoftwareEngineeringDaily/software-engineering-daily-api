@@ -1,5 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import Vote from './vote.model';
+import config from '../../config/config';
 /**
  * @swagger
  * definitions:
@@ -110,4 +111,4 @@ RelatedLinkSchema.statics = {
 RelatedLinkSchema.index({ url: 'text' });
 
 exports.RelatedLinkSchema = RelatedLinkSchema;
-export default mongoose.model('RelatedLink', RelatedLinkSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}RelatedLink`, RelatedLinkSchema);

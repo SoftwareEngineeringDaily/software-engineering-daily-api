@@ -1,5 +1,5 @@
-
 import mongoose, { Schema } from 'mongoose';
+import config from '../../config/config';
 
 const CompanySchema = new mongoose.Schema({
   companyName: {
@@ -46,4 +46,4 @@ const CompanySchema = new mongoose.Schema({
   }
 });
 
-export default mongoose.model('Company', CompanySchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Company`, CompanySchema);
