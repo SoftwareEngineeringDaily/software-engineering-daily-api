@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import config from '../../config/config';
 
 const slug = require('mongoose-slug-generator');
 
@@ -16,4 +17,4 @@ const TopicSchema = new mongoose.Schema({
 });
 
 // Export the model
-module.exports = mongoose.model('Topic', TopicSchema);
+module.exports = mongoose.model(`${config.mongo.collectionPrefix}-Topic`, TopicSchema);

@@ -12,6 +12,9 @@
     "MONGO_HOST_TEST": {
       "required": true
     },
+    "MONGO_COLLECTION_PREFIX": {
+      "required": true
+    },
     "AWS_ACCESS_KEY_ID": {
       "required": true
     },
