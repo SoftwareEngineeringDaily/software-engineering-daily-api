@@ -46,4 +46,4 @@ const CompanySchema = new mongoose.Schema({
   }
 });
 
-export default mongoose.model(`${config.mongo.collectionPrefix}-Company`, CompanySchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Company`, CompanySchema);

@@ -17,4 +17,4 @@ const TopicSchema = new mongoose.Schema({
 });
 
 // Export the model
-module.exports = mongoose.model(`${config.mongo.collectionPrefix}-Topic`, TopicSchema);
+module.exports = mongoose.model(`${config.mongo.collectionPrefix}Topic`, TopicSchema);

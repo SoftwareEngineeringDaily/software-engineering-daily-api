@@ -108,4 +108,4 @@ FavoriteSchema.statics = {
   }
 };
 
-export default mongoose.model(`${config.mongo.collectionPrefix}-Favorite`, FavoriteSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Favorite`, FavoriteSchema);

@@ -228,4 +228,4 @@ CommentSchema.statics = {
 // Indexes
 CommentSchema.index({ content: 'text' });
 
-export default mongoose.model(`${config.mongo.collectionPrefix}-Comment`, CommentSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Comment`, CommentSchema);

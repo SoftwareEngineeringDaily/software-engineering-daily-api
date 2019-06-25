@@ -101,4 +101,4 @@ ListenedSchema.statics = {
   }
 };
 
-export default mongoose.model(`${config.mongo.collectionPrefix}-Listened`, ListenedSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Listened`, ListenedSchema);

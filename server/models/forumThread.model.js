@@ -132,4 +132,4 @@ ForumThreadSchema.statics = {
   */
 };
 
-export default mongoose.model(`${config.mongo.collectionPrefix}-ForumThread`, ForumThreadSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}ForumThread`, ForumThreadSchema);

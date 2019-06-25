@@ -273,4 +273,4 @@ PostSchema.statics = {
 
 PostSchema.index({ 'title.rendered': 'text', 'content.rendered': 'text' });
 
-export default mongoose.model(`${config.mongo.collectionPrefix}-Post`, PostSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Post`, PostSchema);

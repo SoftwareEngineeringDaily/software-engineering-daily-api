@@ -24,4 +24,4 @@ const SubscriptionSchema = new mongoose.Schema({
   // TODO: date expired???
 });
 
-export default mongoose.model(`${config.mongo.collectionPrefix}-Subscription`, SubscriptionSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Subscription`, SubscriptionSchema);

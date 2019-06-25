@@ -59,4 +59,4 @@ TagSchema.statics = {
 /**
  * @typedef Tag
  */
-export default mongoose.model(`${config.mongo.collectionPrefix}-Tag`, TagSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Tag`, TagSchema);

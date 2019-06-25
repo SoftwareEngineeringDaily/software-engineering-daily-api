@@ -121,4 +121,4 @@ VoteSchema.statics = {
 /**
  * @typedef Vote
  */
-export default mongoose.model(`${config.mongo.collectionPrefix}-Vote`, VoteSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Vote`, VoteSchema);

@@ -111,4 +111,4 @@ RelatedLinkSchema.statics = {
 RelatedLinkSchema.index({ url: 'text' });
 
 exports.RelatedLinkSchema = RelatedLinkSchema;
-export default mongoose.model(`${config.mongo.collectionPrefix}-RelatedLink`, RelatedLinkSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}RelatedLink`, RelatedLinkSchema);

@@ -115,4 +115,4 @@ const JobSchema = new mongoose.Schema({
   }
 });
 
-export default mongoose.model(`${config.mongo.collectionPrefix}-Job`, JobSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Job`, JobSchema);

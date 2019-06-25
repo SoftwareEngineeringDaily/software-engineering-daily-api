@@ -176,4 +176,4 @@ UserSchema.statics = {
 /**
  * @typedef User
  */
-export default mongoose.model(`${config.mongo.collectionPrefix}-User`, UserSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}User`, UserSchema);

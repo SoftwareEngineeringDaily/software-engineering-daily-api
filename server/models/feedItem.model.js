@@ -80,7 +80,7 @@ FeedItemSchema.statics = {
 
 };
 
-export default mongoose.model(`${config.mongo.collectionPrefix}-FeedItem`, FeedItemSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}FeedItem`, FeedItemSchema);
 
 // Can have the frontend interweave the form posts .. nope.catch((
 

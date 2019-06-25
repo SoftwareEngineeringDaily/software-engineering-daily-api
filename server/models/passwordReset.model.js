@@ -35,4 +35,4 @@ PasswordResetSchema.statics = {
   }
 };
 
-export default mongoose.model(`${config.mongo.collectionPrefix}-PasswordReset`, PasswordResetSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}PasswordReset`, PasswordResetSchema);

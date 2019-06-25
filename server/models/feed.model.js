@@ -10,4 +10,4 @@ const FeedSchema = new Schema({
   feedItems: [feedItemSchema]
 });
 
-export default mongoose.model(`${config.mongo.collectionPrefix}-Feed`, FeedSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Feed`, FeedSchema);
