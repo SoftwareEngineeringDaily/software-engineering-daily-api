@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Post from './post.model';
+import config from '../../config/config';
 
 /**
  * todo: once clients migrated "bookmark" - do final refactor of code and db migration
@@ -107,4 +108,4 @@ FavoriteSchema.statics = {
   }
 };
 
-export default mongoose.model('Favorite', FavoriteSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Favorite`, FavoriteSchema);

@@ -2,6 +2,7 @@ import Promise from 'bluebird';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
+import config from '../../config/config';
 
 /**
  * @swagger
@@ -120,4 +121,4 @@ VoteSchema.statics = {
 /**
  * @typedef Vote
  */
-export default mongoose.model('Vote', VoteSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Vote`, VoteSchema);

@@ -2,6 +2,7 @@ import Promise from 'bluebird';
 import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
+import config from '../../config/config';
 
 /**
  * TODO: Add swagger doc
@@ -58,4 +59,4 @@ TagSchema.statics = {
 /**
  * @typedef Tag
  */
-export default mongoose.model('Tag', TagSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Tag`, TagSchema);

@@ -3,6 +3,7 @@ import mongoose, { Schema } from 'mongoose';
 import httpStatus from 'http-status';
 import bcrypt from 'bcrypt-nodejs';
 import APIError from '../helpers/APIError';
+import config from '../../config/config';
 
 /**
  * User Schema
@@ -175,4 +176,4 @@ UserSchema.statics = {
 /**
  * @typedef User
  */
-export default mongoose.model('User', UserSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}User`, UserSchema);

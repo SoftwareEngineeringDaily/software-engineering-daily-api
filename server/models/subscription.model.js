@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
+import config from '../../config/config';
 
 /**
  * Schema
@@ -23,4 +24,4 @@ const SubscriptionSchema = new mongoose.Schema({
   // TODO: date expired???
 });
 
-export default mongoose.model('Subscription', SubscriptionSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Subscription`, SubscriptionSchema);

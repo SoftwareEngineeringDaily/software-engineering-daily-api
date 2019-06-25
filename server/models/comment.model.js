@@ -5,6 +5,7 @@ import mongoose, { Schema } from 'mongoose';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Vote from './vote.model';
+import config from '../../config/config';
 /**
  * @swagger
  * definitions:
@@ -227,4 +228,4 @@ CommentSchema.statics = {
 // Indexes
 CommentSchema.index({ content: 'text' });
 
-export default mongoose.model('Comment', CommentSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}Comment`, CommentSchema);

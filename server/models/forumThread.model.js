@@ -3,6 +3,7 @@ import moment from 'moment';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Vote from './vote.model';
+import config from '../../config/config';
 
 const ForumThreadSchema = new mongoose.Schema({
   id: String,
@@ -131,4 +132,4 @@ ForumThreadSchema.statics = {
   */
 };
 
-export default mongoose.model('ForumThread', ForumThreadSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}ForumThread`, ForumThreadSchema);
