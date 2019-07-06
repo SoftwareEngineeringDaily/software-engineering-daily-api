@@ -221,7 +221,7 @@ PostSchema.statics = {
       });
   },
   addVotesForUserToPosts(posts, userId) {
-    const postIds = posts.map((post) => { //eslint-disable-line
+    const postIds = posts.map((post) => {
       return post._id;
     });
     return Vote.find({
