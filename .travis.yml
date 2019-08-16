@@ -14,13 +14,13 @@ git:
 stages:
   - test
   - name: docker
-    if: (branch = develop AND type = push) OR (branch = ci-build)
+    if: (branch = develop AND type = push) OR (branch = master AND type = push)
 jobs:
   include:
     - stage: test
       script:
         - npm run test
     - stage: docker
-      script: 
+      script:
         - ./devops/build-api.sh
         - cd devops; ./build-mongodb.sh
