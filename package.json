@@ -10,20 +10,18 @@
     "npm": "5.5.1"
   },
   "scripts": {
-    "launch": "npm run build && node dist/index.js",
-    "start": "gulp serve",
-    "staging-deploy": "git push staging develop:master",
-    "deploy": "git push production master:master",
-    "start:debug": "cross-env DEBUG=software-engineering-daily-api:* npm run start",
     "build": "gulp",
+    "launch": "npm run build && node dist/index.js",
     "lint": "esw *.js server config --color",
     "lint:watch": "npm run lint -- --watch",
     "precommit": "lint-staged",
+    "report-coverage": "coveralls < ./coverage/lcov.info",
+    "start": "gulp serve",
+    "start:debug": "cross-env DEBUG=software-engineering-daily-api:* npm run start",
     "test": "cross-env NODE_ENV=test ./node_modules/.bin/mocha --ui bdd --reporter spec --colors --compilers js:babel-core/register --require babel-polyfill server/tests --recursive",
     "test:watch": "npm run test -- --watch",
     "test:coverage": "cross-env NODE_ENV=test ./node_modules/.bin/istanbul cover _mocha -- --ui bdd --reporter spec --colors --compilers js:babel-core/register --require babel-polyfill server/tests --recursive",
-    "test:check-coverage": "npm run test:coverage && istanbul check-coverage",
-    "report-coverage": "coveralls < ./coverage/lcov.info"
+    "test:check-coverage": "npm run test:coverage && istanbul check-coverage"
   },
   "lint-staged": {
     "*.js": [

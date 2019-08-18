@@ -4,7 +4,6 @@ node_js:
 sudo: required
 services:
   - mongodb
-  - redis-server
   - docker
 cache:
   directories:
@@ -19,7 +18,9 @@ jobs:
   include:
     - stage: test
       script:
+        - npm run lint
         - npm run test
+        - npm run build
     - stage: docker
       script:
         - ./devops/build-api.sh
