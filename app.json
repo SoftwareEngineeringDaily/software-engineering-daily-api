@@ -33,9 +33,6 @@
     "SEND_GRID_KEY": {
       "required": true
     },
-    "EVENTS_API_BASE_URL": {
-      "required": true
-    },
     "MAILCHIMP_KEY": {
       "required": true
     },

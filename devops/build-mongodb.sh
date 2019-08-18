@@ -5,13 +5,7 @@ if [ -f .env ]; then
 	source .env
 fi
 
-if [[ -z $1 ]]; then
-	TAG="develop"
-else
-	TAG=$1
-fi
-
-DOCKER_IMAGE="softwaredaily/sedaily-mongo:$TAG"
+DOCKER_IMAGE="softwaredaily/sedaily-mongo"
 
 mongodump --host $MONGO_CI_HOST --port $MONGO_CI_PORT --username $MONGO_CI_USER --password $MONGO_CI_PASS -d $MONGO_CI_DB --excludeCollection users --out ./backup
 

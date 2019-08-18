@@ -93,7 +93,7 @@ ForumThreadSchema.statics = {
   },
 
   addVotesForUserToEntities(entities, userId) {
-    const ids = entities.map((entity) => { //eslint-disable-line
+    const ids = entities.map((entity) => {
       return entity._id;
     });
     return Vote.find({

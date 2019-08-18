@@ -35,7 +35,7 @@ services:
       - mongo
       - redis
   mongo:
-    image: softwaredaily/sedaily-mongo:develop
+    image: softwaredaily/sedaily-mongo
     container_name: sedaily-mongo
     ports:
       - "27017:27017"
