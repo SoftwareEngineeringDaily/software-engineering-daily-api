@@ -18,7 +18,8 @@ function dumpAdminUser() {
 function dumpForumThreads() {
 	# remove all documents from forumthreadsCI collection
 	tmpFile=$(mktemp)
-	echo -e "use ${MONGO_CI_DB};\ndb.forumthreadsCI.remove({});" > ${tmpFile}
+	echo "use ${MONGO_CI_DB};" > ${tmpFile}
+	echo "db.forumthreadsCI.remove({});" >> ${tmpFile}
 	mongo --quiet --host ${MONGO_CI_HOST} --port ${MONGO_CI_PORT} --username ${MONGO_CI_USER} --password ${MONGO_CI_PASS} --authenticationDatabase ${MONGO_CI_DB} <${tmpFile}
 	rm ${tmpFile}
 
@@ -29,7 +30,9 @@ function dumpForumThreads() {
 
 	# set all authors to admin
 	tmpFile=$(mktemp)
-	echo -e "use ${MONGO_CI_DB};\ndb.forumthreadsCI.updateMany({}, {\$set: {author: ObjectId(\"5bf2d291955b3910513537ad\")}});" > ${tmpFile}
+	echo "use ${MONGO_CI_DB};" > ${tmpFile}
+	echo "user=db.users.findOne({email: \"forum_admin@softwaredaily.com\"})._id;" >> ${tmpFile}
+	echo "db.forumthreadsCI.updateMany({}, {\$set: {author: user}});" >> ${tmpFile}
 	mongo --quiet --host ${MONGO_CI_HOST} --port ${MONGO_CI_PORT} --username ${MONGO_CI_USER} --password ${MONGO_CI_PASS} --authenticationDatabase ${MONGO_CI_DB} <${tmpFile}
 	rm ${tmpFile}
 
