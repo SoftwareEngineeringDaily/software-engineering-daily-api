@@ -1,5 +1,7 @@
 // import mongoose from 'mongoose';
 
+
+import algoliasearch from 'algoliasearch';
 import Post from '../models/post.model';
 import {
   getAdFreeSinglePostIfSubscribed,
@@ -125,20 +127,20 @@ function list(req, res, next) {
     type = null,
     tags = null,
     categories = null,
-    search = null,
+    search: _search = null,
     transcripts = null,
     topic = null
   } = req.query;
 
   const query = {};
+
   if (limit) query.limit = limit;
   if (createdAtBefore) query.createdAtBefore = createdAtBefore;
   if (createdAfter) query.createdAfter = createdAfter;
   if (type) query.type = type;
   if (req.user) query.user = req.user;
-  if (search) query.search = search;
+  if (_search) query.search = _search;
   if (transcripts) query.transcripts = transcripts;
-
 
   if (tags) {
     query.tags = tags.split(',');
@@ -195,6 +197,77 @@ function recommendations(req, res) {
   res.json([]);
 }
 
+/**
+ * @swagger
+ * /posts:
+ *   get:
+ *     summary: Make algolia search request
+ *     description: Get posts based on algolia search query
+ *     tags: [post]
+ *     security: [] #indicates no authorization required to use route
+ *     parameters:
+ *       - $ref: '#/parameters/limit'
+ *       - in: query
+ *         name: query
+ *         type: string
+ *         format: date-time #All date-time format follow https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14
+ *         required: false
+ *         description: search term
+ *       - in: query
+ *         name: page
+ *         type: integer
+ *         format: int64
+ *         required: true
+ *         description: search page number
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           type: array
+ *           items:
+ *             $ref: '#/definitions/Post'
+ */
+
+function search(req, res, next) {
+  let isEnd = false;
+  let nextPage = 0;
+  let slugs = [];
+  const {
+    query = '',
+    page = 0,
+  } = req.query;
+
+  const client = algoliasearch(
+    process.env.ALGOLIA_APP_ID,
+    process.env.ALGOLIA_API_KEY,
+  );
+
+  const index = client.initIndex(process.env.ALGOLIA_POSTS_INDEX);
+  const searchQuery = {
+    query,
+    page,
+    hitsPerPage: 10,
+  };
+
+  index.search(searchQuery)
+    .then((reply) => {
+      nextPage = (page >= reply.nbPages) ? reply.nbPages : page + 1;
+      isEnd = (nextPage === reply.nbPages);
+      slugs = reply.hits.map(h => h.slug);
+
+      Post.list({ slugs })
+        .then((posts) => {
+          res.json({
+            posts: getAdFreePostsIfSubscribed(posts, req.fullUser, next),
+            isEnd,
+            nextPage
+          });
+        })
+        .catch(e => next(e));
+    })
+    .catch(e => next(e));
+}
+
 function upvote(req, res, next) {
   // Raccoon recommendations were removed, vote logic moved to vote controller
   next();
@@ -209,6 +282,7 @@ export default {
   load,
   get,
   list,
+  search,
   recommendations,
   downvote,
   upvote

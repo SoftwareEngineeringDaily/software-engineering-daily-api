@@ -135,6 +135,7 @@ PostSchema.statics = {
    * @returns {Promise<Post[]>}
    */
   list({
+    slugs = [],
     limit = 10,
     createdAtBefore = null,
     user = null,
@@ -159,6 +160,7 @@ PostSchema.statics = {
 
     if (tags.length > 0) query.tags = { $all: tags };
     if (categories.length > 0) query.categories = { $all: categories };
+    if (slugs.length > 0) query.slug = { $in: slugs };
     if (topic) query.topics = { $in: topic };
     if (search) {
       const titleSearch = {};
@@ -187,6 +189,7 @@ PostSchema.statics = {
     if (type === 'top') {
       sort = { score: -1 };
     }
+
     const queryPromise = this.find(query, this.standardSelectForFind)
       .populate('thread')
       .sort(sort)

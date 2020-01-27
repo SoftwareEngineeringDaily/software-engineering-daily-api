@@ -20,6 +20,13 @@ router.route('/')
     , postCtrl.list
   );
 
+router.route('/search')
+  .get(
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false })
+    , loadFullUser
+    , postCtrl.search
+  );
+
 router.route('/recommendations')
   .get(
     expressJwt({ secret: config.jwtSecret })
