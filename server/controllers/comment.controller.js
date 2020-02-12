@@ -105,10 +105,15 @@ function extractedNewMentions(comment, updatedMentions) {
 
 async function update(req, res, next) {
   const { comment, user } = req;
-  const { content, mentions } = req.body;
+  const { content, mentions, highlight } = req.body;
+
   if (comment && user) {
     if (comment.author._id.toString() !== user._id.toString()) {
       return res.status(401).json({ Error: 'Please login' });
+    }
+
+    if (highlight) {
+      comment.highlight = highlight;
     }
 
     if (mentions) {
@@ -131,6 +136,7 @@ async function update(req, res, next) {
 
     comment.content = content;
     comment.dateLastEdited = Date();
+
     return comment
       .save()
       .then((editedComment) => {
@@ -184,7 +190,7 @@ async function update(req, res, next) {
 async function create(req, res, next) {
   const { entityId } = req.params;
   const { parentCommentId, mentions } = req.body;
-  const { content, entityType } = req.body;
+  const { content, entityType, highlight } = req.body;
   const { user } = req;
 
   const comment = new Comment();
@@ -193,6 +199,10 @@ async function create(req, res, next) {
   if (mentions) {
     usersMentioned = await idsToUsers(mentions);
     comment.mentions = usersMentioned;
+  }
+
+  if (highlight) {
+    comment.highlight = highlight;
   }
 
   comment.rootEntity = entityId;
