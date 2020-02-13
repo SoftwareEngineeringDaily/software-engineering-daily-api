@@ -233,6 +233,23 @@ async function list(req, res, next) {
   }
 }
 
+async function listNames(req, res, next) {
+  try {
+    const query = User.find();
+
+    const users = await query
+      .where('name').regex(new RegExp(req.query.name, 'i'))
+      .where('name').ne('Software Engineer')
+      .limit(100)
+      .select('name')
+      .exec();
+
+    return res.json(users);
+  } catch (err) {
+    return next(err);
+  }
+}
+
 /**
  * @swagger
  * /users/me/bookmarked:
@@ -295,6 +312,7 @@ export default {
   get,
   me,
   list,
+  listNames,
   update,
   listBookmarked,
   requestPasswordReset,

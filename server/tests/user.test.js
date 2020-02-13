@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import request from 'supertest-as-promised';
 import httpStatus from 'http-status';
-import chai, { expect } from 'chai';
+import chai, { expect, assert } from 'chai';
 import app from '../../index';
 
 chai.config.includeStack = true;
@@ -60,6 +60,34 @@ describe('## User APIs', () => {
         .expect(httpStatus.NOT_FOUND)
         .then((res) => {
           expect(res.body.message).to.equal('Not Found');
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# GET /api/users/search', () => {
+    it('should get users list', (done) => {
+      request(app)
+        .get('/api/users/search?name=')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          assert(Array.isArray(res.body));
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# GET /api/users/search/names', () => {
+    it('should get users list', (done) => {
+      request(app)
+        .get('/api/users/search/names?name=')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          assert(Array.isArray(res.body));
           done();
         })
         .catch(done);
