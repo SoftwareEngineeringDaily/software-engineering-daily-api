@@ -44,6 +44,9 @@ const CommentSchema = new Schema({
     type: String,
     required: true
   },
+  highlight: {
+    type: String,
+  },
   score: { type: Number, default: 0 },
   dateCreated: {
     type: Date,
