@@ -78,6 +78,12 @@ const config = {
   },
   email: {
     fromAddress: envVars.EMAIL_FROM_ADDRESS
+  },
+  cron: {
+    RSS: {
+      time: '0 */1 * * * *',
+      timeZone: null
+    }
   }
 };
 

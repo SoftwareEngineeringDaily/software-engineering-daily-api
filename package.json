@@ -65,6 +65,7 @@
     "cookie-parser": "1.4.3",
     "cors": "2.8.4",
     "coveralls": "2.13.1",
+    "cron": "1.8.2",
     "cross-env": "5.0.5",
     "cz-conventional-changelog": "2.0.0",
     "debug": "3.0.1",
