@@ -22,6 +22,12 @@ router.route('/search')
     , userCtrl.list
   );
 
+router.route('/search/names')
+  .get(
+    expressJwt({ secret: config.jwtSecret })
+    , userCtrl.listNames
+  );
+
 router.route('/update-email-notiication-settings')
   .put(
     expressJwt({ secret: config.jwtSecret })
