@@ -14,4 +14,4 @@ class CronItem {
   }
 }
 
-module.exports = CronItem;
+export default CronItem;

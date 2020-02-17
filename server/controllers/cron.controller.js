@@ -1,10 +1,11 @@
-import rssPublic from '../crons/RSSPublic.cron';
+import rssPublic from '../crons/rssPublic.cron';
 
 const cronItems = [rssPublic];
 
 class CronJobs {
   constructor() {
     this.jobs = [];
+    this.initialStart = true;
     this.createJobs();
   }
 
@@ -16,11 +17,11 @@ class CronJobs {
   }
 
   start() {
-    console.log('Starting CronJobs');
     this.jobs.forEach((item) => {
       item.job.start();
-      if (item.runOnInit) item.callback();
+      if (item.runOnInit && this.initialStart) item.callback();
     });
+    this.initialStart = false; // run just on app start
   }
 
   pause() {
@@ -30,4 +31,4 @@ class CronJobs {
     });
   }
 }
-module.exports = CronJobs;
+export default CronJobs;
