@@ -1,9 +1,13 @@
 import { toXML } from 'jstoxml';
+import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import config from '../../config/config';
 import CronItem from '../helpers/cronItem.helper';
 import app from '../../config/express';
 import Post from '../models/post.model';
+
+
+const privateMp3URL = 'https://s3-us-west-2.amazonaws.com/sd-profile-pictures/adfree/';
 
 // RSS header
 const publicFeedConfig = {
@@ -52,6 +56,8 @@ const publicFeedConfig = {
     ]
   }
 };
+
+const privateFeedConfig = cloneDeep(publicFeedConfig);
 
 function decode(text) {
   return (text || '')
@@ -124,6 +130,39 @@ async function callback() {
         'itunes:explicit': false
       }
     });
+
+    const extractedFile = post.mp3.match(/\/traffic.libsyn.com\/sedaily\/(.*?).mp3/);
+
+    let privateMp3 = post.mp3;
+
+    if (extractedFile && extractedFile.length && extractedFile[1]) {
+      privateMp3 = `${privateMp3URL}${extractedFile[1]}_adfree.mp3`;
+    }
+
+    privateFeedConfig._content.channel.push({
+      item: {
+        'itunes:episodeType': 'full',
+        'itunes:episode': episode,
+        'itunes:season': seasonYear - moment(post.date_gmt).year(),
+        title: post.title.rendered,
+        description: `<![CDATA[${description || post.title.rendered}]]>`,
+        'itunes:image': {
+          _attrs: {
+            href: encode(post.mainImage)
+          }
+        },
+        link: encode(post.link),
+        enclosure: {
+          _attrs: {
+            type: 'audio/mpeg',
+            url: privateMp3
+          }
+        },
+        guid: parseInt(post.id, 10).toString(36),
+        pubDate: moment.utc(post.date_gmt).toDate(),
+        'itunes:explicit': false
+      }
+    });
   });
 
   const xmlOptions = {
@@ -131,16 +170,16 @@ async function callback() {
     indent: '  '
   };
 
-  const xml = toXML(publicFeedConfig, xmlOptions);
-  app.set('rssFeed', xml);
+  app.set('rssFeedPublic', toXML(publicFeedConfig, xmlOptions));
+  app.set('rssFeedPrivate', toXML(privateFeedConfig, xmlOptions));
 }
 
-const RSSPublic = {
-  name: 'RSSPublic',
+const rssFeed = {
+  name: 'rssFeed',
   time: config.cron.RSS.time,
   timeZone: config.cron.RSS.timeZone,
   runOnInit: true,
   callback,
 };
 
-export default new CronItem(RSSPublic);
+export default new CronItem(rssFeed);

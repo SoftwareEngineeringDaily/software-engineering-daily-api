@@ -1,4 +1,4 @@
-import rssPublic from '../crons/rssPublic.cron';
+import rssPublic from '../crons/rssFeed.cron';
 
 const cronItems = [rssPublic];
 
