@@ -3,11 +3,9 @@ import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import config from '../../config/config';
 import CronItem from '../helpers/cronItem.helper';
+import { getAdFreeMp3 } from '../helpers/mp3.helper';
 import app from '../../config/express';
 import Post from '../models/post.model';
-
-
-const privateMp3URL = 'https://s3-us-west-2.amazonaws.com/sd-profile-pictures/adfree/';
 
 // RSS header
 const publicFeedConfig = {
@@ -131,13 +129,7 @@ async function callback() {
       }
     });
 
-    const extractedFile = post.mp3.match(/\/traffic.libsyn.com\/sedaily\/(.*?).mp3/);
-
-    let privateMp3 = post.mp3;
-
-    if (extractedFile && extractedFile.length && extractedFile[1]) {
-      privateMp3 = `${privateMp3URL}${extractedFile[1]}_adfree.mp3`;
-    }
+    const privateMp3 = getAdFreeMp3(post.mp3);
 
     privateFeedConfig._content.channel.push({
       item: {
