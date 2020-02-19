@@ -19,6 +19,10 @@ import config from '../../config/config';
  *         type: string
  *         description: Related URL
  *         example: google.com
+ *       type:
+ *         type: string
+ *         description: Type of related content
+ *         example: link, episode
  *       clicks:
  *         type: number
  *         description: Number of clicks this url has received
@@ -41,6 +45,10 @@ const RelatedLinkSchema = new Schema({
   title: {
     type: String,
     required: true
+  },
+  type: {
+    type: String,
+    default: 'link',
   },
   image: { type: String },
   clicks: { type: Number, default: 0 },
