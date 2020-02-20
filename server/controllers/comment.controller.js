@@ -7,6 +7,7 @@ import Comment from '../models/comment.model';
 import User from '../models/user.model';
 import ForumThread from '../models/forumThread.model';
 import ForumNotifications from '../helpers/forumNotifications.helper';
+import { subscribePostFromEntity, notifySubscribersFromEntity } from '../controllers/postSubscription.controller';
 /*
 * Load comment and append to req.
 */
@@ -187,6 +188,21 @@ async function update(req, res, next) {
  *         $ref: '#/responses/NotFound'
  */
 
+async function subscribeAndNotify(entityId, user) {
+  const post = await subscribePostFromEntity(entityId, user);
+
+  const payload = {
+    notification: {
+      title: `New comment from @${user.username}`,
+      body: post.title.rendered
+    },
+    type: 'comment',
+    entity: post._id
+  };
+
+  await notifySubscribersFromEntity(entityId, user, payload);
+}
+
 async function create(req, res, next) {
   const { entityId } = req.params;
   const { parentCommentId, mentions } = req.body;
@@ -214,43 +230,42 @@ async function create(req, res, next) {
 
   comment
     .save()
-    .then((commentSaved) => {
+    .then(async (commentSaved) => {
+      // don't wait
+      subscribeAndNotify(entityId, user);
+
       // TODO: result key is not consistent with other responses, consider changing this
-      if (entityType) {
-        switch (entityType.toLowerCase()) {
-          case 'forumthread':
+      if (entityType && entityType.toLowerCase() === 'forumthread') {
+        // TODO: move these so we also email for posts:
+        // get entity outside of this function and then pass down:
+        // if (parentCommentId) {
+        //   // TODO: don't email if you are the author and replying to own stuff:
+        //   ForumNotifications.sendReplyNotificationEmail({
+        //     content,
+        //     threadId: entityId,
+        //     userWhoReplied: user
+        //   });
+        // }
 
-            // TODO: move these so we also email for posts:
-            // get entity outside of this function and then pass down:
-            if (parentCommentId) {
-              // TODO: don't email if you are the author and replying to own stuff:
-              ForumNotifications.sendReplyNotificationEmail({
-                content,
-                threadId: entityId,
-                userWhoReplied: user
-              });
-            }
+        // if (mentions) {
+        //   ForumNotifications.sendMentionsNotificationEmail({
+        //     parentCommentId,
+        //     content,
+        //     threadId: entityId,
+        //     userWhoReplied: user,
+        //     usersMentioned
+        //   });
+        // }
 
-            if (mentions) {
-              ForumNotifications.sendMentionsNotificationEmail({
-                parentCommentId,
-                content,
-                threadId: entityId,
-                userWhoReplied: user,
-                usersMentioned
-              });
-            }
-
-            ForumNotifications.sendForumNotificationEmail({
-              threadId: entityId,
-              content,
-              userWhoReplied: user
-            });
-            return ForumThread.increaseCommentCount(entityId).then(() =>
-              res.status(201).json({ result: commentSaved }));
-          default:
-        }
+        // ForumNotifications.sendForumNotificationEmail({
+        //   threadId: entityId,
+        //   content,
+        //   userWhoReplied: user
+        // });
+        return ForumThread.increaseCommentCount(entityId).then(() =>
+          res.status(201).json({ result: commentSaved }));
       }
+
       return res.status(201).json({ result: commentSaved });
     })
     .catch(err => next(err));

@@ -19,4 +19,4 @@ const postSubscriptionSchema = new mongoose.Schema({
   }
 });
 
-export default mongoose.model(`${config.mongo.collectionPrefix}Subscription`, postSubscriptionSchema);
+export default mongoose.model(`${config.mongo.collectionPrefix}PostSubscription`, postSubscriptionSchema);
