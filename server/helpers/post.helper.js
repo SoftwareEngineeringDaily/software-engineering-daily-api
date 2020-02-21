@@ -1,34 +1,26 @@
-import config from '../../config/config';
+import { getAdFreeMp3 } from '../helpers/mp3.helper';
+import { getPrivateRss } from '../helpers/rss.helper';
 
-function replaceWithAdFree(post) {
-  try {
-    const originalMP3Split = post.mp3.split('/');
-    if (originalMP3Split.length > 0) {
-      const fileName = originalMP3Split[originalMP3Split.length - 1];
-      const newFileName = fileName.replace('.mp3', '_adfree.mp3');
-      post.mp3 = config.adFreeURL + newFileName; // eslint-disable-line
-    }
-  } catch (e) {
-    console.log('Error, could not get mp3', post, e); // eslint-disable-line
-    // next(e); // We don't want to do this since it could still return posts.
-  }
-  return post;
+function replaceWithAdFree(post, fullUser) {
+  post.mp3 = getAdFreeMp3(post.mp3); // eslint-disable-line
+  post.rss = getPrivateRss(fullUser) // eslint-disable-line
 }
 
-function getAdFreeSinglePostIfSubscribed(post, fullUser, next) {
+function addPostData(post, fullUser) {
+  post.rss = '/rss/public/all'; // eslint-disable-line
   if (fullUser && fullUser.subscription && fullUser.subscription.active) {
-    return replaceWithAdFree(post, next);
+    replaceWithAdFree(post, fullUser);
   }
   return post;
 }
 
-function getAdFreePostsIfSubscribed(posts, fullUser, next) {
+function getAdFreePostsIfSubscribed(posts, fullUser) {
   if (fullUser && fullUser.subscription && fullUser.subscription.active) {
     // Here we do this so we can fetch subscritions:
-    const _posts = posts.map(post => replaceWithAdFree(post, next));
+    const _posts = posts.map(post => addPostData(post, fullUser));
     return _posts;
   }
   return posts;
 }
 
-export { replaceWithAdFree, getAdFreeSinglePostIfSubscribed, getAdFreePostsIfSubscribed };
+export { replaceWithAdFree, addPostData, getAdFreePostsIfSubscribed };

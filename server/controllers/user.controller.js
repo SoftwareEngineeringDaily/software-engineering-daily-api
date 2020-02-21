@@ -7,6 +7,7 @@ import Favorite from '../models/favorite.model';
 import User from '../models/user.model';
 import PasswordReset from '../models/passwordReset.model';
 import config from '../../config/config';
+import { getPrivateRss } from '../helpers/rss.helper';
 
 const sgMail = require('@sendgrid/mail');
 // TODO: move this out of here, probably in it's own file:
@@ -48,6 +49,7 @@ function me(req, res, next) {
   User.get(req.user._id)
     .then((user) => {
       user.password = null; // eslint-disable-line
+      user.rss = getPrivateRss(user); // eslint-disable-line
       return res.json(user);
     })
     .catch(e => next(e));

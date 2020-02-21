@@ -1,8 +1,17 @@
 import httpStatus from 'http-status';
+import mongoose from 'mongoose';
 import stripe from '../helpers/stripe.helper';
 import APIError from '../helpers/APIError';
 import Subscription from '../models/subscription.model';
 import User from '../models/user.model';
+
+async function isActive(id) {
+  if (!id || typeof id !== 'string') return false;
+  if (!mongoose.Types.ObjectId.isValid(id)) return false;
+  const subscription = await Subscription.findById(id).lean();
+  if (!subscription) return false;
+  return subscription.active;
+}
 
 function cancel(req, res, next) {
   if (req.fullUser && req.fullUser.subscription) {
@@ -151,4 +160,9 @@ function create(req, res, next) {
   return null;
 }
 
-export default { create, cancel, subscriptionDeletedWebhook };
+export default {
+  create,
+  cancel,
+  subscriptionDeletedWebhook,
+  isActive
+};

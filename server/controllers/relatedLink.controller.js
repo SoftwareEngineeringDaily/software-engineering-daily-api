@@ -73,13 +73,16 @@ function remove(req, res, next) {
 function create(req, res, next) {
   const { user } = req;
   const { postId } = req.params;
-  const { url, title } = req.body;
+  const { url, title, type = 'link' } = req.body;
 
   const relatedLink = new RelatedLink();
+
   relatedLink.url = url;
   relatedLink.title = title;
+  relatedLink.type = type;
   relatedLink.post = postId;
   relatedLink.author = user._id;
+
   relatedLink
     .save()
     .then(relatedLink1 => res.status(201).json(relatedLink1))
