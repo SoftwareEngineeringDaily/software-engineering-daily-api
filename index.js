@@ -1,15 +1,18 @@
 // adding comment
 import mongoose from 'mongoose';
 import util from 'util';
-// import SocketIO from 'socket.io';
+import SocketIO from 'socket.io';
 import Http from 'http';
 
 // config should be imported before importing any other file
 import config from './config/config';
 import appExpress from './config/express';
+import websocket from './config/websocket';
 
 const app = Http.createServer(appExpress);
-// const io = SocketIO(app);
+const io = SocketIO(app);
+
+websocket.setServer(io);
 
 const debug = require('debug')('express-mongoose-es6-rest-api:index');
 

@@ -1,5 +1,6 @@
 import { queue } from 'async';
 import Notification from '../models/notification.model';
+import { ws } from '../../config/websocket';
 
 // queue for low priority
 const notificationSaveQueue = queue(saveNotification, 1);
@@ -27,6 +28,7 @@ async function saveNotification(task, next) {
 
 function sendNotification(notification, next) {
   console.log(notification, next);
+  console.log(`ws: ${typeof ws}`);
 }
 
 
