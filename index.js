@@ -6,6 +6,11 @@ import util from 'util';
 import config from './config/config';
 import app from './config/express';
 
+// cron jobs control
+import Cron from './server/controllers/cron.controller';
+
+const cron = new Cron();
+
 const debug = require('debug')('express-mongoose-es6-rest-api:index');
 
 // make bluebird default Promise
@@ -28,6 +33,12 @@ mongoose.connect(mongoUri, {
 });
 mongoose.connection.on('error', () => {
   throw new Error(`unable to connect to database: ${mongoUri}`);
+});
+mongoose.connection.on('connected', () => {
+  cron.start();
+});
+mongoose.connection.on('disconnected', () => {
+  cron.pause();
 });
 
 // print mongoose logs in dev env
