@@ -35,7 +35,7 @@ const publicFeedConfig = {
       {
         'itunes:image': {
           _attrs: {
-            href: 'http://softwaredaily.wpengine.com/wp-content/uploads/powerpress/SED_square_solid_bg.png'
+            href: 'https://www.softwaredaily.com/static/sedailywords.png'
           }
         }
       },
