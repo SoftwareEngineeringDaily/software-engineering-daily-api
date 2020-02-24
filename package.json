@@ -89,7 +89,7 @@
     "http-status": "1.0.1",
     "istanbul": "1.0.0-alpha.2",
     "joi": "10.6.0",
-    "jsdom": "^16.2.0",
+    "jsdom": "^15.2.1",
     "jsonwebtoken": "8.0.0",
     "lodash": "^4.17.15",
     "method-override": "2.3.9",
