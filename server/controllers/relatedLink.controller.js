@@ -1,4 +1,9 @@
+import request from 'request';
+import { getMetadata } from 'page-metadata-parser';
+import jsdom from 'jsdom';
 import RelatedLink from '../models/relatedLink.model';
+
+const { JSDOM } = jsdom;
 
 /**
  * @swagger
@@ -73,20 +78,35 @@ function remove(req, res, next) {
 function create(req, res, next) {
   const { user } = req;
   const { postId } = req.params;
-  const { url, title, type = 'link' } = req.body;
+  const { url, type = 'link' } = req.body;
 
-  const relatedLink = new RelatedLink();
+  request(url, { timeout: 15000 }, (error, reply) => {
+    // If there's an error or nothing
+    // let's remember that
+    if (error || !reply.body || reply.statusCode !== 200) {
+      return next(error);
+    }
 
-  relatedLink.url = url;
-  relatedLink.title = title;
-  relatedLink.type = type;
-  relatedLink.post = postId;
-  relatedLink.author = user._id;
+    const { body } = reply;
+    const { document } = (new JSDOM(body)).window;
+    const relatedLink = new RelatedLink();
+    const metadata = getMetadata(document, url);
 
-  relatedLink
-    .save()
-    .then(relatedLink1 => res.status(201).json(relatedLink1))
-    .catch(err => next(err));
+    relatedLink.url = url;
+    relatedLink.title = metadata.title || 'Related Link';
+    relatedLink.type = type;
+    relatedLink.post = postId;
+    relatedLink.author = user._id;
+
+    if (metadata.icon) {
+      relatedLink.icon = metadata.icon;
+    }
+
+    return relatedLink
+      .save()
+      .then(relatedLink1 => res.status(201).json(relatedLink1))
+      .catch(err => next(err));
+  });
 }
 
 function list(req, res, next) {
