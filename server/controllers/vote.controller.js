@@ -1,6 +1,9 @@
 import Bluebird from 'bluebird';
 
 import Vote from '../models/vote.model';
+import Comment from '../models/comment.model';
+import { subscribePostFromEntity } from '../controllers/postSubscription.controller';
+import { saveAndNotifyUser } from '../controllers/notification.controller';
 
 /**
  * @swagger
@@ -275,8 +278,36 @@ function downvote(req, res, next) {
     .catch(e => next(e));
 }
 
+async function subscribeAndNotify(vote, user) {
+  const comment = await Comment.findOne({ _id: vote.entityId });
+
+  if (user._id === comment.author) return;
+
+  const post = await subscribePostFromEntity(comment.rootEntity, user);
+
+  if (!post) return;
+
+  const payload = {
+    notification: {
+      title: `New upvote from @${user.username}`,
+      body: post.title.rendered,
+      data: {
+        user: user.username,
+        commentAuthor: comment.author,
+        thread: post.thread,
+        slug: post.slug
+      }
+    },
+    type: 'upvote',
+    entity: post._id
+  };
+
+  saveAndNotifyUser(payload, comment.author);
+}
+
 function finish(req, res) {
   req.vote = req.vote.toObject();
+  if (req.vote.direction === 'upvote') subscribeAndNotify(req.vote, req.user);
   // Pass down the entity
   // We are getting the correct vote information to be part of the
   // entity object so that the clients can have an easier time figuring

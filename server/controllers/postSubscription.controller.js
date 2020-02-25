@@ -1,6 +1,6 @@
 import Post from '../models/post.model';
 import PostSubscription from '../models/postSubscription.model';
-import { notifyUser } from '../controllers/notification.controller';
+import { saveAndNotifyUser } from '../controllers/notification.controller';
 
 async function getPostFromThread(entityId) {
   return Post.findOne({ thread: entityId }).lean();
@@ -35,6 +35,7 @@ async function subscribePost(post, user) { // Forumthread ID
 }
 
 async function notifySubscribers(post, user, payload) {
+  // get everyone that we need to notify
   const users = await PostSubscription.find({ post: post._id })
     .where('user').ne(user._id) // ignore own user
     .select('user')
@@ -44,8 +45,9 @@ async function notifySubscribers(post, user, payload) {
 
   if (!users.length) return;
 
+  // save and sends an update with all the latest notifications
   users.forEach((u) => {
-    notifyUser(payload, u);
+    saveAndNotifyUser(payload, u);
   });
 }
 

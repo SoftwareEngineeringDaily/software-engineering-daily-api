@@ -194,7 +194,12 @@ async function subscribeAndNotify(entityId, user) {
   const payload = {
     notification: {
       title: `New comment from @${user.username}`,
-      body: post.title.rendered
+      body: post.title.rendered,
+      data: {
+        user: user.username,
+        slug: post.slug,
+        thread: post.thread
+      }
     },
     type: 'comment',
     entity: post._id
@@ -238,30 +243,30 @@ async function create(req, res, next) {
       if (entityType && entityType.toLowerCase() === 'forumthread') {
         // TODO: move these so we also email for posts:
         // get entity outside of this function and then pass down:
-        // if (parentCommentId) {
-        //   // TODO: don't email if you are the author and replying to own stuff:
-        //   ForumNotifications.sendReplyNotificationEmail({
-        //     content,
-        //     threadId: entityId,
-        //     userWhoReplied: user
-        //   });
-        // }
+        if (parentCommentId) {
+          // TODO: don't email if you are the author and replying to own stuff:
+          ForumNotifications.sendReplyNotificationEmail({
+            content,
+            threadId: entityId,
+            userWhoReplied: user
+          });
+        }
 
-        // if (mentions) {
-        //   ForumNotifications.sendMentionsNotificationEmail({
-        //     parentCommentId,
-        //     content,
-        //     threadId: entityId,
-        //     userWhoReplied: user,
-        //     usersMentioned
-        //   });
-        // }
+        if (mentions) {
+          ForumNotifications.sendMentionsNotificationEmail({
+            parentCommentId,
+            content,
+            threadId: entityId,
+            userWhoReplied: user,
+            usersMentioned
+          });
+        }
 
-        // ForumNotifications.sendForumNotificationEmail({
-        //   threadId: entityId,
-        //   content,
-        //   userWhoReplied: user
-        // });
+        ForumNotifications.sendForumNotificationEmail({
+          threadId: entityId,
+          content,
+          userWhoReplied: user
+        });
         return ForumThread.increaseCommentCount(entityId).then(() =>
           res.status(201).json({ result: commentSaved }));
       }
