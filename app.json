@@ -28,9 +28,6 @@
     "STRIPE_SECRET_KEY": {
       "required": true
     },
-    "AD_FREE_URL": {
-      "required": true
-    },
     "SEND_GRID_KEY": {
       "required": true
     },

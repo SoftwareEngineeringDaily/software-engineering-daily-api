@@ -6,8 +6,8 @@
   "main": "index.js",
   "private": false,
   "engines": {
-    "node": "10.17.0",
-    "npm": "6.11.3"
+    "node": "10.19.0",
+    "npm": "^6.13.4"
   },
   "scripts": {
     "build": "gulp",
@@ -49,6 +49,7 @@
   "dependencies": {
     "@sendgrid/mail": "^6.1.4",
     "algoliasearch": "^3.35.1",
+    "async": "^3.1.1",
     "aws-sdk": "^2.150.0",
     "axios": "^0.19.0",
     "babel-cli": "6.26.0",
@@ -65,6 +66,7 @@
     "cookie-parser": "1.4.3",
     "cors": "2.8.4",
     "coveralls": "2.13.1",
+    "cron": "1.8.2",
     "cross-env": "5.0.5",
     "cz-conventional-changelog": "2.0.0",
     "debug": "3.0.1",
@@ -91,6 +93,7 @@
     "joi": "10.6.0",
     "jsdom": "^16.2.0",
     "jsonwebtoken": "8.0.0",
+    "jstoxml": "^1.6.0",
     "lodash": "^4.17.15",
     "method-override": "2.3.9",
     "mocha": "3.5.0",
@@ -109,6 +112,7 @@
     "request": "^2.88.2",
     "run-sequence": "2.1.0",
     "sendgrid": "^5.2.3",
+    "socket.io": "^2.3.0",
     "stripe": "^5.3.0",
     "supertest": "3.0.0",
     "supertest-as-promised": "4.0.2",

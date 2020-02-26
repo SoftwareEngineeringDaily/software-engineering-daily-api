@@ -1,10 +1,22 @@
 // adding comment
 import mongoose from 'mongoose';
 import util from 'util';
+import SocketIO from 'socket.io';
+import Http from 'http';
 
 // config should be imported before importing any other file
 import config from './config/config';
-import app from './config/express';
+import appExpress from './config/express';
+import websocket from './config/websocket';
+import Cron from './server/controllers/cron.controller';
+
+const app = Http.createServer(appExpress);
+const io = SocketIO(app);
+
+websocket.setServer(io);
+
+// cron jobs control
+const cron = new Cron();
 
 const debug = require('debug')('express-mongoose-es6-rest-api:index');
 
@@ -28,6 +40,12 @@ mongoose.connect(mongoUri, {
 });
 mongoose.connection.on('error', () => {
   throw new Error(`unable to connect to database: ${mongoUri}`);
+});
+mongoose.connection.on('connected', () => {
+  cron.start();
+});
+mongoose.connection.on('disconnected', () => {
+  cron.pause();
 });
 
 // print mongoose logs in dev env
