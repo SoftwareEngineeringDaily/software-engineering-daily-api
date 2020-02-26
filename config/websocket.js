@@ -52,7 +52,9 @@ function socketEvents(socket) {
   });
 }
 
-function clearDisconnected() { sockets = sockets.filter(s => s.connected); }
+function clearDisconnected() {
+  sockets = sockets.filter(s => s.connected);
+}
 
 function isConnected(userId) {
   return sockets.find(s => s.registered && s.userData && s.userData._id === userId && s.connected);
