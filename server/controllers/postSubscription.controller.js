@@ -13,10 +13,10 @@ async function subscribePostFromEntity(entityId, user) {
   return post;
 }
 
-async function notifySubscribersFromEntity(entityId, user, payload) {
+async function notifySubscribersFromEntity(entityId, user, payload, ignoreNotify) {
   const post = await getPostFromThread(entityId);
   if (!post) return;
-  await notifySubscribers(post, user, payload);
+  await notifySubscribers(post, user, payload, ignoreNotify);
 }
 
 async function subscribePost(post, user) { // Forumthread ID
@@ -34,7 +34,7 @@ async function subscribePost(post, user) { // Forumthread ID
   return post;
 }
 
-async function notifySubscribers(post, user, payload) {
+async function notifySubscribers(post, user, payload, ignoreNotify = []) {
   // get everyone that we need to notify
   const users = await PostSubscription.find({ post: post._id })
     .where('user').ne(user._id) // ignore own user
@@ -47,7 +47,8 @@ async function notifySubscribers(post, user, payload) {
 
   // save and sends an update with all the latest notifications
   users.forEach((u) => {
-    saveAndNotifyUser(payload, u);
+    // ignoring users that already received a mention
+    if (!ignoreNotify.includes(u.toString())) saveAndNotifyUser(payload, u);
   });
 }
 

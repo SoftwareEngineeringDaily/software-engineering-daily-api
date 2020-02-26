@@ -8,6 +8,7 @@ import User from '../models/user.model';
 import ForumThread from '../models/forumThread.model';
 import ForumNotifications from '../helpers/forumNotifications.helper';
 import { subscribePostFromEntity, notifySubscribersFromEntity } from '../controllers/postSubscription.controller';
+import { saveAndNotifyUser } from '../controllers/notification.controller';
 /*
 * Load comment and append to req.
 */
@@ -188,7 +189,7 @@ async function update(req, res, next) {
  *         $ref: '#/responses/NotFound'
  */
 
-async function subscribeAndNotify(entityId, user) {
+async function subscribeAndNotifyCommenter(entityId, user, ignoreNotify) {
   const post = await subscribePostFromEntity(entityId, user);
 
   const payload = {
@@ -205,7 +206,30 @@ async function subscribeAndNotify(entityId, user) {
     entity: post._id
   };
 
-  await notifySubscribersFromEntity(entityId, user, payload);
+  // notify all subscribers
+  await notifySubscribersFromEntity(entityId, user, payload, ignoreNotify);
+}
+
+async function subscribeAndNotifyMentioned(entityId, mentioned, user) {
+  const post = await subscribePostFromEntity(entityId, mentioned);
+
+  const payload = {
+    notification: {
+      title: `You were mentioned by @${user.username}`,
+      body: post.title.rendered,
+      data: {
+        user: user.username,
+        mentioned: mentioned._id,
+        slug: post.slug,
+        thread: post.thread
+      }
+    },
+    type: 'mention',
+    entity: post._id
+  };
+
+  // just notify the mentioned user
+  saveAndNotifyUser(payload, mentioned._id);
 }
 
 async function create(req, res, next) {
@@ -220,6 +244,9 @@ async function create(req, res, next) {
   if (mentions) {
     usersMentioned = await idsToUsers(mentions);
     comment.mentions = usersMentioned;
+    usersMentioned.forEach((mentioned) => {
+      subscribeAndNotifyMentioned(entityId, mentioned, user);
+    });
   }
 
   if (highlight) {
@@ -237,7 +264,7 @@ async function create(req, res, next) {
     .save()
     .then(async (commentSaved) => {
       // don't wait
-      subscribeAndNotify(entityId, user);
+      subscribeAndNotifyCommenter(entityId, user, mentions);
 
       // TODO: result key is not consistent with other responses, consider changing this
       if (entityType && entityType.toLowerCase() === 'forumthread') {

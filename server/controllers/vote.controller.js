@@ -302,6 +302,7 @@ async function subscribeAndNotify(vote, user) {
     entity: post._id
   };
 
+  // just notify the commenter
   saveAndNotifyUser(payload, comment.author);
 }
 
