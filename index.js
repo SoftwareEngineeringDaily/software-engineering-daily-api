@@ -1,14 +1,21 @@
 // adding comment
 import mongoose from 'mongoose';
 import util from 'util';
+import SocketIO from 'socket.io';
+import Http from 'http';
 
 // config should be imported before importing any other file
 import config from './config/config';
-import app from './config/express';
-
-// cron jobs control
+import appExpress from './config/express';
+import websocket from './config/websocket';
 import Cron from './server/controllers/cron.controller';
 
+const app = Http.createServer(appExpress);
+const io = SocketIO(app);
+
+websocket.setServer(io);
+
+// cron jobs control
 const cron = new Cron();
 
 const debug = require('debug')('express-mongoose-es6-rest-api:index');
