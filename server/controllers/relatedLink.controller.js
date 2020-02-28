@@ -79,21 +79,25 @@ function create(req, res, next) {
   const { user } = req;
   const { postId } = req.params;
   const { url, type = 'link' } = req.body;
+  const options = {
+    url,
+    timeout: 15000,
+    headers: {
+      'User-Agent': 'googlebot',
+    }
+  };
 
-  request(url, { timeout: 15000 }, (error, reply) => {
-    // If there's an error or nothing
-    // let's remember that
-    if (error || !reply.body || reply.statusCode !== 200) {
+  request(options, (error, reply, body) => {
+    if (error || !body || reply.statusCode !== 200) {
       return next(error);
     }
 
-    const { body } = reply;
     const { document } = (new JSDOM(body)).window;
     const relatedLink = new RelatedLink();
     const metadata = getMetadata(document, url);
 
     relatedLink.url = url;
-    relatedLink.title = metadata.title || 'Related Link';
+    relatedLink.title = metadata.title || url;
     relatedLink.type = type;
     relatedLink.post = postId;
     relatedLink.author = user._id;
