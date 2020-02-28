@@ -42,6 +42,9 @@ const RelatedLinkSchema = new Schema({
     type: String,
     required: true
   },
+  icon: {
+    type: String,
+  },
   title: {
     type: String,
     required: true
