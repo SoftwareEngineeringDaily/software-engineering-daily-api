@@ -36,8 +36,7 @@ describe('## Post with relatedLink APIs', () => {
   let postId;
 
   const relatedLinkData = {
-    title: 'Some Awesome Related Link',
-    url: 'https://news.com/article'
+    url: 'https://softwareengineeringdaily.com/2020/02/24/infrastructure-management-with-joey-parsons/'
   };
 
   before((done) => {
@@ -89,7 +88,8 @@ describe('## Post with relatedLink APIs', () => {
         .expect(httpStatus.CREATED)
         .then((res) => { //eslint-disable-line
           const relatedLink = res.body;
-          expect(relatedLink.title).to.eql(relatedLinkData.title);
+          expect(relatedLink.icon).to.be.a('string');
+          expect(relatedLink.title).to.be.a('string');
           expect(relatedLink.url).to.eql(relatedLinkData.url);
           expect(relatedLink.author).to.eql(firstUserId.toString());
           expect(relatedLink.post).to.eql(postId.toString());
@@ -129,7 +129,8 @@ describe('## Post with relatedLink APIs', () => {
             .expect(httpStatus.OK)
             .then((res) => {
               const relatedLink = res.body[0];
-              expect(relatedLink.title).to.eql(relatedLinkData.title);
+              expect(relatedLink.icon).to.be.a('string');
+              expect(relatedLink.title).to.be.a('string');
               expect(relatedLink.url).to.eql(relatedLinkData.url);
               expect(relatedLink.post).to.eql(postId.toString());
               expect(relatedLink.score).to.eql(0);
@@ -154,7 +155,8 @@ describe('## Post with relatedLink APIs', () => {
             .expect(httpStatus.OK)
             .then((res) => {
               const relatedLink = res.body[0];
-              expect(relatedLink.title).to.eql(relatedLinkData.title);
+              expect(relatedLink.icon).to.be.a('string');
+              expect(relatedLink.title).to.be.a('string');
               expect(relatedLink.url).to.eql(relatedLinkData.url);
               expect(relatedLink.post).to.eql(postId.toString());
               expect(relatedLink.score).to.eql(0);

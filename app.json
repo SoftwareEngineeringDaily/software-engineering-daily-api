@@ -1,5 +1,6 @@
 {
   "name": "software-engineering-daily-api",
+  "stack": "heroku-18",
   "scripts": {
   },
   "env": {
