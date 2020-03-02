@@ -26,6 +26,7 @@ const publicFeedConfig = {
       { description: 'Technical interviews about software topics.' },
       { 'itunes:type': 'serial' },
       { 'itunes:summary': 'Technical interviews about software topics.' },
+      { 'itunes:explicit': 'no' },
       {
         'itunes:owner': {
           'itunes:name': 'Software Daily',
@@ -110,6 +111,7 @@ async function callback() {
         'itunes:episode': episode,
         'itunes:season': seasonYear - moment(post.date_gmt).year(),
         title: post.title.rendered,
+        'itunes:title': post.title.rendered,
         description: `<![CDATA[${description || post.title.rendered}]]>`,
         'itunes:image': {
           _attrs: {
@@ -125,7 +127,17 @@ async function callback() {
         },
         guid: parseInt(post.id, 10).toString(36),
         pubDate: moment.utc(post.date_gmt).toDate(),
-        'itunes:explicit': 'clean'
+        'itunes:explicit': 'no',
+        'itunes:category': {
+          _attrs: {
+            text: 'News'
+          },
+          'itunes:category': {
+            _attrs: {
+              text: 'Tech News'
+            }
+          }
+        }
       }
     });
 
@@ -137,6 +149,7 @@ async function callback() {
         'itunes:episode': episode,
         'itunes:season': seasonYear - moment(post.date_gmt).year(),
         title: post.title.rendered,
+        'itunes:title': post.title.rendered,
         description: `<![CDATA[${description || post.title.rendered}]]>`,
         'itunes:image': {
           _attrs: {
@@ -152,7 +165,17 @@ async function callback() {
         },
         guid: parseInt(post.id, 10).toString(36),
         pubDate: moment.utc(post.date_gmt).toDate(),
-        'itunes:explicit': 'clean'
+        'itunes:explicit': 'no',
+        'itunes:category': {
+          _attrs: {
+            text: 'News'
+          },
+          'itunes:category': {
+            _attrs: {
+              text: 'Tech News'
+            }
+          }
+        }
       }
     });
   });
