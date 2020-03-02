@@ -125,7 +125,7 @@ async function callback() {
         },
         guid: parseInt(post.id, 10).toString(36),
         pubDate: moment.utc(post.date_gmt).toDate(),
-        'itunes:explicit': false
+        'itunes:explicit': 'clean'
       }
     });
 
@@ -152,7 +152,7 @@ async function callback() {
         },
         guid: parseInt(post.id, 10).toString(36),
         pubDate: moment.utc(post.date_gmt).toDate(),
-        'itunes:explicit': false
+        'itunes:explicit': 'clean'
       }
     });
   });
