@@ -16,6 +16,7 @@ import listenedRoutes from './listened.route';
 import tagsRoutes from './tag.route';
 import topicRoutes from './topic.route';
 import rssRoutes from './rss.route';
+import profileRoutes from './profile.route';
 // import userRoutes from './user.route';
 
 const router = express.Router(); // eslint-disable-line new-cap
@@ -61,5 +62,6 @@ router.use('/feed', feedRoutes);
 router.use('/auth', authRoutes);
 router.use('/topics', topicRoutes);
 router.use('/rss', rssRoutes);
+router.use('/profile', profileRoutes);
 
 export default router;
