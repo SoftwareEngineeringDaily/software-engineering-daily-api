@@ -1,3 +1,4 @@
+import Like from '../models/like.model';
 import { getAdFreeMp3 } from '../helpers/mp3.helper';
 import { getPrivateRss } from '../helpers/rss.helper';
 
@@ -6,11 +7,23 @@ function replaceWithAdFree(post, fullUser) {
   post.rss = getPrivateRss(fullUser) // eslint-disable-line
 }
 
-function addPostData(post, fullUser) {
+async function addPostData(post, fullUser) {
+  const query = {
+    userId: fullUser ? fullUser._id : null,
+    postId: post._id,
+  };
+
+  const likeActive = await Like
+    .findOne(query)
+    .exec(l => Promise.resolve(l));
+
+  post.likeActive = !!(likeActive); // eslint-disable-line
   post.rss = '/rss/public/all'; // eslint-disable-line
+
   if (fullUser && fullUser.subscription && fullUser.subscription.active) {
     replaceWithAdFree(post, fullUser);
   }
+
   return post;
 }
 

@@ -1,11 +1,8 @@
-// import mongoose from 'mongoose';
-
-
 import algoliasearch from 'algoliasearch';
 import Post from '../models/post.model';
 import {
   addPostData,
-  getAdFreePostsIfSubscribed
+  getAdFreePostsIfSubscribed,
 } from '../helpers/post.helper';
 
 /**
@@ -54,10 +51,15 @@ function load(req, res, next, id) {
  *         $ref: '#/responses/NotFound'
  */
 
-function get(req, res, next) {
-  // Load ad free version of podcast episode if subscrbied:
+async function get(req, res, next) {
+  const response = await addPostData(
+    req.post.toObject(),
+    req.fullUser,
+    next
+  );
 
-  return res.json(addPostData(req.post.toObject(), req.fullUser, next));
+  // Load ad free version of podcast episode if subscrbied:
+  return res.json(response);
 }
 
 /**

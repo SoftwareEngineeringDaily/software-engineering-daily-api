@@ -4,6 +4,7 @@ import validate from 'express-validation';
 import paramValidation from '../../config/param-validation';
 import postCtrl from '../controllers/post.controller';
 import voteCtrl from '../controllers/vote.controller';
+import likeCtrl from '../controllers/like.controller';
 import transferField from '../middleware/transferField';
 import relatedLinkCtrl from '../controllers/relatedLink.controller';
 import bookmarkCtrl from '../controllers/bookmark.controller';
@@ -55,6 +56,12 @@ router.route('/:postId/related-link')
     , relatedLinkCtrl.create
   );
 
+router.route('/:postId/like')
+  .post(
+    expressJwt({ secret: config.jwtSecret }),
+    likeCtrl.likePost,
+  );
+
 router.route('/:postId/upvote')
   .post(
     expressJwt({ secret: config.jwtSecret })
@@ -87,10 +94,16 @@ router.route('/:postId/unbookmark')
 
 // todo: deprecate once all clients use unbookmark
 router.route('/:postId/unfavorite')
-  .post(expressJwt({ secret: config.jwtSecret }), bookmarkCtrl.unbookmark);
+  .post(
+    expressJwt({ secret: config.jwtSecret }),
+    bookmarkCtrl.unbookmark,
+  );
 
 router.route('/:postId/listened')
-  .post(expressJwt({ secret: config.jwtSecret }), listenedCtrl.create);
+  .post(
+    expressJwt({ secret: config.jwtSecret }),
+    listenedCtrl.create,
+  );
 
 router.param('postId', postCtrl.load);
 
