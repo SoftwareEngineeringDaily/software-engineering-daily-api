@@ -17,11 +17,6 @@ stages:
 jobs:
   include:
     - stage: test
-      env:
-        global:
-          - ALGOLIA_APP_ID=algolia_app_id
-          - ALGOLIA_API_KEY=algolia_api_key
-          - ALGOLIA_POSTS_INDEX=algolia_posts_index
       script:
         - npm run lint
         - npm run test

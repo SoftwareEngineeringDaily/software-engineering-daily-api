@@ -2,12 +2,16 @@ import algoliasearch from 'algoliasearch';
 import Like from '../models/like.model';
 import Post from '../models/post.model';
 
-const client = algoliasearch(
-  process.env.ALGOLIA_APP_ID,
-  process.env.ALGOLIA_API_KEY,
-);
+function syncAlgolia(query) {
+  const client = algoliasearch(
+    process.env.ALGOLIA_APP_ID,
+    process.env.ALGOLIA_API_KEY,
+  );
 
-const index = client.initIndex(process.env.ALGOLIA_POSTS_INDEX);
+  const index = client.initIndex(process.env.ALGOLIA_POSTS_INDEX);
+
+  index.partialUpdateObject(query);
+}
 
 /**
  * @swagger
@@ -63,7 +67,7 @@ async function likePost(req, res) {
         return res.status(500).json({ message: 'Error liking post' });
       }
 
-      index.partialUpdateObject({
+      syncAlgolia({
         likeCount: reply.likeCount,
         objectID: reply.id,
       });
