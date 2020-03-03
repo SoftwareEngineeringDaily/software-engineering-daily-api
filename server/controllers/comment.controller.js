@@ -194,10 +194,10 @@ async function subscribeAndNotifyCommenter(entityId, user, ignoreNotify) {
 
   const payload = {
     notification: {
-      title: `New comment from @${user.username}`,
+      title: `New comment from @${user.name}`,
       body: post.title.rendered,
       data: {
-        user: user.username,
+        user: user._id,
         slug: post.slug,
         thread: post.thread
       }
@@ -215,10 +215,10 @@ async function subscribeAndNotifyMentioned(entityId, mentioned, user) {
 
   const payload = {
     notification: {
-      title: `You were mentioned by @${user.username}`,
+      title: `You were mentioned by @${user.name}`,
       body: post.title.rendered,
       data: {
-        user: user.username,
+        user: user._id,
         mentioned: mentioned._id,
         slug: post.slug,
         thread: post.thread

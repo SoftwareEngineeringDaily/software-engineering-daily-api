@@ -289,10 +289,10 @@ async function subscribeAndNotify(vote, user) {
 
   const payload = {
     notification: {
-      title: `New upvote from @${user.username}`,
+      title: `New upvote from @${user.name}`,
       body: post.title.rendered,
       data: {
-        user: user.username,
+        user: user._id,
         commentAuthor: comment.author,
         thread: post.thread,
         slug: post.slug

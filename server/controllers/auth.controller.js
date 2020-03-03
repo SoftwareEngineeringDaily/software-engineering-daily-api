@@ -149,13 +149,13 @@ function loginWithEmail(req, res, next) {
  */
 
 function register(req, res, next) {
-  const { username } = req.body;
   const { password } = req.body;
   const newsletterSignup = req.body.newsletter;
-  if (!username) {
-    let err = new APIError('Username is required to register.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
-    return next(err);
-  }
+
+  // a simple, non conflict, random id. Ex: K7DRS1HR
+  const username = (Date.now() + Math.floor(Math.random() * Math.floor(99999)))
+    .toString(36)
+    .toUpperCase();
 
   if (!password) {
     let err = new APIError('Password is required to register.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
@@ -232,7 +232,7 @@ function register(req, res, next) {
       newUser.password = User.generateHash(password);
       newUser.signedupForNewsletter = newsletterSignup; // Probably works
       // We assign a set of "approved fields"
-      const newValues = _.pick(req.body, User.updatableFields);
+      const newValues = { username, ..._.pick(req.body, User.updatableFields) };
       Object.assign(newUser, newValues);
 
       return newUser.save();

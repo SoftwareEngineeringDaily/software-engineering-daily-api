@@ -20,7 +20,6 @@ function askRegister(socket) {
 function registerSocket(socket, token) {
   try {
     const data = jwt.verify(token, config.jwtSecret);
-    if (!data.username) return false;
     socket.userData = data; // eslint-disable-line no-param-reassign
     socket.registered = true; // eslint-disable-line no-param-reassign
     socket.join('registered');
