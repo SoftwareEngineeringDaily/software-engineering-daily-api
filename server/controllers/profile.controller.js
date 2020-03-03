@@ -11,7 +11,7 @@ async function getPublic(req, res) {
   const userId = div[div.length - 1];
 
   const user = await User.findById(userId)
-    .select('name bio')
+    .select('name bio avatarUrl')
     .lean()
     .exec();
 
