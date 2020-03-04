@@ -16,9 +16,12 @@ const router = express.Router(); // eslint-disable-line new-cap
 
 router.route('/')
   .get(
-    expressJwt({ secret: config.jwtSecret, credentialsRequired: false })
-    , loadFullUser
-    , postCtrl.list
+    expressJwt({
+      secret: config.jwtSecret,
+      credentialsRequired: false,
+    }),
+    loadFullUser,
+    postCtrl.list,
   );
 
 router.route('/search')

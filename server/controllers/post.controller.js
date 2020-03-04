@@ -165,8 +165,12 @@ function list(req, res, next) {
   if (topic) {
     query.topic = [topic];
   }
+
   Post.list(query)
-    .then(posts => res.json(getAdFreePostsIfSubscribed(posts, req.fullUser, next)))
+    .then(async (posts) => {
+      const response = await getAdFreePostsIfSubscribed(posts, req.fullUser, next);
+      return res.json(response);
+    })
     .catch(e => next(e));
 }
 
