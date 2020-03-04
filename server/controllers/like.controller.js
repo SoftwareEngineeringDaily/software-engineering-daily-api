@@ -48,13 +48,13 @@ async function likePost(req, res) {
   const { _id: userId } = req.user;
   const query = { postId, userId };
   const like = new Like(query);
-  const likeActive = await Like.findOne(query, (err, reply) => Promise.resolve(reply));
+  const likeActive = await Like.findOne(query);
   const likeCount = likeActive ? -1 : 1;
 
   if (likeActive) {
-    await Like.deleteOne({ _id: likeActive._id }, () => Promise.resolve());
+    await Like.deleteOne({ _id: likeActive._id });
   } else {
-    await like.save(() => Promise.resolve());
+    await like.save();
   }
 
   Post

@@ -26,6 +26,7 @@ import config from '../../config/config';
 const LikeSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
+  dateCreated: { type: Date, default: Date.now },
 });
 
 /**
