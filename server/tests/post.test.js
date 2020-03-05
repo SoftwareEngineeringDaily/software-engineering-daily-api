@@ -194,7 +194,7 @@ describe('## Post APIs', () => {
     });
   });
 
-  describe('# GET /api/posts/search', () => {
+  xdescribe('# GET /api/posts/search', () => {
     it('returns search results', (done) => {
       request(app)
         .get('/api/posts/search?query=apple&page=0')
