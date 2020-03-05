@@ -3,6 +3,10 @@ import Like from '../models/like.model';
 import Post from '../models/post.model';
 
 function syncAlgolia(query) {
+  if (process.env.NODE_ENV === 'test') {
+    return;
+  }
+
   const client = algoliasearch(
     process.env.ALGOLIA_APP_ID,
     process.env.ALGOLIA_API_KEY,
