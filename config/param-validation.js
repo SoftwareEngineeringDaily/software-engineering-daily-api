@@ -4,7 +4,6 @@ export default {
   // UPDATE /api/users/:userId
   updateUser: {
     body: {
-      username: Joi.string().required(),
       name: Joi.string().required(),
       bio: Joi.string().allow(''),
       about: Joi.string().allow(''),
@@ -67,7 +66,6 @@ export default {
   // POST /api/auth/register
   register: {
     body: {
-      username: Joi.string().required(),
       password: Joi.string().required(),
       // Should be required once mobile apps get updated:
       name: Joi.string(),
