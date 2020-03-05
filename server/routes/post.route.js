@@ -26,9 +26,9 @@ router.route('/')
 
 router.route('/search')
   .get(
-    expressJwt({ secret: config.jwtSecret, credentialsRequired: false })
-    , loadFullUser
-    , postCtrl.search
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
+    loadFullUser,
+    postCtrl.search,
   );
 
 router.route('/recommendations')

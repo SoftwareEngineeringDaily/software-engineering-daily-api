@@ -238,10 +238,9 @@ function search(req, res, next) {
   let isEnd = false;
   let nextPage = 0;
   let slugs = [];
-  const {
-    query = '',
-    page = 0,
-  } = req.query;
+
+  const { query = '' } = req.query;
+  const page = parseInt(req.query.page || '0', 10);
 
   const client = algoliasearch(
     process.env.ALGOLIA_APP_ID,
@@ -262,12 +261,9 @@ function search(req, res, next) {
       slugs = reply.hits.map(h => h.slug);
 
       Post.list({ slugs })
-        .then((posts) => {
-          res.json({
-            posts: getAdFreePostsIfSubscribed(posts, req.fullUser, next),
-            isEnd,
-            nextPage
-          });
+        .then(async (posts) => {
+          posts = await getAdFreePostsIfSubscribed(posts, req.fullUser, next); //eslint-disable-line
+          res.json({ posts, isEnd, nextPage });
         })
         .catch(e => next(e));
     })

@@ -5,6 +5,7 @@ import httpStatus from 'http-status';
 import chai, { expect } from 'chai';
 import app from '../../index';
 import Post from '../models/post.model';
+import User from '../models/user.model';
 
 chai.config.includeStack = true;
 
@@ -113,6 +114,97 @@ describe('## Post APIs', () => {
           done();
         })
         .catch(done);
+    });
+  });
+
+  describe('# POST /api/posts/:postId/like', () => {
+    const validUserCredentials = {
+      username: 'react',
+      password: 'express'
+    };
+
+    let userToken;
+    let postId;
+
+    before((done) => {
+      request(app)
+        .post('/api/auth/register')
+        .send(validUserCredentials)
+        .expect(httpStatus.CREATED)
+        .then((res) => {
+          expect(res.body).to.have.property('token');
+          userToken = res.body.token;
+          const post = new Post();
+          return post.save();
+        })
+        .then((post) => {
+          postId = post._id;
+          done();
+        })
+        .catch(done);
+    });
+
+    after((done) => {
+      User.remove({})
+        .exec()
+        .then(() => Post.remove({}).exec())
+        .then(() => {
+          done();
+        });
+    });
+
+    it('errors when not logged in', (done) => {
+      request(app)
+        .post(`/api/posts/${postId}/like`)
+        .expect(httpStatus.UNAUTHORIZED)
+        .then((res) => {
+          expect(res.body).to.exist; //eslint-disable-line
+          done();
+        });
+    });
+
+    it('likes a post', (done) => {
+      request(app)
+        .post(`/api/posts/${postId}/like`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          const like = res.body;
+          expect(like).to.have.property('likeCount').that.is.a('number');
+          expect(like).to.have.property('likeActive').that.is.a('boolean');
+          expect(like.likeActive).to.be.true; //eslint-disable-line
+          done();
+        })
+        .catch(done);
+    });
+
+    it('toggles the like for a post', (done) => {
+      request(app)
+        .post(`/api/posts/${postId}/like`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(httpStatus.OK)
+        .then((res) => {
+          const like = res.body;
+          expect(like).to.have.property('likeCount').that.is.a('number');
+          expect(like).to.have.property('likeActive').that.is.a('boolean');
+          expect(like.likeActive).to.be.false; //eslint-disable-line
+          done();
+        })
+        .catch(done);
+    });
+  });
+
+  describe('# GET /api/posts/search', () => {
+    it('returns search results', (done) => {
+      request(app)
+        .get('/api/posts/search?query=apple&page=0')
+        .then((res) => {
+          expect(res.body).to.exist; //eslint-disable-line
+          expect(res.body.posts).to.have.property('length'); //eslint-disable-line
+          expect(res.body).to.have.property('isEnd').that.is.a('boolean');
+          expect(res.body).to.have.property('nextPage', 1).that.is.a('number');
+          done();
+        });
     });
   });
 });
