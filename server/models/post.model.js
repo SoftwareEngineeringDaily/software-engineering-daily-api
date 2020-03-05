@@ -43,6 +43,10 @@ mongoose.plugin(slug);
  *         type: integer
  *         description: Number of upvotes given to episode by logged in users
  *         example: 3
+ *       likeCount:
+ *         type: integer
+ *         description: Number of likes given to post by logged in users
+ *         example: 5
  *       upvote:
  *         type: boolean
  *         description: if authenticated, returns if user upvoted episode
@@ -64,6 +68,7 @@ const PostSchema = new mongoose.Schema({
   id: String,
   score: { type: Number, default: 0 },
   totalFavorites: { type: Number, default: 0 },
+  likeCount: { type: Number, default: 0 },
   title: {
     rendered: String,
   },
@@ -86,7 +91,6 @@ const PostSchema = new mongoose.Schema({
  * - validations
  * - virtuals
  */
-
 PostSchema.virtual('bookmarkedByUser', {
   ref: 'Favorite',
   localField: '_id',
@@ -121,8 +125,31 @@ PostSchema.statics = {
         return Promise.reject(err);
       });
   },
-  // standard list of fields to select for find Post queries
-  standardSelectForFind: 'content title date mp3 link score featuredImage guestImage upvoted downvoted tags categories thread excerpt transcriptUrl topics',
+
+  /**
+   * Standard list of fields to select for find Post queries
+   */
+  standardSelectForFind: [
+    'content',
+    'likeCount',
+    'totalFavorites',
+    'title',
+    'date',
+    'mp3',
+    'link',
+    'score',
+    'featuredImage',
+    'guestImage',
+    'upvoted',
+    'downvoted',
+    'tags',
+    'categories',
+    'thread',
+    'excerpt',
+    'transcriptUrl',
+    'topics',
+  ].join(' '),
+
   /**
    * List posts in descending order of 'createdAt' timestamp.
    * @param {number} limit - Limit number of posts to be returned.
@@ -208,7 +235,7 @@ PostSchema.statics = {
       select: 'active',
       match: { userId: user._id }
     })
-      // .lean() // returns as plain object, but this will remove deafault values which is bad
+    // .lean() // returns as plain object, but this will remove deafault values which is bad
       .exec()
       .then((postsFound) => {
       // add bookmarked
@@ -223,10 +250,12 @@ PostSchema.statics = {
         return this.addVotesForUserToPosts(postsWithBookmarked, user._id);
       });
   },
+
   addVotesForUserToPosts(posts, userId) {
     const postIds = posts.map((post) => {
       return post._id;
     });
+
     return Vote.find({
       $or: [
         {
