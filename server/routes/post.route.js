@@ -86,14 +86,20 @@ router.route('/:postId/downvote')
   );
 
 router.route('/:postId/bookmark')
-  .post(expressJwt({ secret: config.jwtSecret }), bookmarkCtrl.bookmark);
+  .post(
+    expressJwt({ secret: config.jwtSecret }),
+    bookmarkCtrl.bookmark,
+  );
 
 // todo: deprecate once all clients use bookmark
 router.route('/:postId/favorite')
   .post(expressJwt({ secret: config.jwtSecret }), bookmarkCtrl.bookmark);
 
 router.route('/:postId/unbookmark')
-  .post(expressJwt({ secret: config.jwtSecret }), bookmarkCtrl.unbookmark);
+  .post(
+    expressJwt({ secret: config.jwtSecret }),
+    bookmarkCtrl.unbookmark,
+  );
 
 // todo: deprecate once all clients use unbookmark
 router.route('/:postId/unfavorite')

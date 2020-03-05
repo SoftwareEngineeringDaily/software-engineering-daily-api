@@ -132,6 +132,7 @@ PostSchema.statics = {
   standardSelectForFind: [
     'content',
     'likeCount',
+    'totalFavorites',
     'title',
     'date',
     'mp3',

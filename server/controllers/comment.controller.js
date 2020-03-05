@@ -192,6 +192,10 @@ async function update(req, res, next) {
 async function subscribeAndNotifyCommenter(entityId, user, ignoreNotify) {
   const post = await subscribePostFromEntity(entityId, user);
 
+  if (!post) {
+    return;
+  }
+
   const payload = {
     notification: {
       title: `New comment from @${user.username}`,

@@ -281,11 +281,15 @@ function downvote(req, res, next) {
 async function subscribeAndNotify(vote, user) {
   const comment = await Comment.findOne({ _id: vote.entityId });
 
-  if (user._id === comment.author) return;
+  if (!comment || (comment && user._id === comment.author)) {
+    return;
+  }
 
   const post = await subscribePostFromEntity(comment.rootEntity, user);
 
-  if (!post) return;
+  if (!post) {
+    return;
+  }
 
   const payload = {
     notification: {
