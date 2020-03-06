@@ -53,6 +53,7 @@ function load(req, res, next, id) {
  */
 function remove(req, res, next) {
   const { comment, user } = req;
+
   if (comment && user) {
     if (comment.author._id.toString() !== user._id.toString()) {
       return res.status(401).json({ Error: 'Please login' });
@@ -66,10 +67,14 @@ function remove(req, res, next) {
         // Sucess:
         res.json({ deleted: true });
       })
+      .then(() => {
+        ForumThread.increaseCommentCount(comment.rootEntity, -1);
+      })
       .catch((e) => {
         next(e);
       });
   }
+
   return res.status(500).json({});
 }
 

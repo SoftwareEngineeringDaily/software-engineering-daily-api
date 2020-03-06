@@ -55,10 +55,11 @@ ForumThreadSchema.statics = {
       });
   },
 
-  increaseCommentCount(id) {
+  increaseCommentCount(id, count = 1) {
     return this.get(id).then((thread) => {
       const forumThread = thread;
-      forumThread.commentsCount += 1;
+      forumThread.commentsCount += count;
+      forumThread.commentsCount = Math.max(forumThread.commentsCount, 0);
       forumThread.dateLastAcitiy = new Date();
       return forumThread.save();
     });
