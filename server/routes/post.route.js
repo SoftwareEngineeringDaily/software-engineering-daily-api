@@ -1,6 +1,7 @@
 import express from 'express';
 import expressJwt from 'express-jwt';
 import validate from 'express-validation';
+import omit from 'lodash/omit';
 import paramValidation from '../../config/param-validation';
 import postCtrl from '../controllers/post.controller';
 import voteCtrl from '../controllers/vote.controller';
@@ -14,8 +15,17 @@ import loadFullUser from '../middleware/loadFullUser.middleware';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
+// @TODO: Remove this after it's fixed in iOS
+const jwtCleanUp = (req, res, next) => {
+  if (req.headers.authorization && !req.headers.authorization.split(' ')[1]) {
+    req.headers = omit(req.headers, 'authorization');
+  }
+  next();
+};
+
 router.route('/')
   .get(
+    jwtCleanUp,
     expressJwt({
       secret: config.jwtSecret,
       credentialsRequired: false,
