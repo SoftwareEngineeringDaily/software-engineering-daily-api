@@ -12,6 +12,7 @@ const TopicSchema = new mongoose.Schema({
     unique: true
   },
   slug: { type: String, slug: 'name', unique: true },
+  maintainer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   postCount: { type: Number, default: 0 },
   status: { type: String, default: 'active' }
 });

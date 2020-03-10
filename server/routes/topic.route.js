@@ -15,6 +15,16 @@ router.route('/')
   .get(topicCtrl.index)
   .post(topicCtrl.create);
 
+router.route('/add')
+  .post(topicCtrl.add);
+
+router.route('/full')
+  .get(topicCtrl.getFull);
+
+router.route('/:topicId')
+  .get(expressJwt({ secret: config.jwtSecret }), topicCtrl.get)
+  .put(expressJwt({ secret: config.jwtSecret }), topicCtrl.update);
+
 router.route('/addTopicsToUser')
   .post(topicCtrl.addTopicsToUser);
 
@@ -23,7 +33,7 @@ router.route('/searchTopics')
 
 router.route('/:slug')
   .get(topicCtrl.show)
-  .put(expressJwt({ secret: config.jwtSecret }), topicCtrl.update)
+  // .put(expressJwt({ secret: config.jwtSecret }), topicCtrl.update)
   .delete(expressJwt({ secret: config.jwtSecret }), topicCtrl.deleteTopic);
 
 
