@@ -121,7 +121,7 @@ async function get(req, res, next) {
  *             $ref: '#/definitions/Post'
  */
 
-function list(req, res, next) {
+async function list(req, res, next) {
   const {
     limit = null,
     createdAtBefore = null,

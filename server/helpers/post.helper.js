@@ -1,3 +1,4 @@
+import algoliasearch from 'algoliasearch';
 import Like from '../models/like.model';
 import Favorite from '../models/favorite.model';
 import { getAdFreeMp3 } from '../helpers/mp3.helper';
@@ -6,6 +7,33 @@ import { getPrivateRss } from '../helpers/rss.helper';
 function replaceWithAdFree(post, fullUser) {
   post.mp3 = getAdFreeMp3(post.mp3) // eslint-disable-line
   post.rss = getPrivateRss(fullUser) // eslint-disable-line
+}
+
+async function getSearchQuery({ search, limit, createdAtBefore }) {
+  const client = algoliasearch(
+    process.env.ALGOLIA_APP_ID,
+    process.env.ALGOLIA_API_KEY,
+  );
+
+  const index = client.initIndex(process.env.ALGOLIA_POSTS_INDEX);
+  const timestamp = new Date(createdAtBefore).getTime();
+  const searchQuery = {
+    query: search,
+    filters: `date_timestamp < ${timestamp}`,
+    hitsPerPage: limit || 10,
+  };
+
+  return new Promise((resolve, reject) => {
+    index.search(searchQuery)
+      .then((reply) => {
+        return resolve({
+          slug: {
+            $in: reply.hits.map(h => h.slug),
+          },
+        });
+      })
+      .catch(e => reject(e));
+  });
 }
 
 async function addPostData(post, fullUser) {
@@ -50,6 +78,7 @@ async function getAdFreePostsIfSubscribed(posts, fullUser) {
 }
 
 export {
+  getSearchQuery,
   replaceWithAdFree,
   addPostData,
   getAdFreePostsIfSubscribed,
