@@ -18,7 +18,7 @@ async function getSearchQuery({
   );
 
   const index = client.initIndex(process.env.ALGOLIA_POSTS_INDEX);
-  const timestamp = new Date(createdAtBefore).getTime();
+  const timestamp = createdAtBefore ? new Date(createdAtBefore).getTime() : new Date().getTime();
   const searchQuery = {
     query: search,
     filters: `date_timestamp < ${timestamp}`,
