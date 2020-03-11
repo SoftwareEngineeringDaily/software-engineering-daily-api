@@ -4,6 +4,7 @@ import moment from 'moment';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Vote from './vote.model';
+import { getSearchQuery } from './../helpers/post.helper';
 import config from '../../config/config';
 
 const slug = require('mongoose-slug-generator');
@@ -161,7 +162,7 @@ PostSchema.statics = {
    * @param {string} transcripts - Get posts with or without transcripts
    * @returns {Promise<Post[]>}
    */
-  list({
+  async list({
     slugs = [],
     limit = 10,
     createdAtBefore = null,
@@ -174,33 +175,42 @@ PostSchema.statics = {
     search = null,
     transcripts = null
   } = {}) {
-    const query = {};
+    const limitOption = parseInt(limit, 10);
+
+    let query = {};
+
     // @TODO use
     let numberOfPages = 0; //eslint-disable-line
-
     let dateDirection = -1;
-    if (createdAtBefore) query.date = { $lt: moment(createdAtBefore).toDate() };
+
+    if (createdAtBefore) {
+      query.date = {
+        $lt: moment(createdAtBefore).toDate(),
+      };
+    }
+
     if (createdAfter) {
       dateDirection = 1;
-      query.date = { $gt: moment(createdAfter).toDate() };
+      query.date = {
+        $gt: moment(createdAfter).toDate(),
+      };
     }
 
     if (tags.length > 0) query.tags = { $all: tags };
     if (categories.length > 0) query.categories = { $all: categories };
     if (slugs.length > 0) query.slug = { $in: slugs };
     if (topic) query.topics = { $in: topic };
+
     if (search) {
-      const titleSearch = {};
-      const searchWords = search.split(' ').join('|');
-      titleSearch['title.rendered'] = {
-        $regex: new RegExp(`${searchWords}`, 'i')
-      };
-
-      // @TODO: Add this when content doesn't have so much extra data
-      // let contentSearch = {}
-      // contentSearch['content.rendered'] = { $regex: new RegExp(`${search}`, 'i') };
-
-      query.$or = [titleSearch];
+      try {
+        query = await getSearchQuery({
+          search,
+          limit,
+          createdAtBefore,
+        });
+      } catch (err) {
+        console.error(err); //eslint-disable-line
+      }
     }
 
     if (transcripts === 'true') {
@@ -208,8 +218,6 @@ PostSchema.statics = {
     } else if (transcripts === 'false') {
       query.transcriptUrl = { $exists: false };
     }
-
-    const limitOption = parseInt(limit, 10);
 
     let sort = { date: dateDirection };
 
@@ -226,6 +234,7 @@ PostSchema.statics = {
     if (dateDirection === 1) {
       queryPromise.sort({ date: -1 });
     }
+
     if (!user) {
       return queryPromise.then(postsFound => postsFound);
     }
@@ -235,10 +244,10 @@ PostSchema.statics = {
       select: 'active',
       match: { userId: user._id }
     })
-    // .lean() // returns as plain object, but this will remove deafault values which is bad
+      // .lean() // returns as plain object, but this will remove deafault values which is bad
       .exec()
       .then((postsFound) => {
-      // add bookmarked
+        // add bookmarked
         const postsWithBookmarked = postsFound.map((post) => {
           const _post = post;
           const { bookmarkedByUser } = _post;
@@ -246,6 +255,7 @@ PostSchema.statics = {
           delete _post.bookmarkedByUser;
           return Object.assign({}, post.toObject(), { bookmarked });
         });
+
         // add vote info
         return this.addVotesForUserToPosts(postsWithBookmarked, user._id);
       });
