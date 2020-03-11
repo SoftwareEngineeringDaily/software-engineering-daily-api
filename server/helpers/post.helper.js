@@ -9,7 +9,9 @@ function replaceWithAdFree(post, fullUser) {
   post.rss = getPrivateRss(fullUser) // eslint-disable-line
 }
 
-async function getSearchQuery({ search, limit, createdAtBefore }) {
+async function getSearchQuery({
+  search, topic, limit, createdAtBefore
+}) {
   const client = algoliasearch(
     process.env.ALGOLIA_APP_ID,
     process.env.ALGOLIA_API_KEY,
@@ -22,6 +24,10 @@ async function getSearchQuery({ search, limit, createdAtBefore }) {
     filters: `date_timestamp < ${timestamp}`,
     hitsPerPage: limit || 10,
   };
+
+  if (topic) {
+    searchQuery.filters += ` AND topics:${topic}`;
+  }
 
   return new Promise((resolve, reject) => {
     index.search(searchQuery)
@@ -71,7 +77,10 @@ async function getAdFreePostsIfSubscribed(posts, fullUser) {
   // Here we do this so we can
   // fetch subscriptions:
   const _posts = posts.map(async (post) => {
-    return await addPostData(post, fullUser); // eslint-disable-line
+    return await addPostData( // eslint-disable-line
+      typeof post.toObject === 'function' ? post.toObject() : post,
+      fullUser,
+    );
   });
 
   return Promise.all(_posts);
