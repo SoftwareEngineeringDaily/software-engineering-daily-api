@@ -174,7 +174,6 @@ function upvote(req, res, next) {
       entity.score -= incrementValue;
       req.unliked = true;
     }
-
     promise = Bluebird.all([vote.save(), entity.save()]);
   } else {
     const newvote = new Vote();
