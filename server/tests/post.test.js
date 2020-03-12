@@ -170,9 +170,9 @@ describe('## Post APIs', () => {
         .expect(httpStatus.OK)
         .then((res) => {
           const like = res.body;
-          expect(like).to.have.property('likeCount').that.is.a('number');
-          expect(like).to.have.property('likeActive').that.is.a('boolean');
-          expect(like.likeActive).to.be.true; //eslint-disable-line
+          expect(like).to.have.property('score').that.is.a('number');
+          expect(like).to.have.property('upvoted').that.is.a('boolean');
+          expect(like.upvoted).to.be.true; //eslint-disable-line
           done();
         })
         .catch(done);
@@ -185,9 +185,9 @@ describe('## Post APIs', () => {
         .expect(httpStatus.OK)
         .then((res) => {
           const like = res.body;
-          expect(like).to.have.property('likeCount').that.is.a('number');
-          expect(like).to.have.property('likeActive').that.is.a('boolean');
-          expect(like.likeActive).to.be.false; //eslint-disable-line
+          expect(like).to.have.property('score').that.is.a('number');
+          expect(like).to.have.property('upvoted').that.is.a('boolean');
+          expect(like.upvoted).to.be.false; //eslint-disable-line
           done();
         })
         .catch(done);

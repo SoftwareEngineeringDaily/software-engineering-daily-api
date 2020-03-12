@@ -43,30 +43,31 @@ router.route('/search')
 
 router.route('/recommendations')
   .get(
-    expressJwt({ secret: config.jwtSecret })
-    , loadFullUser
-    , postCtrl.recommendations
+    expressJwt({ secret: config.jwtSecret }),
+    loadFullUser,
+    postCtrl.recommendations,
   );
 
 router.route('/:postId')
   .get(
-    expressJwt({ secret: config.jwtSecret, credentialsRequired: false })
-    , loadFullUser
-    , postCtrl.get
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
+    loadFullUser,
+    postCtrl.get,
   );
+
 // Get related links associated with postId
 router.route('/:postId/related-links')
   .get(
-    expressJwt({ secret: config.jwtSecret, credentialsRequired: false })
-    , relatedLinkCtrl.list
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
+    relatedLinkCtrl.list,
   );
 
 // Add a related-link to postId:
 router.route('/:postId/related-link')
   .post(
-    expressJwt({ secret: config.jwtSecret })
-    , validate(paramValidation.relatedLinkCreate)
-    , relatedLinkCtrl.create
+    expressJwt({ secret: config.jwtSecret }),
+    validate(paramValidation.relatedLinkCreate),
+    relatedLinkCtrl.create,
   );
 
 router.route('/:postId/like')
@@ -77,22 +78,20 @@ router.route('/:postId/like')
 
 router.route('/:postId/upvote')
   .post(
-    expressJwt({ secret: config.jwtSecret })
-    , transferField({ source: 'post', target: 'entity' })
-    , voteCtrl.findVote
-    , voteCtrl.upvote // normal upvoting via vote model
-    , postCtrl.upvote // special-case: uses racoon upvoting just for posts.
-    , voteCtrl.finish
+    expressJwt({ secret: config.jwtSecret }),
+    transferField({ source: 'post', target: 'entity' }),
+    voteCtrl.findVote,
+    voteCtrl.upvote, // normal upvoting via vote model
+    voteCtrl.finish,
   );
 
 router.route('/:postId/downvote')
   .post(
-    expressJwt({ secret: config.jwtSecret })
-    , transferField({ source: 'post', target: 'entity' })
-    , voteCtrl.findVote
-    , voteCtrl.downvote
-    , postCtrl.downvote
-    , voteCtrl.finish
+    expressJwt({ secret: config.jwtSecret }),
+    transferField({ source: 'post', target: 'entity' }),
+    voteCtrl.findVote,
+    voteCtrl.downvote,
+    voteCtrl.finish,
   );
 
 router.route('/:postId/bookmark')

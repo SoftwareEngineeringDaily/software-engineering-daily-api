@@ -1,5 +1,5 @@
 import algoliasearch from 'algoliasearch';
-import Like from '../models/like.model';
+import Vote from '../models/vote.model';
 import Favorite from '../models/favorite.model';
 import { getAdFreeMp3 } from '../helpers/mp3.helper';
 import { getPrivateRss } from '../helpers/rss.helper';
@@ -46,9 +46,10 @@ async function addPostData(post, fullUser) {
   const query = {
     userId: fullUser ? fullUser._id : null,
     postId: post._id,
+    active: true,
   };
 
-  const likeActive = await Like
+  const upvoted = await Vote
     .findOne(query)
     .exec(l => Promise.resolve(l));
 
@@ -56,10 +57,9 @@ async function addPostData(post, fullUser) {
     .findOne(query)
     .exec(l => Promise.resolve(l));
 
-  post.likeCount = post.likeCount || 0 // eslint-disable-line
+  post.upvoted = !!(upvoted) // eslint-disable-line
   post.totalFavorites = post.totalFavorites || 0 // eslint-disable-line
-  post.likeActive = !!(likeActive) // eslint-disable-line
-  post.bookmarkActive = !!(bookmark && bookmark.active) // eslint-disable-line
+  post.bookmarked = !!(bookmark && bookmark.active) // eslint-disable-line
   post.rss = '/rss/public/all' // eslint-disable-line
 
   if (fullUser && fullUser.subscription && fullUser.subscription.active) {

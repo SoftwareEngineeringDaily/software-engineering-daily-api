@@ -1,5 +1,5 @@
 import algoliasearch from 'algoliasearch';
-import Like from '../models/like.model';
+import Vote from '../models/vote.model';
 import Post from '../models/post.model';
 
 function syncAlgolia(query) {
@@ -50,13 +50,19 @@ function syncAlgolia(query) {
 async function likePost(req, res) {
   const { postId } = req.params;
   const { _id: userId } = req.user;
-  const query = { postId, userId };
-  const like = new Like(query);
-  const likeActive = await Like.findOne(query);
-  const likeCount = likeActive ? -1 : 1;
+  const query = {
+    postId,
+    userId,
+    direction: 'upvote',
+    active: true,
+  };
+
+  const like = new Vote(query);
+  const likeActive = await Vote.findOne(query);
+  const score = likeActive ? -1 : 1;
 
   if (likeActive) {
-    await Like.deleteOne({ _id: likeActive._id });
+    await Vote.deleteOne({ _id: likeActive._id });
   } else {
     await like.save();
   }
@@ -64,7 +70,7 @@ async function likePost(req, res) {
   Post
     .findOneAndUpdate(
       { _id: postId },
-      { $inc: { likeCount } },
+      { $inc: { score } },
       { new: true },
     ).exec(async (err, reply) => {
       if (err) {
@@ -72,13 +78,13 @@ async function likePost(req, res) {
       }
 
       syncAlgolia({
-        likeCount: reply.likeCount,
+        score: reply.score,
         objectID: reply.id,
       });
 
       return res.json({
-        likeCount: reply.likeCount,
-        likeActive: !(likeActive),
+        score: reply.score,
+        upvoted: !(likeActive),
       });
     });
 }
