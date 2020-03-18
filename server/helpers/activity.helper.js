@@ -38,14 +38,19 @@ async function getComments(userId, limitDate) {
   return Comment.find({
     author: userId,
     dateCreated: { $gte: limitDate.toDate() },
-    deleted: false
+    deleted: false,
   })
-    .select('rootEntity dateCreated highlight')
+    .select('rootEntity dateCreated highlight content mentions')
+    .populate('mentions')
     .sort('-dateCreated')
     .lean()
     .exec()
-    .map((item) => {
-      return { ...item, activityType: 'comment', groupDate: moment(item.dateCreated).format('YYYY-MM-DD') };
+    .map(async (item) => {
+      return {
+        ...item,
+        activityType: 'comment',
+        groupDate: moment(item.dateCreated).format('YYYY-MM-DD'),
+      };
     });
 }
 
@@ -60,7 +65,11 @@ async function getRelatedLinks(userId, limitDate) {
     .lean()
     .exec()
     .map((item) => {
-      return { ...item, activityType: 'relatedLink', groupDate: moment(item.dateCreated).format('YYYY-MM-DD') };
+      return {
+        ...item,
+        activityType: 'relatedLink',
+        groupDate: moment(item.dateCreated).format('YYYY-MM-DD'),
+      };
     });
 }
 
@@ -70,7 +79,11 @@ async function populatePosts(options) {
   for (let i = 0; i < options.data.length; i += 1) {
     const item = options.data[i];
     const find = item[options.field];
-    let post = options.cachedPosts.find(p => p[options.postField || '_id'].toString() === find.toString());
+
+    let post = options.cachedPosts.find(p => (
+      p[options.postField || '_id'].toString() === find.toString()
+    ));
+
     if (!post) {
       try {
         post = await getPost(find); // eslint-disable-line no-await-in-loop
@@ -84,6 +97,7 @@ async function populatePosts(options) {
         console.error(e);
       }
     }
+
     item.post = post; // eslint-disable-line no-param-reassign
   }
   return options.data;
