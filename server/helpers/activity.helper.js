@@ -40,12 +40,17 @@ async function getComments(userId, limitDate) {
     dateCreated: { $gte: limitDate.toDate() },
     deleted: false,
   })
-    .select('rootEntity dateCreated highlight content')
+    .select('rootEntity dateCreated highlight content mentions')
+    .populate('mentions')
     .sort('-dateCreated')
     .lean()
     .exec()
-    .map((item) => {
-      return { ...item, activityType: 'comment', groupDate: moment(item.dateCreated).format('YYYY-MM-DD') };
+    .map(async (item) => {
+      return {
+        ...item,
+        activityType: 'comment',
+        groupDate: moment(item.dateCreated).format('YYYY-MM-DD'),
+      };
     });
 }
 
@@ -60,7 +65,11 @@ async function getRelatedLinks(userId, limitDate) {
     .lean()
     .exec()
     .map((item) => {
-      return { ...item, activityType: 'relatedLink', groupDate: moment(item.dateCreated).format('YYYY-MM-DD') };
+      return {
+        ...item,
+        activityType: 'relatedLink',
+        groupDate: moment(item.dateCreated).format('YYYY-MM-DD'),
+      };
     });
 }
 
