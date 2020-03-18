@@ -38,9 +38,9 @@ async function getComments(userId, limitDate) {
   return Comment.find({
     author: userId,
     dateCreated: { $gte: limitDate.toDate() },
-    deleted: false
+    deleted: false,
   })
-    .select('rootEntity dateCreated highlight')
+    .select('rootEntity dateCreated highlight content')
     .sort('-dateCreated')
     .lean()
     .exec()
@@ -70,7 +70,11 @@ async function populatePosts(options) {
   for (let i = 0; i < options.data.length; i += 1) {
     const item = options.data[i];
     const find = item[options.field];
-    let post = options.cachedPosts.find(p => p[options.postField || '_id'].toString() === find.toString());
+
+    let post = options.cachedPosts.find(p => (
+      p[options.postField || '_id'].toString() === find.toString()
+    ));
+
     if (!post) {
       try {
         post = await getPost(find); // eslint-disable-line no-await-in-loop
@@ -84,6 +88,7 @@ async function populatePosts(options) {
         console.error(e);
       }
     }
+
     item.post = post; // eslint-disable-line no-param-reassign
   }
   return options.data;
