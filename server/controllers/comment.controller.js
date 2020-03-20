@@ -89,7 +89,7 @@ async function idsToUsers(ids) {
       const user = await User.get(id);
       users.push(user);
     } catch (e) {
-      console.log('e.idsToUsers', e);
+      console.log('e.idsToUsers', e); // eslint-disable-line
     }
   }
   /* eslint-disable no-await-in-loop */
@@ -135,7 +135,7 @@ async function update(req, res, next) {
           usersMentioned: usersWeShouldEmail
         });
       } catch (e) {
-        console.log('e', e);
+        console.log('e', e); // eslint-disable-line
       }
     } else {
       comment.mentions = [];
@@ -249,6 +249,7 @@ async function create(req, res, next) {
 
   const comment = new Comment();
   comment.content = content;
+
   let usersMentioned = [];
   if (mentions) {
     usersMentioned = await idsToUsers(mentions);
@@ -303,6 +304,7 @@ async function create(req, res, next) {
           content,
           userWhoReplied: user
         });
+
         return ForumThread.increaseCommentCount(entityId).then(() =>
           res.status(201).json({ result: commentSaved }));
       }
