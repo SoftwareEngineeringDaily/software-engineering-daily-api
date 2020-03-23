@@ -154,7 +154,9 @@ function show(req, res) {
 }
 
 function update(req, res) {
-  Topic.findByIdAndUpdate(req.params.topicId, { $set: req.body }, (err) => {
+  const data = req.body;
+  if (!data.maintainer) data.maintainer = null;
+  Topic.findByIdAndUpdate(req.params.topicId, { $set: data }, (err) => {
     if (err) return;
     res.send('Topic udpated.');
   });
