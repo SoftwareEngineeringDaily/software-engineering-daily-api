@@ -165,32 +165,47 @@ function list(req, res, next) {
  */
 function bookmark(req, res, next) {
   const { post } = req;
-  if (!post.totalFavorites) post.totalFavorites = 0;
+  const newFavorite = new Favorite();
 
-  Favorite.findOne({
-    postId: post._id,
-    userId: req.user._id
-  })
+  if (!post.totalFavorites) {
+    post.totalFavorites = 0;
+  }
+
+  Favorite
+    .findOne({
+      postId: post._id,
+      userId: req.user._id
+    })
     .then((favoriteFound) => {
       const favorite = favoriteFound;
 
       if (favorite) {
         post.totalFavorites = !favorite.active ? post.totalFavorites + 1 : post.totalFavorites - 1;
+        post.totalFavorites = Math.max(post.totalFavorites, 0);
         favorite.active = !favorite.active;
 
-        return Bluebird.all([favorite.save(), post.save()]);
+        return Bluebird.all([
+          favorite.save(),
+          post.save(),
+        ]);
       }
 
-      const newFavorite = new Favorite();
       newFavorite.postId = post._id;
       newFavorite.userId = req.user._id;
       post.totalFavorites += 1;
 
-      return Bluebird.all([newFavorite.save(), post.save()]);
+      return Bluebird.all([
+        newFavorite.save(),
+        post.save(),
+      ]);
     })
-    .then((favorite) => {
-      req.favorite = favorite[0]; // eslint-disable-line
-      return res.json(favorite[0]);
+    .then(([favorite, _post]) => {
+      req.favorite = favorite; // eslint-disable-line
+
+      return res.json({
+        ...favorite.toObject(),
+        totalFavorites: _post.totalFavorites || 0,
+      });
     })
     .catch((e) => {
       next(e);
@@ -241,34 +256,52 @@ function bookmark(req, res, next) {
  */
 function unbookmark(req, res, next) {
   const { post } = req;
-  if (!post.totalFavorites) post.totalFavorites = 0;
+  const newFavorite = new Favorite();
 
-  Favorite.findOne({
-    postId: post._id,
-    userId: req.user._id
-  })
+  if (!post.totalFavorites) {
+    post.totalFavorites = 0;
+  }
+
+  Favorite
+    .findOne({
+      postId: post._id,
+      userId: req.user._id
+    })
     .then((favoriteFound) => {
       const favorite = favoriteFound;
 
       if (favorite) {
         if (favorite.active) {
           post.totalFavorites -= 1;
+          post.totalFavorites = Math.max(post.totalFavorites, 0);
           favorite.active = false;
         }
 
-        return Bluebird.all([favorite.save(), post.save()]);
+        return Bluebird.all([
+          favorite.save(),
+          post.save(),
+        ]);
       }
 
-      const newFavorite = new Favorite();
       newFavorite.active = false;
       newFavorite.postId = post._id;
       newFavorite.userId = req.user._id;
 
-      return Bluebird.all([newFavorite.save()]);
+      post.totalFavorites -= 1;
+      post.totalFavorites = Math.max(post.totalFavorites, 0);
+
+      return Bluebird.all([
+        newFavorite.save(),
+        post.save(),
+      ]);
     })
-    .then((favorite) => {
+    .then(([favorite, _post]) => {
       req.favorite = favorite; // eslint-disable-line
-      return res.json(favorite[0]);
+
+      return res.json({
+        ...favorite.toObject(),
+        totalFavorites: _post.totalFavorites || 0,
+      });
     })
     .catch((e) => {
       next(e);

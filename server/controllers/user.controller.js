@@ -75,7 +75,6 @@ function get(req, res) {
 // eslint-disable-next-line
 function update(req, res, next) {
   const user = req.userLoaded;
-  const { username } = req.body;
   const avatarWasSet = req.body.isAvatarSet;
   // We gotta check a few things:
   // First we make sure we are the actual user we are modifying.
@@ -85,17 +84,20 @@ function update(req, res, next) {
       'Not enough  permissions to modify that user.',
       httpStatus.UNAUTHORIZED,
       true
-    ); //eslint-disable-line
+    );
     return next(err);
   }
 
   // Next we are making sure the username doens't already exist:
-  User.findOne({ username })
+  User.findById(user.id)
     .exec()
     .then((_user) => {
-      // eslint-disable-next-line
-      if (_user && _user.id != user.id) {
-        let err = new APIError('User already exists.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+      if (!_user) {
+        const err = new APIError(
+          'User not found.',
+          httpStatus.NOT_FOUND,
+          true
+        );
         return next(err);
       }
       // Using _.pick to only get a few properties:

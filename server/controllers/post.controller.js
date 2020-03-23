@@ -1,11 +1,8 @@
-// import mongoose from 'mongoose';
-
-
 import algoliasearch from 'algoliasearch';
 import Post from '../models/post.model';
 import {
   addPostData,
-  getAdFreePostsIfSubscribed
+  getAdFreePostsIfSubscribed,
 } from '../helpers/post.helper';
 
 /**
@@ -54,10 +51,15 @@ function load(req, res, next, id) {
  *         $ref: '#/responses/NotFound'
  */
 
-function get(req, res, next) {
-  // Load ad free version of podcast episode if subscrbied:
+async function get(req, res, next) {
+  const response = await addPostData(
+    req.post.toObject(),
+    req.fullUser,
+    next
+  );
 
-  return res.json(addPostData(req.post.toObject(), req.fullUser, next));
+  // Load ad free version of podcast episode if subscrbied:
+  return res.json(response);
 }
 
 /**
@@ -163,8 +165,12 @@ function list(req, res, next) {
   if (topic) {
     query.topic = [topic];
   }
+
   Post.list(query)
-    .then(posts => res.json(getAdFreePostsIfSubscribed(posts, req.fullUser, next)))
+    .then(async (posts) => {
+      const response = await getAdFreePostsIfSubscribed(posts, req.fullUser, next);
+      return res.json(response);
+    })
     .catch(e => next(e));
 }
 
@@ -232,10 +238,9 @@ function search(req, res, next) {
   let isEnd = false;
   let nextPage = 0;
   let slugs = [];
-  const {
-    query = '',
-    page = 0,
-  } = req.query;
+
+  const { query = '' } = req.query;
+  const page = parseInt(req.query.page || '0', 10);
 
   const client = algoliasearch(
     process.env.ALGOLIA_APP_ID,
@@ -256,12 +261,9 @@ function search(req, res, next) {
       slugs = reply.hits.map(h => h.slug);
 
       Post.list({ slugs })
-        .then((posts) => {
-          res.json({
-            posts: getAdFreePostsIfSubscribed(posts, req.fullUser, next),
-            isEnd,
-            nextPage
-          });
+        .then(async (posts) => {
+          posts = await getAdFreePostsIfSubscribed(posts, req.fullUser, next); //eslint-disable-line
+          res.json({ posts, isEnd, nextPage });
         })
         .catch(e => next(e));
     })

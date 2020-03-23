@@ -70,12 +70,6 @@ describe('## Auth APIs', () => {
     password: 'express'
   };
 
-  const invalidRegisterAddEmailCapitalizedUsername = {
-    username: 'React',
-    email: 'react@email.com',
-    password: 'express'
-  };
-
   let jwtToken;
 
   afterEach((done) => {
@@ -319,24 +313,6 @@ describe('## Auth APIs', () => {
           return request(app)
             .post('/api/auth/register')
             .send(invalidRegisterWithEmailUppercaseUniqueUsername)
-            .expect(httpStatus.UNAUTHORIZED);
-        })
-        .then((res) => {
-          expect(res.body.message).to.equal('User already exists.');
-          done();
-        })
-        .catch(done);
-    });
-
-    it('should return User already exists error - register without email - reregister with email and  capitalized username', (done) => {
-      request(app)
-        .post('/api/auth/register')
-        .send(validUserCredentials)
-        .expect(httpStatus.CREATED)
-        .then((res) => {  //eslint-disable-line
-          return request(app)
-            .post('/api/auth/register')
-            .send(invalidRegisterAddEmailCapitalizedUsername)
             .expect(httpStatus.UNAUTHORIZED);
         })
         .then((res) => {

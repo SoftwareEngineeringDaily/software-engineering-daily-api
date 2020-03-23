@@ -54,7 +54,6 @@ router.use('/companies', companyRoutes);
 router.use('/comments', commentRoutes);
 router.use('/votes', voteRoutes);
 router.use('/bookmarks', bookmarkRoutes);
-// todo: deprecate once all clients use bookmarks
 router.use('/favorites', bookmarkRoutes);
 router.use('/listened', listenedRoutes);
 router.use('/tags', tagsRoutes);

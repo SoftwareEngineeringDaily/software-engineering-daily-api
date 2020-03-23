@@ -4,6 +4,7 @@ import moment from 'moment';
 import httpStatus from 'http-status';
 import APIError from '../helpers/APIError';
 import Vote from './vote.model';
+import { getSearchQuery } from './../helpers/post.helper';
 import config from '../../config/config';
 
 const slug = require('mongoose-slug-generator');
@@ -43,6 +44,10 @@ mongoose.plugin(slug);
  *         type: integer
  *         description: Number of upvotes given to episode by logged in users
  *         example: 3
+ *       likeCount:
+ *         type: integer
+ *         description: Number of likes given to post by logged in users
+ *         example: 5
  *       upvote:
  *         type: boolean
  *         description: if authenticated, returns if user upvoted episode
@@ -64,6 +69,7 @@ const PostSchema = new mongoose.Schema({
   id: String,
   score: { type: Number, default: 0 },
   totalFavorites: { type: Number, default: 0 },
+  likeCount: { type: Number, default: 0 },
   title: {
     rendered: String,
   },
@@ -86,7 +92,6 @@ const PostSchema = new mongoose.Schema({
  * - validations
  * - virtuals
  */
-
 PostSchema.virtual('bookmarkedByUser', {
   ref: 'Favorite',
   localField: '_id',
@@ -121,8 +126,30 @@ PostSchema.statics = {
         return Promise.reject(err);
       });
   },
-  // standard list of fields to select for find Post queries
-  standardSelectForFind: 'content title date mp3 link score featuredImage guestImage upvoted downvoted tags categories thread excerpt transcriptUrl topics',
+
+  /**
+   * Standard list of fields to select for find Post queries
+   */
+  standardSelectForFind: [
+    'content',
+    'totalFavorites',
+    'title',
+    'date',
+    'mp3',
+    'link',
+    'score',
+    'featuredImage',
+    'guestImage',
+    'upvoted',
+    'downvoted',
+    'tags',
+    'categories',
+    'thread',
+    'excerpt',
+    'transcriptUrl',
+    'topics',
+  ].join(' '),
+
   /**
    * List posts in descending order of 'createdAt' timestamp.
    * @param {number} limit - Limit number of posts to be returned.
@@ -134,7 +161,7 @@ PostSchema.statics = {
    * @param {string} transcripts - Get posts with or without transcripts
    * @returns {Promise<Post[]>}
    */
-  list({
+  async list({
     slugs = [],
     limit = 10,
     createdAtBefore = null,
@@ -147,33 +174,42 @@ PostSchema.statics = {
     search = null,
     transcripts = null
   } = {}) {
-    const query = {};
+    const limitOption = parseInt(limit, 10);
+
+    let query = {};
+
     // @TODO use
     let numberOfPages = 0; //eslint-disable-line
-
     let dateDirection = -1;
-    if (createdAtBefore) query.date = { $lt: moment(createdAtBefore).toDate() };
+
+    if (createdAtBefore) {
+      query.date = {
+        $lt: moment(createdAtBefore).toDate(),
+      };
+    }
+
     if (createdAfter) {
       dateDirection = 1;
-      query.date = { $gt: moment(createdAfter).toDate() };
+      query.date = {
+        $gt: moment(createdAfter).toDate(),
+      };
     }
 
     if (tags.length > 0) query.tags = { $all: tags };
     if (categories.length > 0) query.categories = { $all: categories };
     if (slugs.length > 0) query.slug = { $in: slugs };
     if (topic) query.topics = { $in: topic };
+
     if (search) {
-      const titleSearch = {};
-      const searchWords = search.split(' ').join('|');
-      titleSearch['title.rendered'] = {
-        $regex: new RegExp(`${searchWords}`, 'i')
-      };
-
-      // @TODO: Add this when content doesn't have so much extra data
-      // let contentSearch = {}
-      // contentSearch['content.rendered'] = { $regex: new RegExp(`${search}`, 'i') };
-
-      query.$or = [titleSearch];
+      try {
+        query = await getSearchQuery({
+          search,
+          limit,
+          createdAtBefore,
+        });
+      } catch (err) {
+        console.error(err); //eslint-disable-line
+      }
     }
 
     if (transcripts === 'true') {
@@ -181,8 +217,6 @@ PostSchema.statics = {
     } else if (transcripts === 'false') {
       query.transcriptUrl = { $exists: false };
     }
-
-    const limitOption = parseInt(limit, 10);
 
     let sort = { date: dateDirection };
 
@@ -199,6 +233,7 @@ PostSchema.statics = {
     if (dateDirection === 1) {
       queryPromise.sort({ date: -1 });
     }
+
     if (!user) {
       return queryPromise.then(postsFound => postsFound);
     }
@@ -211,7 +246,7 @@ PostSchema.statics = {
       // .lean() // returns as plain object, but this will remove deafault values which is bad
       .exec()
       .then((postsFound) => {
-      // add bookmarked
+        // add bookmarked
         const postsWithBookmarked = postsFound.map((post) => {
           const _post = post;
           const { bookmarkedByUser } = _post;
@@ -219,14 +254,17 @@ PostSchema.statics = {
           delete _post.bookmarkedByUser;
           return Object.assign({}, post.toObject(), { bookmarked });
         });
+
         // add vote info
         return this.addVotesForUserToPosts(postsWithBookmarked, user._id);
       });
   },
+
   addVotesForUserToPosts(posts, userId) {
     const postIds = posts.map((post) => {
       return post._id;
     });
+
     return Vote.find({
       $or: [
         {
