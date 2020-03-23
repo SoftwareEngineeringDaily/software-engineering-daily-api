@@ -3,6 +3,7 @@ import Bluebird from 'bluebird';
 import Vote from '../models/vote.model';
 import Comment from '../models/comment.model';
 import { subscribePostFromEntity } from '../controllers/postSubscription.controller';
+import { subscribeTopicPage } from '../controllers/topicPageSubscription.controller';
 import { saveAndNotifyUser } from '../controllers/notification.controller';
 
 /**
@@ -283,24 +284,48 @@ async function subscribeAndNotify(vote, user) {
 
   if (user._id === comment.author) return;
 
-  const post = await subscribePostFromEntity(comment.rootEntity, user);
+  let payload;
 
-  if (!post) return;
+  if (!comment.entityType || comment.entityType === 'post') {
+    const post = await subscribePostFromEntity(comment.rootEntity, user);
 
-  const payload = {
-    notification: {
-      title: `New upvote from @${user.username}`,
-      body: post.title.rendered,
-      data: {
-        user: user.username,
-        commentAuthor: comment.author,
-        thread: post.thread,
-        slug: post.slug
-      }
-    },
-    type: 'upvote',
-    entity: post._id
-  };
+    if (!post) return;
+
+    payload = {
+      notification: {
+        title: `New upvote from @${user.name}`,
+        body: post.title.rendered,
+        data: {
+          user: user.username,
+          commentAuthor: comment.author,
+          thread: post.thread,
+          slug: post.slug
+        }
+      },
+      type: 'upvote',
+      entity: post._id
+    };
+  }
+
+  if (comment.entityType === 'topic') {
+    const topic = await subscribeTopicPage(comment.rootEntity, user);
+
+    if (!topic) return;
+
+    payload = {
+      notification: {
+        title: `New upvote from @${user.name}`,
+        body: topic.name,
+        data: {
+          user: user.username,
+          url: `/topic/${topic.slug}`,
+          slug: topic.slug
+        }
+      },
+      type: 'upvote',
+      entity: comment.rootEntity
+    };
+  }
 
   // just notify the commenter
   saveAndNotifyUser(payload, comment.author);

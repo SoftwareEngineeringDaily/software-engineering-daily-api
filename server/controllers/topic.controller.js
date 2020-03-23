@@ -125,6 +125,7 @@ function mostPopular(req, res) {
     });
 }
 
+// old, still used in mobile?
 function show(req, res) {
   Topic.find({ slug: req.params.slug }, async (err, topic) => {
     if (err) return;

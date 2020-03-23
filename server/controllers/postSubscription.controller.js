@@ -13,7 +13,7 @@ async function subscribePostFromEntity(entityId, user) {
   return post;
 }
 
-async function notifySubscribersFromEntity(entityId, user, payload, ignoreNotify) {
+async function notifyPostSubscribersFromEntity(entityId, user, payload, ignoreNotify) {
   const post = await getPostFromThread(entityId);
   if (!post) return;
   await notifySubscribers(post, user, payload, ignoreNotify);
@@ -54,7 +54,7 @@ async function notifySubscribers(post, user, payload, ignoreNotify = []) {
 
 export default {
   subscribePostFromEntity,
-  notifySubscribersFromEntity,
+  notifyPostSubscribersFromEntity,
   subscribePost,
   notifySubscribers
 };

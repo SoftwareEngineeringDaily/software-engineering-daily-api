@@ -7,7 +7,8 @@ import Comment from '../models/comment.model';
 import User from '../models/user.model';
 import ForumThread from '../models/forumThread.model';
 import ForumNotifications from '../helpers/forumNotifications.helper';
-import { subscribePostFromEntity, notifySubscribersFromEntity } from '../controllers/postSubscription.controller';
+import { subscribePostFromEntity, notifyPostSubscribersFromEntity } from '../controllers/postSubscription.controller';
+import { subscribeTopicPage, notifySubscribers } from '../controllers/topicPageSubscription.controller';
 import { saveAndNotifyUser } from '../controllers/notification.controller';
 /*
 * Load comment and append to req.
@@ -189,47 +190,85 @@ async function update(req, res, next) {
  *         $ref: '#/responses/NotFound'
  */
 
-async function subscribeAndNotifyCommenter(entityId, user, ignoreNotify) {
-  const post = await subscribePostFromEntity(entityId, user);
-
+async function subscribeAndNotifyCommenter(entityId, entityType, user, ignoreNotify) {
   const payload = {
     notification: {
-      title: `New comment from @${user.username}`,
-      body: post.title.rendered,
-      data: {
-        user: user.username,
-        slug: post.slug,
-        thread: post.thread
-      }
+      title: `New comment from @${user.name}`,
     },
     type: 'comment',
-    entity: post._id
   };
 
-  // notify all subscribers
-  await notifySubscribersFromEntity(entityId, user, payload, ignoreNotify);
+  if (entityType.toLowerCase() === 'forumthread') {
+    const post = await subscribePostFromEntity(entityId, user);
+    payload.notification.body = post.title.rendered;
+    payload.notification.data = {
+      user: user.username,
+      slug: post.slug,
+      url: `/post/${post._id}/${post.slug}`,
+      thread: post.thread
+    };
+    payload.entity = post._id;
+    // notify all subscribers
+    await notifyPostSubscribersFromEntity(entityId, user, payload, ignoreNotify);
+  }
+
+  if (entityType.toLowerCase() === 'topic') {
+    const topic = await subscribeTopicPage(entityId, user);
+    payload.notification.body = topic.name;
+    payload.notification.data = {
+      user: user.username,
+      slug: topic.slug,
+      url: `/topic/${topic.slug}`
+    };
+    payload.entity = entityId;
+    // notify all subscribers
+    await notifySubscribers(entityId, user, payload, ignoreNotify);
+  }
 }
 
-async function subscribeAndNotifyMentioned(entityId, mentioned, user) {
-  const post = await subscribePostFromEntity(entityId, mentioned);
+async function subscribeAndNotifyMentioned(entityId, entityType, mentioned, user) {
+  if (entityType.toLowerCase() === 'forumthread') {
+    const post = await subscribePostFromEntity(entityId, mentioned);
 
-  const payload = {
-    notification: {
-      title: `You were mentioned by @${user.username}`,
-      body: post.title.rendered,
-      data: {
-        user: user.username,
-        mentioned: mentioned._id,
-        slug: post.slug,
-        thread: post.thread
-      }
-    },
-    type: 'mention',
-    entity: post._id
-  };
+    const payload = {
+      notification: {
+        title: `You were mentioned by @${user.name}`,
+        body: post.title.rendered,
+        data: {
+          user: user.username,
+          mentioned: mentioned._id,
+          slug: post.slug,
+          url: `/post/${post._id}/${post.slug}`,
+          thread: post.thread
+        }
+      },
+      type: 'mention',
+      entity: post._id
+    };
 
-  // just notify the mentioned user
-  saveAndNotifyUser(payload, mentioned._id);
+    // just notify the mentioned user
+    saveAndNotifyUser(payload, mentioned._id);
+  }
+  if (entityType.toLowerCase() === 'topic') {
+    const topic = await subscribeTopicPage(entityId, mentioned);
+    const payload = {
+      notification: {
+        title: `You were mentioned by @${user.name}`,
+        body: topic.name,
+        data: {
+          user: user.username,
+          mentioned: mentioned._id,
+          url: `/topic/${topic.slug}`,
+          slug: topic.slug
+        }
+      },
+      type: 'mention',
+      entity: entityId
+    };
+
+    // just notify the mentioned user
+    saveAndNotifyUser(payload, mentioned._id);
+  }
 }
 
 async function create(req, res, next) {
@@ -245,7 +284,7 @@ async function create(req, res, next) {
     usersMentioned = await idsToUsers(mentions);
     comment.mentions = usersMentioned;
     usersMentioned.forEach((mentioned) => {
-      subscribeAndNotifyMentioned(entityId, mentioned, user);
+      subscribeAndNotifyMentioned(entityId, entityType, mentioned, user);
     });
   }
 
@@ -254,6 +293,7 @@ async function create(req, res, next) {
   }
 
   comment.rootEntity = entityId;
+  comment.entityType = entityType;
   // If this is a child comment we need to assign it's parent
   if (parentCommentId) {
     comment.parentComment = parentCommentId;
@@ -264,7 +304,7 @@ async function create(req, res, next) {
     .save()
     .then(async (commentSaved) => {
       // don't wait
-      subscribeAndNotifyCommenter(entityId, user, mentions);
+      subscribeAndNotifyCommenter(entityId, entityType, user, mentions);
 
       // TODO: result key is not consistent with other responses, consider changing this
       if (entityType && entityType.toLowerCase() === 'forumthread') {

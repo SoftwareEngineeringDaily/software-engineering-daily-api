@@ -2,6 +2,8 @@ import request from 'request';
 import { getMetadata } from 'page-metadata-parser';
 import jsdom from 'jsdom';
 import RelatedLink from '../models/relatedLink.model';
+import TopicPage from '../models/topicPage.model';
+import Topic from '../models/topic.model';
 
 const { JSDOM } = jsdom;
 
@@ -75,9 +77,9 @@ function remove(req, res, next) {
  *         $ref: '#/responses/NotFound'
  */
 
-function create(req, res, next) {
+async function create(req, res, next) {
   const { user } = req;
-  const { postId } = req.params;
+  const { postId, slug } = req.params;
   const { url, type = 'link' } = req.body;
   const options = {
     url,
@@ -86,6 +88,15 @@ function create(req, res, next) {
       'User-Agent': 'googlebot',
     }
   };
+
+  let topic;
+  let topicPage;
+  let entityType = 'post';
+  if (slug) {
+    topic = await Topic.findOne({ slug }).lean();
+    topicPage = await TopicPage.findOne({ topic: topic._id }).lean();
+    entityType = 'topic';
+  }
 
   request(options, (error, reply, body) => {
     if (error || !body || reply.statusCode !== 200) {
@@ -99,7 +110,9 @@ function create(req, res, next) {
     relatedLink.url = url;
     relatedLink.title = metadata.title || url;
     relatedLink.type = type;
-    relatedLink.post = postId;
+    relatedLink.entityType = entityType;
+    relatedLink.post = postId || undefined;
+    relatedLink.topicPage = (topicPage) ? topicPage._id : undefined;
     relatedLink.author = user._id;
 
     if (metadata.icon) {

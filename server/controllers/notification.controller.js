@@ -48,7 +48,7 @@ async function execSendNotification(user, next) {
       .exec();
 
     notifications.forEach((n) => {
-      if (['comment', 'upvote', 'mention'].includes(n.type)) {
+      if (['comment', 'upvote', 'mention'].includes(n.type) && !n.notification.data.url) {
         n.notification.data.url = `/post/${n.entity}/${n.notification.data.slug}`; // eslint-disable-line no-param-reassign
       }
     });

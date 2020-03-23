@@ -15,6 +15,9 @@ const notificationSchema = new mongoose.Schema({
   type: {
     type: String
   },
+  url: {
+    type: String
+  },
   entity: {
     type: String
   },
