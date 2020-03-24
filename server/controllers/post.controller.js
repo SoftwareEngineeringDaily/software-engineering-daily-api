@@ -260,7 +260,7 @@ function search(req, res, next) {
       isEnd = (nextPage === reply.nbPages);
       slugs = reply.hits.map(h => h.slug);
 
-      Post.list({ slugs })
+      Post.find({ slug: { $in: slugs } })
         .then(async (posts) => {
           posts = await getAdFreePostsIfSubscribed(posts, req.fullUser, next); //eslint-disable-line
           res.json({ posts, isEnd, nextPage });
