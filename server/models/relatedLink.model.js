@@ -68,6 +68,14 @@ const RelatedLinkSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Post'
   },
+  topicPage: {
+    type: Schema.Types.ObjectId,
+    ref: 'TopicPage'
+  },
+  entityType: {
+    type: String,
+    default: 'post'
+  },
   author: {
     type: Schema.Types.ObjectId,
     ref: 'User'

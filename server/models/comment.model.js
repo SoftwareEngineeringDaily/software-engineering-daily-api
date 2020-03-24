@@ -68,6 +68,9 @@ const CommentSchema = new Schema({
     type: Schema.Types.ObjectId // The entity that owns this comment
     // , ref: 'Post' | 'AMA'
   },
+  entityType: {
+    type: String
+  },
   mentions: [{
     type: Schema.Types.ObjectId,
     ref: 'User'

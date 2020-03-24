@@ -197,7 +197,7 @@ PostSchema.statics = {
 
     if (tags.length > 0) query.tags = { $all: tags };
     if (categories.length > 0) query.categories = { $all: categories };
-    if (slugs.length > 0) query.slug = { $in: slugs };
+    if (query.slugs && query.slugs.length) query.slug = { $in: slugs };
     if (topic) query.topics = { $in: topic };
 
     if (search) {

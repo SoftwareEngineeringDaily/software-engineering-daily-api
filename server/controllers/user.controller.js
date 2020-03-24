@@ -245,7 +245,7 @@ async function listNames(req, res, next) {
       .where('name').regex(new RegExp(req.query.name, 'i'))
       .where('name').ne('Software Engineer')
       .limit(100)
-      .select('name')
+      .select('name avatarUrl')
       .exec();
 
     return res.json(users);

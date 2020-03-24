@@ -71,7 +71,8 @@ const config = {
     secretKey: envVars.RECAPTCHA_SECRET_KEY
   },
   aws: {
-    profilePicBucketName: envVars.AWS_PROFILE_PIC_BUCKET_NAME
+    profilePicBucketName: envVars.AWS_PROFILE_PIC_BUCKET_NAME,
+    topicBucketName: envVars.AWS_TOPIC_BUCKET_NAME,
   },
   email: {
     fromAddress: envVars.EMAIL_FROM_ADDRESS

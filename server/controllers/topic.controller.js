@@ -42,6 +42,30 @@ async function create(req, res) {
     .catch(err => res.status(422).json(err.errmsg));
 }
 
+async function add(req, res) {
+  const exist = await Topic.findOne({ name: req.body.data.name });
+  if (exist) return res.status(400).send(`A ${req.body.data.name} Topic already exists`);
+  const topic = new Topic(req.body.data);
+  return topic
+    .save()
+    .then((topicSaved) => {
+      res.status(201).json(topicSaved);
+    })
+    .catch(err => res.status(400).send(err.errmsg));
+}
+
+async function get(req, res) {
+  const topic = await Topic.findById(req.params.topicId)
+    .populate('maintainer', 'name email website avatarUrl isAdmin bio');
+  res.send(topic);
+}
+
+async function getFull(req, res) {
+  const topics = await Topic.find()
+    .populate('maintainer', 'name email website avatarUrl isAdmin');
+  res.send(topics);
+}
+
 async function index(req, res) {
   if (req.query.userId) {
     const user = await User.findById(req.query.userId);
@@ -101,6 +125,7 @@ function mostPopular(req, res) {
     });
 }
 
+// old, still used in mobile?
 function show(req, res) {
   Topic.find({ slug: req.params.slug }, async (err, topic) => {
     if (err) return;
@@ -129,7 +154,9 @@ function show(req, res) {
 }
 
 function update(req, res) {
-  Topic.findByIdAndUpdate(req.params.id, { $set: req.body }, (err) => {
+  const data = req.body;
+  if (!data.maintainer) data.maintainer = null;
+  Topic.findByIdAndUpdate(req.params.topicId, { $set: data }, (err) => {
     if (err) return;
     res.send('Topic udpated.');
   });
@@ -355,6 +382,9 @@ async function addTopicsToPost(req, res) {
   */
 
 export default {
+  add,
+  get,
+  getFull,
   create,
   index,
   mostPopular,
