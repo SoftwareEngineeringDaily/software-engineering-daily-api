@@ -48,7 +48,7 @@ async function update(req, res) {
 
   if (!checkMaintainer(req, topic)) return res.status(403).send('Not authorized');
 
-  topicPage.history.push(new TopicPage.History({
+  topicPage.history = topicPage.history.concat(new TopicPage.History({
     user: req.user._id,
     event: req.body.event
   }));
