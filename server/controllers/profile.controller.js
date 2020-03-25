@@ -1,5 +1,6 @@
 import User from '../models/user.model';
 import { getActivityTree } from '../helpers/activity.helper';
+import { getBadges } from '../helpers/badge.helper';
 
 const activityDays = 10;
 
@@ -10,14 +11,27 @@ async function getPublic(req, res) {
     .lean()
     .exec();
 
+  const badges = await getBadges(userId);
   const activities = await getActivityTree(userId, activityDays);
 
-  return res.status(200).send({ user, activities, activityDays });
+  return res.status(200).send({
+    user,
+    activities,
+    badges,
+    activityDays
+  });
 }
 
 async function getActivities(req, res) {
-  const activities = await getActivityTree(req.params.userId, activityDays);
-  return res.status(200).send({ activities, activityDays });
+  const { userId } = req.params;
+  const badges = await getBadges(userId);
+  const activities = await getActivityTree(userId, activityDays);
+
+  return res.status(200).send({
+    activities,
+    badges,
+    activityDays
+  });
 }
 
 export default {
