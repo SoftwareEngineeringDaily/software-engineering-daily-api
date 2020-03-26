@@ -19,6 +19,7 @@ const TopicPageSchema = new mongoose.Schema({
   content: { type: String },
   dateCreated: { type: Date, default: Date.now },
   logo: { type: String, default: '' },
+  published: { type: Boolean, default: false },
   history: [TopicPageHistorySchema],
   images: [TopicPageImageSchema]
 });

@@ -1,6 +1,7 @@
 import Topic from '../models/topic.model';
 import Post from '../models/post.model';
 import User from '../models/user.model';
+import Tag from '../models/tag.model';
 
 /**
  * @swagger
@@ -64,6 +65,19 @@ async function getFull(req, res) {
   const topics = await Topic.find()
     .populate('maintainer', 'name email website avatarUrl isAdmin');
   res.send(topics);
+}
+
+async function episodes(req, res) {
+  const tag = await Tag.findOne({ slug: req.params.slug });
+  if (!tag) return res.status(404).send('No tag found for this topic');
+
+  const eps = await Post.find({ tags: { $in: [tag.id] } })
+    .select('slug title')
+    .sort('-date')
+    .lean()
+    .exec();
+
+  return res.json({ episodes: eps.slice(0, 10), total: eps.length });
 }
 
 async function index(req, res) {
@@ -386,6 +400,7 @@ export default {
   get,
   getFull,
   create,
+  episodes,
   index,
   mostPopular,
   show,

@@ -10,6 +10,12 @@ router.route('/:slug')
   .get(topicPageCtrl.showContent)
   .put(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.update);
 
+router.route('/:slug/publish')
+  .put(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.publish);
+
+router.route('/:slug/unpublish')
+  .put(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.unpublish);
+
 router.route('/:slug/edit')
   .get(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.get);
 

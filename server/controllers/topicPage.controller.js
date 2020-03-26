@@ -53,8 +53,9 @@ async function update(req, res) {
     event: req.body.event
   }));
 
-  topicPage.content = req.body.content;
+  if (req.body.content) topicPage.content = req.body.content;
   if (req.body.logo) topicPage.logo = req.body.logo;
+  topicPage.published = req.body.published || false;
 
   topic.topicPage = topicPage._id;
 
@@ -65,6 +66,20 @@ async function update(req, res) {
   } catch (e) {
     return res.status(404).send(`Error saving: ${e.message || e}`);
   }
+}
+
+async function publish(req, res) {
+  req.body.event = 'publish';
+  req.body.published = true;
+
+  update(req, res);
+}
+
+async function unpublish(req, res) {
+  req.body.event = 'unpublish';
+  req.body.published = false;
+
+  update(req, res);
 }
 
 async function showContent(req, res) {
@@ -156,6 +171,8 @@ async function deleteImage(req, res) {
 export default {
   get,
   update,
+  publish,
+  unpublish,
   showContent,
   relatedLinks,
   getImages,
