@@ -68,6 +68,39 @@ async function getFull(req, res) {
   res.send(topics);
 }
 
+function top(req, res) {
+  Topic.find({ status: 'active' }).sort({ postCount: -1 }).limit(parseInt(req.params.count, 10))
+    .then((topics) => {
+      res.send(topics);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || 'Some error occurred while retrieving topics.'
+      });
+    });
+}
+
+async function maintainerInterest(req, res) {
+  const admins = await User.find({ isAdmin: true }).lean().exec();
+
+  if (!admins.length) return;
+
+  admins.forEach((admin) => {
+    mailTemplate.topicInterest({
+      to: admin.email,
+      subject: 'New topic publish status',
+      data: {
+        user: admin.name,
+        maintainer: req.body.userName,
+        email: req.body.userEmail,
+        topic: req.body.topicName,
+      }
+    });
+  });
+
+  res.send('Registered');
+}
+
 async function episodes(req, res) {
   const tag = await Tag.findOne({ slug: req.params.slug });
   if (!tag) return res.status(404).send('No tag found for this topic');
@@ -426,6 +459,8 @@ export default {
   add,
   get,
   getFull,
+  top,
+  maintainerInterest,
   create,
   episodes,
   index,
