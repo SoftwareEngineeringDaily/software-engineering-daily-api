@@ -1,0 +1,46 @@
+{{#> sd-simple-template }}
+<h2>New publish status</h2>
+<p>Hi {{user}},</p>
+<p>We have a new topic page publish status:</p>
+<table>
+  <tr>
+    <td align="center">
+      <table style="border: 1px solid #ccc; border-radius: 6px; margin: 20px 0; color: #222;">
+        <tr>
+          <td align="left" style="font-weight: 700; width: 50%; border-bottom: 1px solid #ccc; padding: 10px;">
+            Status
+          </td>
+          <td align="right" style="width: 50%; border-bottom: 1px solid #ccc; padding: 10px;">
+            {{publish}}
+          </td>
+        </tr>
+        <tr>
+          <td align="left" style="font-weight: 700; width: 50%; border-bottom: 1px solid #ccc; padding: 10px;">
+            Maintainer
+          </td>
+          <td align="right" style="width: 50%; border-bottom: 1px solid #ccc; padding: 10px;">
+            {{maintainer}}
+          </td>
+        </tr>
+        <tr>
+          <td align="left" style="font-weight: 700; width: 50%; padding: 10px;">
+            Topic Page
+          </td>
+          <td align="right" style="width: 50%; padding: 10px;">
+            {{topicPage}}
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table>
+  <tr>
+    <td align="center">
+      <p>
+        <a href="{{topicLink}}" class="button">Go to topic</a>
+      </p>
+    </td>
+  </tr>
+</table>
+{{/sd-simple-template}}

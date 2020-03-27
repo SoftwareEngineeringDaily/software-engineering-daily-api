@@ -4,6 +4,8 @@ import TopicPage from '../models/topicPage.model';
 import RelatedLink from '../models/relatedLink.model';
 import { signS3 } from '../helpers/s3';
 import config from '../../config/config';
+import { mailTemplate } from '../helpers/mail';
+import User from '../models/user.model';
 
 function checkMaintainer(req, topic) {
   if (!topic.maintainer || !topic.maintainer._id) return false;
@@ -62,6 +64,7 @@ async function update(req, res) {
   try {
     await topic.save();
     await topicPage.save();
+    if (req.body.published !== undefined) mailAdminsPublish(topicPage, topic);
     return res.status(200).send('Saved');
   } catch (e) {
     return res.status(404).send(`Error saving: ${e.message || e}`);
@@ -80,6 +83,26 @@ async function unpublish(req, res) {
   req.body.published = false;
 
   update(req, res);
+}
+
+async function mailAdminsPublish(topicPage, topic) {
+  const admins = await User.find({ isAdmin: true }).lean().exec();
+
+  if (!admins.length) return;
+
+  admins.forEach((admin) => {
+    mailTemplate.topicPublish({
+      to: admin.email,
+      subject: 'New topic publish status',
+      data: {
+        user: admin.name,
+        maintainer: (topic.maintainer) ? topic.maintainer.name : '-',
+        publish: (topicPage.published) ? 'Published' : 'Unpublished',
+        topicPage: topic.name,
+        topicLink: `http://softwaredaily.com/topic/${topic.slug}`
+      }
+    });
+  });
 }
 
 async function showContent(req, res) {
