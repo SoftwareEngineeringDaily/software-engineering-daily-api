@@ -87,6 +87,7 @@
     "gulp-nodemon": "^2.4.2",
     "gulp-sourcemaps": "2.6.1",
     "gulp-util": "3.0.8",
+    "handlebars": "^4.7.3",
     "helmet": "^3.21.1",
     "http-status": "1.0.1",
     "istanbul": "1.0.0-alpha.2",

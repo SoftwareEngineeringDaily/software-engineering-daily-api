@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import { map } from 'lodash';
 import Job from '../models/job.model';
 import APIError from '../helpers/APIError';
-import sgMail from '../helpers/mail';
+import { sgMail } from '../helpers/mail';
 import transform from '../helpers/job.helper';
 import config from '../../config/config';
 

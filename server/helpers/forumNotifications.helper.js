@@ -1,5 +1,5 @@
 import each from 'lodash/each';
-import sgMail from './mail';
+import { sgMail } from './mail';
 import config from '../../config/config';
 import Comment from '../models/comment.model';
 import ForumThread from '../models/forumThread.model';

@@ -1,6 +1,8 @@
 import Topic from '../models/topic.model';
 import Post from '../models/post.model';
 import User from '../models/user.model';
+import Tag from '../models/tag.model';
+import { mailTemplate } from '../helpers/mail';
 
 /**
  * @swagger
@@ -64,6 +66,19 @@ async function getFull(req, res) {
   const topics = await Topic.find()
     .populate('maintainer', 'name email website avatarUrl isAdmin');
   res.send(topics);
+}
+
+async function episodes(req, res) {
+  const tag = await Tag.findOne({ slug: req.params.slug });
+  if (!tag) return res.status(404).send('No tag found for this topic');
+
+  const eps = await Post.find({ tags: { $in: [tag.id] } })
+    .select('slug title')
+    .sort('-date')
+    .lean()
+    .exec();
+
+  return res.json({ episodes: eps.slice(0, 10), total: eps.length });
 }
 
 async function index(req, res) {
@@ -153,13 +168,39 @@ function show(req, res) {
   });
 }
 
-function update(req, res) {
+async function update(req, res) {
   const data = req.body;
   if (!data.maintainer) data.maintainer = null;
-  Topic.findByIdAndUpdate(req.params.topicId, { $set: data }, (err) => {
+
+  const topic = await Topic.findById(req.params.topicId).lean().exec();
+
+  if (!topic) return res.status(404).send('Topic not found');
+
+  return Topic.findByIdAndUpdate(req.params.topicId, { $set: data }, (err) => {
     if (err) return;
     res.send('Topic udpated.');
+    if (
+      data.maintainer &&
+      (!topic.maintainer || topic.maintainer.toString() !== data.maintainer.toString())
+    ) {
+      mailNewMaintainer(topic, data.maintainer);
+    }
   });
+}
+
+async function mailNewMaintainer(topic, maintainerId) {
+  const user = await User.findById(maintainerId);
+
+  if (!user) return;
+
+  const topicLink = `http://softwaredaily.com/topic/${topic.slug}/edit`;
+
+  const send = mailTemplate.topicMaintainer({
+    to: user.email,
+    subject: 'New topic maintainer!',
+    data: { user: user.name, topic: topic.name, topicLink }
+  });
+  if (!send) console.error('[mailTemplate] Send e-mail failed!');
 }
 
 async function deleteTopic(req, res) {
@@ -386,6 +427,7 @@ export default {
   get,
   getFull,
   create,
+  episodes,
   index,
   mostPopular,
   show,

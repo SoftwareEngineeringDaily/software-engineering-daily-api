@@ -1,10 +1,7 @@
 import express from 'express';
 import expressJwt from 'express-jwt';
-import validate from 'express-validation';
 import topicCtrl from '../controllers/topic.controller';
 import topicPageCtrl from '../controllers/topicPage.controller';
-import relatedLinkCtrl from '../controllers/relatedLink.controller';
-import paramValidation from '../../config/param-validation';
 import config from '../../config/config';
 
 const router = express.Router(); // eslint-disable-line new-cap
@@ -20,12 +17,7 @@ router.route('/')
 router.route('/:slug')
   .get(topicPageCtrl.showContent);
 
-router.route('/:slug/related-links')
-  .get(topicPageCtrl.relatedLinks)
-  .post(
-    expressJwt({ secret: config.jwtSecret })
-    , validate(paramValidation.relatedLinkCreate)
-    , relatedLinkCtrl.create
-  );
+router.route('/:slug/episodes')
+  .get(topicCtrl.episodes);
 
 export default router;
