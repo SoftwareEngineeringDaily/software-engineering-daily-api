@@ -18,9 +18,11 @@ const getEpisodeCount = async (author) => {
     : 'Add 5 Related Episodes';
 
   return {
+    id: 'related-episode',
     count,
     label,
     percent,
+    tooltip: 'Add related episodes to episode pages',
     icon: completed ? 'fa-trophy' : 'fa-podcast',
     completed,
   };
@@ -44,9 +46,11 @@ const getHighlightCount = async (author) => {
     : 'Add 5 Highlights';
 
   return {
+    id: 'highlight',
     count,
     label,
     percent,
+    tooltip: 'Highlight interesting parts of an episode',
     icon: completed ? 'fa-trophy' : 'fa-quote-left',
     completed,
   };
@@ -67,9 +71,11 @@ const getTopicCount = async (maintainer) => {
     : 'Write 1 Topic Page';
 
   return {
+    id: 'topic',
     count,
     label,
     percent,
+    tooltip: 'Write a topic page summarizing a topic',
     icon: completed ? 'fa-trophy' : 'fa-pencil-square',
     completed,
   };
