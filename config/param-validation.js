@@ -63,6 +63,7 @@ export default {
       password: Joi.string().required()
     }
   },
+
   // POST /api/auth/register
   register: {
     body: {
