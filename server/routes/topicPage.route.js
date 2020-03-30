@@ -6,6 +6,10 @@ import loadFullUser from '../middleware/loadFullUser.middleware';
 
 const router = express.Router();
 
+
+router.route('/recentPages')
+  .get(topicPageCtrl.recentPages);
+
 router.route('/:slug')
   .get(topicPageCtrl.showContent)
   .put(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.update);

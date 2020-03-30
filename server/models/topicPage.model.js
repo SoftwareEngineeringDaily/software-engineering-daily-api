@@ -18,10 +18,17 @@ const TopicPageSchema = new mongoose.Schema({
   topic: { type: mongoose.Schema.Types.ObjectId, ref: 'Topic' },
   content: { type: String },
   dateCreated: { type: Date, default: Date.now },
+  dateUpdated: { type: Date, default: Date.now },
   logo: { type: String, default: '' },
   published: { type: Boolean, default: false },
   history: [TopicPageHistorySchema],
   images: [TopicPageImageSchema]
+});
+
+TopicPageSchema.pre('save', function onSave(next) {
+  const doc = this;
+  doc.dateUpdated = Date.now;
+  next();
 });
 
 // Export the model
