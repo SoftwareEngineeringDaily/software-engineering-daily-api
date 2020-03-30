@@ -191,6 +191,24 @@ async function deleteImage(req, res) {
   return res.send('Deleted');
 }
 
+async function recentPages(req, res) {
+  const topicPages = await TopicPage.find({ published: true })
+    .sort('-dateUpdated')
+    .populate('topic', 'maintainer status name slug')
+    .limit(50);
+
+  const result = topicPages.filter((topicPage) => {
+    return topicPage.topic && topicPage.topic.maintainer;
+  }).map((topicPage) => {
+    return {
+      name: topicPage.topic.name,
+      slug: topicPage.topic.slug
+    };
+  });
+
+  res.json(result.slice(0, 30));
+}
+
 export default {
   get,
   update,
@@ -200,5 +218,6 @@ export default {
   relatedLinks,
   getImages,
   signS3ImageUpload,
-  deleteImage
+  deleteImage,
+  recentPages
 };

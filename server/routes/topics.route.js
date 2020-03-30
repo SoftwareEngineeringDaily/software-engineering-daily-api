@@ -8,6 +8,9 @@ const router = express.Router(); // eslint-disable-line new-cap
 router.route('/mostPopular')
   .get(topicCtrl.mostPopular);
 
+router.route('/mostPosts')
+  .get(topicCtrl.mostPosts);
+
 router.route('/addTopicsToPost')
   .post(topicCtrl.addTopicsToPost);
 

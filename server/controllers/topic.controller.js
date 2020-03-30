@@ -173,6 +173,22 @@ function mostPopular(req, res) {
     });
 }
 
+function mostPosts(req, res) {
+  Topic.find({ status: 'active' }).sort({ postCount: -1 }).limit(40)
+    .populate('topicPage', 'published')
+    .then((topics) => {
+      const result = topics.filter((topic) => {
+        return !topic.topicPage || !topic.topicPage.published || !topic.maintainer;
+      });
+      res.send(result.slice(0, 10));
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || 'Some error occurred while retrieving topics.'
+      });
+    });
+}
+
 // old, still used in mobile?
 function show(req, res) {
   Topic.find({ slug: req.params.slug }, async (err, topic) => {
@@ -465,6 +481,7 @@ export default {
   episodes,
   index,
   mostPopular,
+  mostPosts,
   show,
   update,
   deleteTopic,
