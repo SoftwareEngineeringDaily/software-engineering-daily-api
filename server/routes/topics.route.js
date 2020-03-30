@@ -24,6 +24,12 @@ router.route('/addTopicsToUser')
 router.route('/searchTopics')
   .get(topicCtrl.searchTopics);
 
+router.route('/top/:count')
+  .get(topicCtrl.top);
+
+router.route('/interest')
+  .post(topicCtrl.maintainerInterest);
+
 router.route('/:slug')
   .get(topicCtrl.show)
   // .put(expressJwt({ secret: config.jwtSecret }), topicCtrl.update)

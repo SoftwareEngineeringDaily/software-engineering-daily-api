@@ -7,7 +7,7 @@ sgMail.setApiKey(config.sendGridKey);
 
 const options = {
   templatesFiles: ['sd-simple-template'],
-  bodiesFiles: ['sd-simple-body', 'sd-body-topic-maintainer', 'sd-body-topic-publish'],
+  bodiesFiles: ['sd-simple-body', 'sd-body-topic-maintainer', 'sd-body-topic-publish', 'sd-body-topic-interest'],
   mailTemplates: [{
     name: 'simple',
     body: 'sd-simple-body'
@@ -17,6 +17,9 @@ const options = {
   }, {
     name: 'topicPublish',
     body: 'sd-body-topic-publish'
+  }, {
+    name: 'topicInterest',
+    body: 'sd-body-topic-interest'
   }]
 };
 
