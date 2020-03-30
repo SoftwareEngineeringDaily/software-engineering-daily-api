@@ -48,6 +48,10 @@ async function getActivityTree(userId, days) {
 
   const activities = [].concat(postComments, topicComments, relatedLinks);
 
+  if (!activities.length) {
+    return null;
+  }
+
   activities.sort((o1, o2) => {
     return o1.dateCreated >= o2.dateCreated ? -1 : 1;
   });
