@@ -106,7 +106,8 @@ function update(req, res, next) {
       Object.assign(user, newValues);
       if (avatarWasSet) {
         const S3_BUCKET = config.aws.profilePicBucketName;
-        user.avatarUrl = `https://${S3_BUCKET}.s3.amazonaws.com/${user._id}`;
+        // timestamp to force browser update. This will force a new browser cache
+        user.avatarUrl = `https://${S3_BUCKET}.s3.amazonaws.com/${user._id}?${Date.now()}`;
       }
       return user.save().then((newUser) => {
         const userMinusPassword = Object.assign({}, newUser, { password: null });
