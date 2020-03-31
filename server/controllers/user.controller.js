@@ -228,11 +228,16 @@ async function list(req, res, next) {
     }
 
     const users = await query
-      .limit(100)
+      .limit(300)
+      .where('name').ne('Software Engineer')
       .select('-password')
       .exec();
 
-    return res.json(users);
+    const filtered = users.filter((user) => {
+      return !/(Software Engineer|Software Developer-)/.test(user);
+    });
+
+    return res.json(filtered.slice(0, 100));
   } catch (err) {
     return next(err);
   }
