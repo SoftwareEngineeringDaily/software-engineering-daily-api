@@ -237,7 +237,7 @@ async function list(req, res, next) {
       return !/(Software Engineer|Software Developer-)/.test(user);
     });
 
-    return res.json(filtered.slice(0, 100));
+    return res.json(filtered.slice(0, 200));
   } catch (err) {
     return next(err);
   }
