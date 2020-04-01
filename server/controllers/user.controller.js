@@ -8,6 +8,7 @@ import User from '../models/user.model';
 import PasswordReset from '../models/passwordReset.model';
 import config from '../../config/config';
 import { getPrivateRss } from '../helpers/rss.helper';
+import searchParser from '../helpers/searchParser.helper';
 
 const sgMail = require('@sendgrid/mail');
 // TODO: move this out of here, probably in it's own file:
@@ -212,32 +213,21 @@ function requestPasswordReset(req, res, next) {
 
 async function list(req, res, next) {
   try {
-    const { username, email, name } = req.query;
+    const find = searchParser.parse(req, { regexFields: ['name', 'email'] });
 
-    const query = User.find();
-    if (username) {
-      query.where('username').regex(new RegExp(username, 'i'));
-    }
-
-    if (email) {
-      query.where('email').regex(new RegExp(email, 'i'));
-    }
-
-    if (name) {
-      query.where('name').regex(new RegExp(name, 'i'));
-    }
+    const query = User.find(find);
 
     const users = await query
-      .limit(300)
+      .limit(200)
       .where('name').ne('Software Engineer')
       .select('-password')
       .exec();
 
     const filtered = users.filter((user) => {
-      return !/(Software Engineer|Software Developer-)/.test(user);
+      return !/(Software Developer-)/.test(user);
     });
 
-    return res.json(filtered.slice(0, 200));
+    return res.json(filtered.slice(0, 150));
   } catch (err) {
     return next(err);
   }
