@@ -180,6 +180,9 @@ async function callback() {
     });
   });
 
+  publicFeedConfig._content.channel = publicFeedConfig._content.channel.slice(0, 300);
+  privateFeedConfig._content.channel = privateFeedConfig._content.channel.slice(0, 300);
+
   const xmlOptions = {
     header: true,
     indent: '  '
