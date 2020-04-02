@@ -175,6 +175,40 @@ async function createImage(req, res, result) {
   res.end();
 }
 
+async function signS3LogoUpload(req, res) {
+  const { fileType } = req.body;
+  const randomNumberString = `${Math.random()}`;
+  const newFileName = `topic_images/${randomNumberString.replace('.', '_')}`;
+
+  const cbSuccess = (result) => {
+    changeLogo(req, res, result);
+  };
+
+  // eslint-disable-next-line
+  const cbError = err => {
+    if (err) {
+      console.log(err); // eslint-disable-line      
+      return res.status(httpStatus.SERVICE_UNAVAILABLE).send('There was a problem getting a signed url');
+    }
+  };
+  signS3(config.aws.topicBucketName, fileType, newFileName, cbSuccess, cbError);
+}
+
+async function changeLogo(req, res, result) {
+  const { slug } = req.params;
+  const topic = await Topic.findOne({ slug });
+
+  const topicPage = await TopicPage.findOne({ topic: topic._id });
+
+  if (topicPage) {
+    topicPage.logo = result.url;
+    await topicPage.save();
+  }
+
+  res.write(JSON.stringify(result));
+  res.end();
+}
+
 async function deleteImage(req, res) {
   const { slug, imageId } = req.params;
   const topic = await Topic.findOne({ slug });
@@ -218,6 +252,7 @@ export default {
   relatedLinks,
   getImages,
   signS3ImageUpload,
+  signS3LogoUpload,
   deleteImage,
   recentPages
 };
