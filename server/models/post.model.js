@@ -138,6 +138,7 @@ PostSchema.statics = {
     'mp3',
     'link',
     'score',
+    'slug',
     'featuredImage',
     'guestImage',
     'upvoted',
