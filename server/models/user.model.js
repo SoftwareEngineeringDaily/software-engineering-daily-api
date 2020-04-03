@@ -29,6 +29,9 @@ const UserSchema = new mongoose.Schema({
     type: String
     // , required: true // Should be requied but need to update all clients
   },
+  lastName: {
+    type: String
+  },
   avatarUrl: {
     type: String
   },
@@ -173,7 +176,7 @@ UserSchema.statics = {
   isValidHash: function validPassword({ original, hash }) {
     return bcrypt.compareSync(original, hash);
   },
-  updatableFields: ['username', 'website', 'bio', 'publicEmail', 'twitter', 'github', 'linkedin', 'about', 'name', 'email']
+  updatableFields: ['username', 'website', 'bio', 'publicEmail', 'twitter', 'github', 'linkedin', 'about', 'name', 'lastName', 'email']
 };
 
 /**

@@ -70,6 +70,7 @@ export default {
       password: Joi.string().required(),
       // Should be required once mobile apps get updated:
       name: Joi.string(),
+      lastName: Joi.string(),
       bio: Joi.string().allow(''),
       website: Joi.string().allow(''),
       email: Joi.string().email().allow('')
