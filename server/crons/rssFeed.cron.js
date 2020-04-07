@@ -122,7 +122,8 @@ async function callback() {
         enclosure: {
           _attrs: {
             type: 'audio/mpeg',
-            url: post.mp3
+            url: post.mp3,
+            length: '1000'
           }
         },
         guid: parseInt(post.id, 10).toString(36),
@@ -160,7 +161,8 @@ async function callback() {
         enclosure: {
           _attrs: {
             type: 'audio/mpeg',
-            url: privateMp3
+            url: privateMp3,
+            length: '1000'
           }
         },
         guid: parseInt(post.id, 10).toString(36),
