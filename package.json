@@ -94,7 +94,7 @@
     "joi": "10.6.0",
     "jsdom": "^16.2.0",
     "jsonwebtoken": "8.0.0",
-    "jstoxml": "^1.6.0",
+    "jstoxml": "1.6.5",
     "lodash": "^4.17.15",
     "method-override": "2.3.9",
     "mocha": "3.5.0",

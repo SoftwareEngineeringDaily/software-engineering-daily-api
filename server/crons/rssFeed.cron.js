@@ -18,7 +18,7 @@ const publicFeedConfig = {
   _content: {
     channel: [
       { title: 'Software Daily' },
-      { link: 'https://softwaredaily.com' },
+      { link: 'https://www.softwaredaily.com' },
       { language: 'en-us' },
       { copyright: '&#169; SoftwareDaily.com' },
       { lastBuildDate: () => new Date() },
