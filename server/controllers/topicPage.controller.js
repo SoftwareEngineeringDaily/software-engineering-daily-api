@@ -16,7 +16,7 @@ function checkMaintainer(req, topic) {
 
 async function get(req, res) {
   const topic = await Topic.findOne({ slug: req.params.slug })
-    .populate('maintainer', 'name avatarUrl isAdmin');
+    .populate('maintainer', 'name lastName avatarUrl isAdmin');
 
   if (!topic) return res.status(404).send(`Topic ${req.params.slug} not found`);
 
@@ -40,7 +40,7 @@ async function get(req, res) {
 
 async function update(req, res) {
   const topic = await Topic.findOne({ slug: req.params.slug })
-    .populate('maintainer', 'name email avatarUrl isAdmin');
+    .populate('maintainer', 'name lastName email avatarUrl isAdmin');
 
   if (!topic) return res.status(404).send(`Topic ${req.params.slug} not found`);
 
@@ -107,7 +107,7 @@ async function mailAdminsPublish(topicPage, topic) {
 
 async function showContent(req, res) {
   const topic = await Topic.findOne({ slug: req.params.slug })
-    .populate('maintainer', 'name avatarUrl');
+    .populate('maintainer', 'name lastName avatarUrl');
 
   if (!topic) return res.status(404).send(`Topic ${req.params.slug} not found`);
 
