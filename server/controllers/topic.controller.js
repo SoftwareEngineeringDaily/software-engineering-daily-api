@@ -58,13 +58,13 @@ async function add(req, res) {
 
 async function get(req, res) {
   const topic = await Topic.findById(req.params.topicId)
-    .populate('maintainer', 'name email website avatarUrl isAdmin bio');
+    .populate('maintainer', 'name lastName email website avatarUrl isAdmin bio');
   res.send(topic);
 }
 
 async function getFull(req, res) {
   const topics = await Topic.find()
-    .populate('maintainer', 'name email website avatarUrl isAdmin');
+    .populate('maintainer', 'name lastName email website avatarUrl isAdmin');
   res.send(topics);
 }
 
