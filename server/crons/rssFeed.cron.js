@@ -8,7 +8,7 @@ import app from '../../config/express';
 import Post from '../models/post.model';
 
 // RSS header
-const publicFeedConfig = {
+const rawFeedConfig = {
   _name: 'rss',
   _attrs: {
     version: '2.0',
@@ -56,8 +56,6 @@ const publicFeedConfig = {
   }
 };
 
-const privateFeedConfig = cloneDeep(publicFeedConfig);
-
 function decode(text) {
   return (text || '')
     .replace(/&amp;/g, '&')
@@ -84,6 +82,9 @@ async function callback() {
   posts.sort((o1, o2) => {
     return o1.date >= o2.date ? -1 : 1;
   });
+
+  const publicFeedConfig = cloneDeep(rawFeedConfig);
+  const privateFeedConfig = cloneDeep(rawFeedConfig);
 
   const lastPost = posts[posts.length - 1];
 
