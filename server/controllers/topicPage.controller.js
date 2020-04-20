@@ -107,7 +107,7 @@ async function mailAdminsPublish(topicPage, topic) {
 
 async function showContent(req, res) {
   const topic = await Topic.findOne({ slug: req.params.slug })
-    .populate('maintainer', 'name lastName avatarUrl');
+    .populate('maintainer', 'name twitter lastName avatarUrl');
 
   if (!topic) return res.status(404).send(`Topic ${req.params.slug} not found`);
 
