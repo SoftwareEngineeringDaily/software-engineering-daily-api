@@ -1,0 +1,56 @@
+{{#if comment.parentComment}}
+<table style="margin: 20px 0;">
+    <tr>
+        <td valign="center" style="padding: 20px 20px 10px 20px; width: 28px; background-color: #f8f9fa;">
+            <div style="background: url({{comment.parentComment.author.avatarUrl}}) center center / cover no-repeat; border-radius: 50%; width: 28px; height: 28px; display: inline-block;"></div>            
+        </td>
+        <td valign="center" style="padding: 20px 20px 10px 0; background-color: #f8f9fa; color: #666 !important; front-size: 14px;">            
+            {{comment.parentComment.author.fullName}}
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" valign="center" style="padding: 10px 20px 20px 20px;; background-color: #f8f9fa; color: #888 !important;">
+            {{{comment.parentComment.content}}}
+        </td>
+    </tr>
+    <tr>
+        <td style="width: 28px; padding: 10px 20px 20px 20px; background-color: #f8f9fa;">
+            &nbsp;
+        </td>
+        <td style="background-color: #f8f9fa;">
+            <table style="margin: 20px 0; border-left: 1px solid #cecece;">
+                <tr>
+                    <td valign="center" style="padding: 20px 20px 10px 20px; width: 28px; background-color: #f8f9fa;">
+                        <div style="background: url({{commenter.avatarUrl}}) center center / cover no-repeat; border-radius: 50%; width: 28px; height: 28px; display: inline-block;"></div>            
+                    </td>
+                    <td valign="center" style="padding: 20px 20px 10px 0; background-color: #f8f9fa; color: #666 !important; front-size: 14px;">            
+                        {{commenter.fullName}}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" valign="center" style="padding: 10px 20px 20px 20px;; background-color: #f8f9fa; color: #888 !important;">
+                        {{{comment.content}}}
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+{{else}}
+<table style="margin: 20px 0;">
+    <tr>
+        <td valign="center" style="padding: 20px 20px 10px 20px; width: 28px; background-color: #f8f9fa;">
+            <div style="background: url({{commenter.avatarUrl}}) center center / cover no-repeat; border-radius: 50%; width: 28px; height: 28px; display: inline-block;"></div>            
+        </td>
+        <td valign="center" style="padding: 20px 20px 10px 0; background-color: #f8f9fa; color: #666 !important; front-size: 14px;">            
+            {{commenter.fullName}}
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" valign="center" style="padding: 10px 20px 20px 20px;; background-color: #f8f9fa; color: #888 !important;">
+            {{{comment.content}}}
+        </td>
+    </tr>
+</table>
+{{/if}}

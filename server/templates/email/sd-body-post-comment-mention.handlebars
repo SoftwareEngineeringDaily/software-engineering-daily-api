@@ -1,0 +1,20 @@
+{{#> sd-simple-template }}
+<h2>New mention</h2>
+<p>Hi {{user}},</p>
+<p><b>{{commenter.name}}</b> mentioned you in a comment.</p>
+
+{{> sd-template-comment}}
+
+<table>
+    <tr>
+        <td align="center">
+            <p>
+                <a href="{{entityLink}}" class="button">Go to {{entityName}}</a>
+            </p>
+        </td>
+    </tr>
+</table>
+<div style="text-align: center; padding: 0px;">
+    <a href="{{unsubscribeLink}}" style="color: #cccccc !important;">Unsubscribe</a>
+</div>
+{{/sd-simple-template}}

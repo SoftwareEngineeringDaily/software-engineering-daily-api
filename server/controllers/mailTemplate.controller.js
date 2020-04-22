@@ -74,9 +74,12 @@ class MailTemplate {
   }
 
   sendMail(options, template) {
+    const content = (options.data) ? template.apply(this, [options.data]) : '';
+
     const mailMsg = {
       from: options.from || config.email.fromAddress,
-      html: (options.data) ? template.apply(this, [options.data]) : '',
+      html: content,
+      text: options.text || content.replace(/(<([^>]+)>)/ig, ''),
       ...options
     };
 
