@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import passport from 'passport';
+import request from 'request';
 import jwt from 'jsonwebtoken';
 import httpStatus from 'http-status';
 import ReCAPTCHA from 'recaptcha2';
@@ -8,7 +9,7 @@ import config from '../../config/config';
 import User from '../models/user.model';
 import { signS3 } from '../helpers/s3';
 
-const http = require('http'); // For mailchimp api call
+// const http = require('http'); // For mailchimp api call
 require('dotenv').config();
 
 const reCaptcha = new ReCAPTCHA({
@@ -116,6 +117,39 @@ function loginWithEmail(req, res, next) {
     });
 }
 
+function registerLinkedIn(req, res, next) {
+  const url = 'https://api.linkedin.com/v2/me';
+
+  console.log('req.access_token ', req.access_token); //eslint-disable-line
+
+  request
+    .get(url, {
+      headers: {
+        Authorization: `Bearer ${req.access_token}`,
+        'content-type': 'application/x-www-form-urlencoded'
+      },
+    }, (err, response, body) => {
+      console.log('ERROR? ', err); //eslint-disable-line
+      console.log('BODY ', body); //eslint-disable-line
+
+      try {
+        if (!err && response.statusCode === 200) {
+          const reply = JSON.parse(body);
+
+          console.log('REPLY ', reply); //eslint-disable-line
+
+          // User.findOrCreate()
+
+          return next();
+        }
+
+        return res.status(response.statusCode).json(err);
+      } catch (e) {
+        return res.status(500).json(err || e);
+      }
+    });
+}
+
 /**
  * @swagger
  *   /auth/register:
@@ -150,7 +184,7 @@ function loginWithEmail(req, res, next) {
 
 function register(req, res, next) {
   const { password } = req.body;
-  const newsletterSignup = req.body.newsletter;
+  // const newsletterSignup = req.body.newsletter;
 
   // a simple, non conflict, random id. Ex: K7DRS1HR
   const username = (Date.now() + Math.floor(Math.random() * Math.floor(99999)))
@@ -161,6 +195,7 @@ function register(req, res, next) {
     let err = new APIError('Password is required to register.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
     return next(err);
   }
+
   const { email } = req.body;
   const queryIfEmail = {
     $or: [
@@ -182,43 +217,43 @@ function register(req, res, next) {
 
   // Sign up user for mailchimp list (if checked)
   // console.log(`newsletter status:${newsletterSignup}`);
-  try {
-    if (newsletterSignup) {
-      const postData = JSON.stringify({ status: 'subscribed', email_address: email });
-      // Build route because it varies based on API key
-      const hostname = `${config.mailchimp.mailchimpKey.split('-')[1]}.api.mailchimp.com`;
-      // Build POST options
-      const options = {
-        hostname,
-        path: `/3.0/lists/${config.mailchimp.mailchimpList}/members`,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `apikey ${config.mailchimp.mailchimpKey}`,
-          'Content-Length': Buffer.byteLength(postData)
-        }
-      };
-      const mailchimpReq = http.request(options, (mailchimpRes) => {
-        mailchimpRes.setEncoding('utf8');
-        mailchimpRes.on('data', (body) => {
-          console.log(`Body: ${body}`);
-        });
-      });
-      mailchimpReq.on('error', (e) => {
-        console.log(`mailchimp error: ${e}`);
-        const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
-        console.log('newsletter error', error);
-        // return next(error); // This will prevent registration which we dont want
-      });
-      mailchimpReq.write(postData);
-      mailchimpReq.end();
-    }
-  } catch (e) {
-    console.log(`mailchimp error: ${e}`);
-    const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
-    console.log('newsletter error2', error);
-    // return next(error); // This will prevent registration which we dont want
-  }
+  // try {
+  //   if (newsletterSignup) {
+  //     const postData = JSON.stringify({ status: 'subscribed', email_address: email });
+  //     // Build route because it varies based on API key
+  //     const hostname = `${config.mailchimp.mailchimpKey.split('-')[1]}.api.mailchimp.com`;
+  //     // Build POST options
+  //     const options = {
+  //       hostname,
+  //       path: `/3.0/lists/${config.mailchimp.mailchimpList}/members`,
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: `apikey ${config.mailchimp.mailchimpKey}`,
+  //         'Content-Length': Buffer.byteLength(postData)
+  //       }
+  //     };
+  //     const mailchimpReq = http.request(options, (mailchimpRes) => {
+  //       mailchimpRes.setEncoding('utf8');
+  //       mailchimpRes.on('data', (body) => {
+  //         console.log(`Body: ${body}`);
+  //       });
+  //     });
+  //     mailchimpReq.on('error', (e) => {
+  //       console.log(`mailchimp error: ${e}`);
+  //       const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
+  //       console.log('newsletter error', error);
+  //       // return next(error); // This will prevent registration which we dont want
+  //     });
+  //     mailchimpReq.write(postData);
+  //     mailchimpReq.end();
+  //   }
+  // } catch (e) {
+  //   console.log(`mailchimp error: ${e}`);
+  //   const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
+  //   console.log('newsletter error2', error);
+  //   // return next(error); // This will prevent registration which we dont want
+  // }
 
   User.findOne(userQuery)
     .exec()
@@ -230,7 +265,8 @@ function register(req, res, next) {
 
       const newUser = new User();
       newUser.password = User.generateHash(password);
-      newUser.signedupForNewsletter = newsletterSignup; // Probably works
+      // newUser.signedupForNewsletter = newsletterSignup; // Probably works
+
       // We assign a set of "approved fields"
       const newValues = { username, ..._.pick(req.body, User.updatableFields) };
       Object.assign(newUser, newValues);
@@ -251,6 +287,7 @@ function register(req, res, next) {
           message: err.message
         });
       }
+
       // return res.status(400).json({err: err});
       const error = new APIError('Authentication error', httpStatus.UNAUTHORIZED, true);
       return next(error);
@@ -286,6 +323,7 @@ function signS3AvatarUpload(req, res, next) {
  *
  */
 function socialAuth(req, res) {
+  console.log('req.user ', req.user); //eslint-disable-line
   const token = jwt.sign(req.user.toJSON(), config.jwtSecret, { expiresIn: '40000h' });
   return res.status(200).json({
     token
@@ -324,6 +362,7 @@ export default {
   loginWithEmail,
   getRandomNumber,
   register,
+  registerLinkedIn,
   socialAuth,
   signS3,
   signS3AvatarUpload,

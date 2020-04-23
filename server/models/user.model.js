@@ -173,7 +173,19 @@ UserSchema.statics = {
   isValidHash: function validPassword({ original, hash }) {
     return bcrypt.compareSync(original, hash);
   },
-  updatableFields: ['username', 'website', 'bio', 'publicEmail', 'twitter', 'github', 'linkedin', 'about', 'name', 'email']
+
+  updatableFields: [
+    'username',
+    'website',
+    'bio',
+    'publicEmail',
+    'twitter',
+    'github',
+    'linkedin',
+    'about',
+    'name',
+    'email',
+  ],
 };
 
 /**

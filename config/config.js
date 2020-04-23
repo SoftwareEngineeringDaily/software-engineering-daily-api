@@ -66,6 +66,10 @@ const config = {
     mailchimpKey: envVars.MAILCHIMP_KEY,
     mailchimpList: envVars.MAILCHIMP_LIST_ID
   },
+  linkedin: {
+    clientId: envVars.LINKEDIN_CLIENT_ID,
+    clientSecret: envVars.LINKEDIN_CLIENT_SECRET,
+  },
   recaptcha: {
     siteKey: envVars.RECAPTCHA_SITE_KEY,
     secretKey: envVars.RECAPTCHA_SECRET_KEY
