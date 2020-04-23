@@ -6,8 +6,16 @@ const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(config.sendGridKey);
 
 const options = {
-  templatesFiles: ['sd-simple-template'],
-  bodiesFiles: ['sd-simple-body', 'sd-body-topic-maintainer', 'sd-body-topic-publish', 'sd-body-topic-interest'],
+  templatesFiles: ['sd-simple-template', 'sd-template-comment'],
+  bodiesFiles: [
+    'sd-simple-body',
+    'sd-body-topic-maintainer',
+    'sd-body-topic-publish',
+    'sd-body-topic-interest',
+    'sd-body-post-comment-author',
+    'sd-body-post-comment-reply',
+    'sd-body-post-comment-mention'
+  ],
   mailTemplates: [{
     name: 'simple',
     body: 'sd-simple-body'
@@ -20,6 +28,15 @@ const options = {
   }, {
     name: 'topicInterest',
     body: 'sd-body-topic-interest'
+  }, {
+    name: 'postNewCommentAuthor',
+    body: 'sd-body-post-comment-author'
+  }, {
+    name: 'postNewCommentReply',
+    body: 'sd-body-post-comment-reply'
+  }, {
+    name: 'postNewCommentMention',
+    body: 'sd-body-post-comment-mention'
   }]
 };
 
