@@ -7,7 +7,7 @@ const activityDays = 10;
 async function getPublic(req, res) {
   const userId = req.params.profileId;
   const user = await User.findById(userId)
-    .select('name bio avatarUrl')
+    .select('name lastName bio avatarUrl twitter')
     .lean()
     .exec();
 

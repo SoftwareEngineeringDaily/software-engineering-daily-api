@@ -80,6 +80,8 @@ const PostSchema = new mongoose.Schema({
   content: {
     rendered: String,
   },
+  relatedTweet: { type: String },
+  relatedTweetUsers: { type: Array },
   date: { type: Date, default: Date.now },
   transcriptUrl: { type: String, default: '' },
   topics: Array,
@@ -138,6 +140,7 @@ PostSchema.statics = {
     'mp3',
     'link',
     'score',
+    'slug',
     'featuredImage',
     'guestImage',
     'upvoted',

@@ -6,7 +6,7 @@ import moment from 'moment';
 import Comment from '../models/comment.model';
 import User from '../models/user.model';
 import ForumThread from '../models/forumThread.model';
-import ForumNotifications from '../helpers/forumNotifications.helper';
+import MailNotification from '../helpers/mailNotification.helper';
 import { subscribePostFromEntity, notifyPostSubscribersFromEntity } from '../controllers/postSubscription.controller';
 import { subscribeTopicPage, notifySubscribers } from '../controllers/topicPageSubscription.controller';
 import { saveAndNotifyUser } from '../controllers/notification.controller';
@@ -124,26 +124,22 @@ async function update(req, res, next) {
       comment.highlight = highlight;
     }
 
+    comment.content = content;
+    comment.dateLastEdited = Date();
+
     if (mentions) {
       try {
         const updatedMentions = await idsToUsers(mentions);
-        const usersWeShouldEmail = extractedNewMentions(comment, updatedMentions);
+        const newMentions = extractedNewMentions(comment, updatedMentions);
         comment.mentions = updatedMentions;
-        ForumNotifications.sendMentionsNotificationEmail({
-          content,
-          threadId: comment.rootEntity,
-          userWhoReplied: user,
-          usersMentioned: usersWeShouldEmail
-        });
+        const { rootEntity: entityId, entityType } = comment;
+        MailNotification.handleUpdatedComment(entityId, entityType, user, comment, newMentions);
       } catch (e) {
         console.log('e', e); // eslint-disable-line
       }
     } else {
       comment.mentions = [];
     }
-
-    comment.content = content;
-    comment.dateLastEdited = Date();
 
     return comment
       .save()
@@ -309,43 +305,15 @@ async function create(req, res, next) {
   comment
     .save()
     .then(async (commentSaved) => {
-      // don't wait
-      subscribeAndNotifyCommenter(entityId, entityType, user, mentions);
+      subscribeAndNotifyCommenter(entityId, entityType, user, mentions); // don't await
 
-      // TODO: result key is not consistent with other responses, consider changing this
+      MailNotification.handleNotification(entityId, entityType, user, comment);
+
       if (entityType && entityType.toLowerCase() === 'forumthread') {
-        // TODO: move these so we also email for posts:
-        // get entity outside of this function and then pass down:
-        if (parentCommentId) {
-          // TODO: don't email if you are the author and replying to own stuff:
-          ForumNotifications.sendReplyNotificationEmail({
-            content,
-            threadId: entityId,
-            userWhoReplied: user
-          });
-        }
-
-        if (mentions) {
-          ForumNotifications.sendMentionsNotificationEmail({
-            parentCommentId,
-            content,
-            threadId: entityId,
-            userWhoReplied: user,
-            usersMentioned
-          });
-        }
-
-        ForumNotifications.sendForumNotificationEmail({
-          threadId: entityId,
-          content,
-          userWhoReplied: user
-        });
-
-        return ForumThread.increaseCommentCount(entityId).then(() =>
-          res.status(201).json({ result: commentSaved }));
+        ForumThread.increaseCommentCount(entityId);
       }
 
-      return res.status(201).json({ result: commentSaved });
+      res.status(201).json({ result: commentSaved });
     })
     .catch(err => next(err));
 }

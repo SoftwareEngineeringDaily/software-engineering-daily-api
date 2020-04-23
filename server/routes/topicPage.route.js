@@ -31,6 +31,13 @@ router.route('/:slug/images')
     topicPageCtrl.signS3ImageUpload
   );
 
+router.route('/:slug/logo')
+  .post(
+    expressJwt({ secret: config.jwtSecret }),
+    loadFullUser,
+    topicPageCtrl.signS3LogoUpload
+  );
+
 router.route('/:slug/images/:imageId')
   .delete(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.deleteImage);
 export default router;

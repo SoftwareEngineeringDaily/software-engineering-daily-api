@@ -8,7 +8,7 @@ import app from '../../config/express';
 import Post from '../models/post.model';
 
 // RSS header
-const publicFeedConfig = {
+const rawFeedConfig = {
   _name: 'rss',
   _attrs: {
     version: '2.0',
@@ -18,7 +18,7 @@ const publicFeedConfig = {
   _content: {
     channel: [
       { title: 'Software Daily' },
-      { link: 'https://softwaredaily.com' },
+      { link: 'https://www.softwaredaily.com' },
       { language: 'en-us' },
       { copyright: '&#169; SoftwareDaily.com' },
       { lastBuildDate: () => new Date() },
@@ -56,8 +56,6 @@ const publicFeedConfig = {
   }
 };
 
-const privateFeedConfig = cloneDeep(publicFeedConfig);
-
 function decode(text) {
   return (text || '')
     .replace(/&amp;/g, '&')
@@ -84,6 +82,9 @@ async function callback() {
   posts.sort((o1, o2) => {
     return o1.date >= o2.date ? -1 : 1;
   });
+
+  const publicFeedConfig = cloneDeep(rawFeedConfig);
+  const privateFeedConfig = cloneDeep(rawFeedConfig);
 
   const lastPost = posts[posts.length - 1];
 
@@ -122,7 +123,8 @@ async function callback() {
         enclosure: {
           _attrs: {
             type: 'audio/mpeg',
-            url: post.mp3
+            url: post.mp3,
+            length: '1000'
           }
         },
         guid: parseInt(post.id, 10).toString(36),
@@ -160,7 +162,8 @@ async function callback() {
         enclosure: {
           _attrs: {
             type: 'audio/mpeg',
-            url: privateMp3
+            url: privateMp3,
+            length: '1000'
           }
         },
         guid: parseInt(post.id, 10).toString(36),
@@ -179,6 +182,9 @@ async function callback() {
       }
     });
   });
+
+  publicFeedConfig._content.channel = publicFeedConfig._content.channel.slice(0, 300);
+  privateFeedConfig._content.channel = privateFeedConfig._content.channel.slice(0, 300);
 
   const xmlOptions = {
     header: true,

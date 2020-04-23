@@ -83,7 +83,7 @@ const config = {
   },
   cron: {
     RSS: {
-      time: '0 20 7,14 * * *',
+      time: '0 15 9,10,11,12,14,16,19,21 * * *',
       timeZone: null
     }
   }
