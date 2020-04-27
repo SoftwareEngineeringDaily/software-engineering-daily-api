@@ -2,9 +2,13 @@ import async from 'async';
 import Question from '../models/question.model';
 
 async function get(req, res) {
-  const question = await Question.findById(req.params.id);
+  const question = await Question.findById(req.params.id).populate('answers');
 
   if (!question) return res.status(404).send('Not found');
+
+  question.answers.sort((o1, o2) => {
+    return o1.votes.length >= o2.votes.length ? -1 : 1;
+  });
 
   return res.json(question.toObject());
 }
@@ -63,7 +67,11 @@ async function getByEntity(req, res) {
     })
     .exec();
 
-  if (!questions) res.json([]);
+  questions.forEach((question) => {
+    question.answers.sort((o1, o2) => {
+      return o1.votes.length >= o2.votes.length ? -1 : 1;
+    });
+  });
 
   return res.json(questions);
 }
