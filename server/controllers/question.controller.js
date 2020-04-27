@@ -1,3 +1,4 @@
+import async from 'async';
 import Question from '../models/question.model';
 
 async function get(req, res) {
@@ -9,33 +10,60 @@ async function get(req, res) {
 }
 
 async function create(req, res) {
-  const { entityId, entityType, content } = req.body;
+  const {
+    entityId, entityType, content, questions
+  } = req.body;
 
-  if (!entityId || !entityType || !content) return res.status(400).send('Missing data');
+  if (!entityId || !entityType || (!content && !questions)) return res.status(400).send('Missing data');
 
-  const question = new Question({ entityId, entityType, content: content.trim() });
+  const series = [];
+  const saved = [];
+  let contents = [];
 
-  try {
-    const saved = await question.save();
-    return res.json(saved.toObject());
-  } catch (e) {
-    return res.status(500).end(e.message ? e.message : e.toString());
+  if (content) {
+    contents.push(content.trim());
   }
+  if (questions) {
+    contents = questions.filter(q => !!q);
+  }
+
+  questions.forEach((questionContent) => {
+    series.push((callback) => {
+      const question = new Question({ entityId, entityType, content: questionContent.trim() });
+      question.save()
+        .then((dbQuestion) => {
+          saved.push(dbQuestion);
+          callback();
+        })
+        .catch(callback);
+    });
+  });
+
+  return async.series(series, (err) => {
+    if (err) return res.status(500).end(err.message ? err.message : err.toString());
+    if (saved.length === 1) return res.json(saved[0]);
+    return res.json(saved);
+  });
 }
 
 async function getByEntity(req, res) {
   const { entityType, entityId } = req.params;
-  const questions = await Question.find({ entityType, entityId })
+  const questions = await Question.find({
+    entityType,
+    entityId,
+    $or: [{ deleted: false }, { deleted: { $exists: false } }]
+  })
     .populate({
       path: 'answers',
       populate: {
         path: 'author',
-        select: 'name lastName avatarUrl'
+        select: 'name lastName avatarUrl',
+        where: { $or: [{ deleted: false }, { deleted: { $exists: false } }] }
       }
     })
     .exec();
 
-  if (!questions) return res.status(404).send('Not found');
+  if (!questions) res.json([]);
 
   return res.json(questions);
 }
