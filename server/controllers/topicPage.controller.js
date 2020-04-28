@@ -130,7 +130,8 @@ async function showContent(req, res) {
 
   const topicPage = await TopicPage.findOne({ topic: topic._id });
 
-  if (!topicPage) return res.status(404).send(`Topic ${req.params.slug} not found`);
+  // if (!topicPage) return res.status(404).send(`Topic ${req.params.slug} not found`);
+
   return res.status(200).json({ topic, topicPage });
 }
 
@@ -167,7 +168,7 @@ async function signS3ImageUpload(req, res) {
   // eslint-disable-next-line
   const cbError = err => {
     if (err) {
-      console.log(err); // eslint-disable-line      
+      console.log(err); // eslint-disable-line
       return res.status(httpStatus.SERVICE_UNAVAILABLE).send('There was a problem getting a signed url');
     }
   };
@@ -204,7 +205,7 @@ async function signS3LogoUpload(req, res) {
   // eslint-disable-next-line
   const cbError = err => {
     if (err) {
-      console.log(err); // eslint-disable-line      
+      console.log(err); // eslint-disable-line
       return res.status(httpStatus.SERVICE_UNAVAILABLE).send('There was a problem getting a signed url');
     }
   };
