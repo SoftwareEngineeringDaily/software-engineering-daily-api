@@ -178,7 +178,7 @@ function mostPosts(req, res) {
     .populate('topicPage', 'published')
     .then((topics) => {
       const result = topics.filter((topic) => {
-        return !topic.topicPage || !topic.topicPage.published || !topic.maintainer;
+        return !topic.topicPage || topic.status !== 'active';
       });
       res.send(result.slice(0, 10));
     })

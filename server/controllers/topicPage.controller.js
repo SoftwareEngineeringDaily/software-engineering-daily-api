@@ -14,6 +14,29 @@ function checkMaintainer(req, topic) {
   return true;
 }
 
+async function createTopicPage(topicId) {
+  let topicPage = await TopicPage.findOne({ topic: topicId })
+    .populate('history.user', 'name avatarUrl isAdmin');
+
+  if (!topicPage) {
+    const topic = await Topic.findById(topicId);
+
+    if (!topic) return false;
+
+    topicPage = new TopicPage({
+      topic: topicId,
+      content: ''
+    });
+
+    const saved = await topicPage.save();
+    topic.topicPage = topicPage._id;
+    await topic.save();
+    return saved;
+  }
+
+  return topicPage;
+}
+
 async function get(req, res) {
   const topic = await Topic.findOne({ slug: req.params.slug })
     .populate('maintainer', 'name lastName avatarUrl isAdmin');
@@ -26,13 +49,7 @@ async function get(req, res) {
   let status = 200;
 
   if (!topicPage) {
-    topicPage = new TopicPage({
-      topic: topic._id,
-      content: 'This is a initial template...'
-    });
-    await topicPage.save();
-    topic.topicPage = topicPage._id;
-    await topic.save();
+    topicPage = await createTopicPage(topic._id);
     status = 201;
   }
   return res.status(status).send({ topic, topicPage });
@@ -226,13 +243,13 @@ async function deleteImage(req, res) {
 }
 
 async function recentPages(req, res) {
-  const topicPages = await TopicPage.find({ published: true })
+  const topicPages = await TopicPage.find()
     .sort('-dateUpdated')
     .populate('topic', 'maintainer status name slug')
     .limit(50);
 
   const result = topicPages.filter((topicPage) => {
-    return topicPage.topic && topicPage.topic.maintainer;
+    return topicPage.topic && topicPage.topic.status === 'active';
   }).map((topicPage) => {
     return {
       name: topicPage.topic.name,
@@ -245,6 +262,7 @@ async function recentPages(req, res) {
 
 export default {
   get,
+  createTopicPage,
   update,
   publish,
   unpublish,

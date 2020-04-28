@@ -1,5 +1,6 @@
 import async from 'async';
 import Question from '../models/question.model';
+import topicPageCtrl from './topicPage.controller';
 
 async function get(req, res) {
   const question = await Question.findById(req.params.id).populate('answers');
@@ -45,6 +46,7 @@ async function create(req, res) {
 
   return async.series(series, (err) => {
     if (err) return res.status(500).end(err.message ? err.message : err.toString());
+    if (entityType === 'topic') topicPageCtrl.createTopicPage(entityId);
     if (saved.length === 1) return res.json(saved[0]);
     return res.json(saved);
   });
