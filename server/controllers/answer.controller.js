@@ -29,7 +29,7 @@ async function create(req, res) {
   try {
     const saved = await answer.save();
 
-    question.answers.push(saved._id);
+    question.answers = question.answers.concat([saved._id]);
     await question.save();
 
     return res.json(saved.toObject());
@@ -94,7 +94,7 @@ async function vote(req, res) {
   if (ownVoted) {
     answer.votes = answer.votes.filter(v => v.toString() !== req.user._id.toString());
   } else {
-    answer.votes.push(req.user._id);
+    answer.votes = answer.votes.concat([req.user._id]);
   }
 
   try {
