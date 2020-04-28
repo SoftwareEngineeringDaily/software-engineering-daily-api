@@ -130,8 +130,6 @@ async function showContent(req, res) {
 
   const topicPage = await TopicPage.findOne({ topic: topic._id });
 
-  // if (!topicPage) return res.status(404).send(`Topic ${req.params.slug} not found`);
-
   return res.status(200).json({ topic, topicPage });
 }
 
