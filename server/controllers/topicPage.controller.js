@@ -150,8 +150,14 @@ async function getImages(req, res) {
   const topicPage = await TopicPage.findOne({ topic: topic._id })
     .lean()
     .exec();
+
+  if (!topicPage) {
+    return res.json([]);
+  }
+
   const images = topicPage.images.filter(img => !img.deleted);
-  res.json(images);
+
+  return res.json(images);
 }
 
 async function signS3ImageUpload(req, res) {
@@ -248,7 +254,7 @@ async function recentPages(req, res) {
     .limit(50);
 
   const result = topicPages.filter((topicPage) => {
-    return topicPage.topic && topicPage.topic.status === 'active';
+    return topicPage.topic && topicPage.published;
   }).map((topicPage) => {
     return {
       name: topicPage.topic.name,

@@ -2,7 +2,7 @@ import User from '../models/user.model';
 import { getActivityTree } from '../helpers/activity.helper';
 import { getBadges } from '../helpers/badge.helper';
 
-const activityDays = 10;
+const activityDays = process.env.NODE_ENV === 'production' ? 10 : 100;
 
 async function getPublic(req, res) {
   const userId = req.params.profileId;
