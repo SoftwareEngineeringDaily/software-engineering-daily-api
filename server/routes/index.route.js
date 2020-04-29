@@ -19,6 +19,8 @@ import topicRoutes from './topic.route';
 import rssRoutes from './rss.route';
 import profileRoutes from './profile.route';
 import topicPageRoutes from './topicPage.route';
+import questionRoutes from './question.route';
+import answerRoutes from './answer.route';
 // import userRoutes from './user.route';
 
 const router = express.Router(); // eslint-disable-line new-cap
@@ -66,5 +68,7 @@ router.use('/topic', topicRoutes);
 router.use('/rss', rssRoutes);
 router.use('/profile', profileRoutes);
 router.use('/topicpage', topicPageRoutes);
+router.use('/question', questionRoutes);
+router.use('/answer', answerRoutes);
 
 export default router;
