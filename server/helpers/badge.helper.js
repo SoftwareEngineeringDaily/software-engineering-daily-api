@@ -1,8 +1,10 @@
 import Comment from '../models/comment.model';
 import RelatedLink from '../models/relatedLink.model';
 import Topic from '../models/topic.model';
+import Answer from '../models/answer.model';
 
 const getEpisodeCount = async (author) => {
+  const goalCount = 5;
   const count = await RelatedLink
     .find({
       type: 'episode',
@@ -11,7 +13,7 @@ const getEpisodeCount = async (author) => {
     })
     .count();
 
-  const percent = Math.min(count / 5, 1) * 100;
+  const percent = Math.min(count / goalCount, 1) * 100;
   const completed = (percent === 100);
   const label = completed
     ? 'Added 5 Related Episodes'
@@ -29,6 +31,7 @@ const getEpisodeCount = async (author) => {
 };
 
 const getHighlightCount = async (author) => {
+  const goalCount = 5;
   const count = await Comment
     .find({
       highlight: {
@@ -39,7 +42,7 @@ const getHighlightCount = async (author) => {
     })
     .count();
 
-  const percent = Math.min(count / 5, 1) * 100;
+  const percent = Math.min(count / goalCount, 1) * 100;
   const completed = (percent === 100);
   const label = completed
     ? 'Added 5 Highlights'
@@ -57,6 +60,7 @@ const getHighlightCount = async (author) => {
 };
 
 const getTopicCount = async (maintainer) => {
+  const goalCount = 1;
   const count = await Topic
     .find({
       status: 'active',
@@ -64,7 +68,7 @@ const getTopicCount = async (maintainer) => {
     })
     .count();
 
-  const percent = Math.min(count, 1) * 100;
+  const percent = Math.min(count / goalCount, 1) * 100;
   const completed = (percent === 100);
   const label = completed
     ? 'Wrote 1 Topic Page'
@@ -81,18 +85,45 @@ const getTopicCount = async (maintainer) => {
   };
 };
 
+const getAnswerCount = async (author) => {
+  const goalCount = 3;
+  const count = await Answer
+    .find({
+      author,
+    })
+    .count();
+
+  const percent = Math.min(count / goalCount, 1) * 100;
+  const completed = (percent === 100);
+  const label = completed
+    ? 'Answered 3 Questions'
+    : 'Answer 3 Questions';
+
+  return {
+    id: 'answer',
+    count,
+    label,
+    percent,
+    tooltip: 'Answer a question posted on a topic',
+    icon: completed ? 'fa-trophy' : 'fa-question',
+    completed,
+  };
+};
+
 const getBadges = async (userId) => {
   const episode = await getEpisodeCount(userId);
   const highlight = await getHighlightCount(userId);
   const topic = await getTopicCount(userId);
+  const answer = await getAnswerCount(userId);
 
   return [
     episode,
     highlight,
     topic,
+    answer,
   ];
 };
 
 export default {
-  getBadges
+  getBadges,
 };

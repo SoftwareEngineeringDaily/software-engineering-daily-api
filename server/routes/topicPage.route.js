@@ -24,7 +24,7 @@ router.route('/:slug/edit')
   .get(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.get);
 
 router.route('/:slug/images')
-  .get(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.getImages)
+  .get(topicPageCtrl.getImages)
   .post(
     expressJwt({ secret: config.jwtSecret }),
     loadFullUser,

@@ -1,3 +1,4 @@
+import isArray from 'lodash/isArray';
 import Topic from '../models/topic.model';
 import Post from '../models/post.model';
 import User from '../models/user.model';
@@ -178,7 +179,7 @@ function mostPosts(req, res) {
     .populate('topicPage', 'published')
     .then((topics) => {
       const result = topics.filter((topic) => {
-        return !topic.topicPage || !topic.topicPage.published || !topic.maintainer;
+        return !topic.topicPage || topic.status !== 'active';
       });
       res.send(result.slice(0, 10));
     })
@@ -205,7 +206,7 @@ function show(req, res) {
     if (limit) query.limit = limit;
     if (createdAtBefore) query.createdAtBefore = createdAtBefore;
     if (createdAfter) query.createdAfter = createdAfter;
-    if (topic) query.topic = [topic[0]._id.toString()];
+    if (isArray(topic) && topic[0]._id) query.topic = [topic[0]._id.toString()];
 
     const posts = await Post.list(query);
 

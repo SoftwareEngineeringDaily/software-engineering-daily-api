@@ -14,6 +14,29 @@ function checkMaintainer(req, topic) {
   return true;
 }
 
+async function createTopicPage(topicId) {
+  let topicPage = await TopicPage.findOne({ topic: topicId })
+    .populate('history.user', 'name avatarUrl isAdmin');
+
+  if (!topicPage) {
+    const topic = await Topic.findById(topicId);
+
+    if (!topic) return false;
+
+    topicPage = new TopicPage({
+      topic: topicId,
+      content: ''
+    });
+
+    const saved = await topicPage.save();
+    topic.topicPage = topicPage._id;
+    await topic.save();
+    return saved;
+  }
+
+  return topicPage;
+}
+
 async function get(req, res) {
   const topic = await Topic.findOne({ slug: req.params.slug })
     .populate('maintainer', 'name lastName avatarUrl isAdmin');
@@ -26,13 +49,7 @@ async function get(req, res) {
   let status = 200;
 
   if (!topicPage) {
-    topicPage = new TopicPage({
-      topic: topic._id,
-      content: 'This is a initial template...'
-    });
-    await topicPage.save();
-    topic.topicPage = topicPage._id;
-    await topic.save();
+    topicPage = await createTopicPage(topic._id);
     status = 201;
   }
   return res.status(status).send({ topic, topicPage });
@@ -113,7 +130,6 @@ async function showContent(req, res) {
 
   const topicPage = await TopicPage.findOne({ topic: topic._id });
 
-  if (!topicPage) return res.status(404).send(`Topic ${req.params.slug} not found`);
   return res.status(200).json({ topic, topicPage });
 }
 
@@ -134,8 +150,14 @@ async function getImages(req, res) {
   const topicPage = await TopicPage.findOne({ topic: topic._id })
     .lean()
     .exec();
+
+  if (!topicPage) {
+    return res.json([]);
+  }
+
   const images = topicPage.images.filter(img => !img.deleted);
-  res.json(images);
+
+  return res.json(images);
 }
 
 async function signS3ImageUpload(req, res) {
@@ -150,7 +172,7 @@ async function signS3ImageUpload(req, res) {
   // eslint-disable-next-line
   const cbError = err => {
     if (err) {
-      console.log(err); // eslint-disable-line      
+      console.log(err); // eslint-disable-line
       return res.status(httpStatus.SERVICE_UNAVAILABLE).send('There was a problem getting a signed url');
     }
   };
@@ -187,7 +209,7 @@ async function signS3LogoUpload(req, res) {
   // eslint-disable-next-line
   const cbError = err => {
     if (err) {
-      console.log(err); // eslint-disable-line      
+      console.log(err); // eslint-disable-line
       return res.status(httpStatus.SERVICE_UNAVAILABLE).send('There was a problem getting a signed url');
     }
   };
@@ -226,13 +248,13 @@ async function deleteImage(req, res) {
 }
 
 async function recentPages(req, res) {
-  const topicPages = await TopicPage.find({ published: true })
+  const topicPages = await TopicPage.find()
     .sort('-dateUpdated')
     .populate('topic', 'maintainer status name slug')
     .limit(50);
 
   const result = topicPages.filter((topicPage) => {
-    return topicPage.topic && topicPage.topic.maintainer;
+    return topicPage.topic && topicPage.published;
   }).map((topicPage) => {
     return {
       name: topicPage.topic.name,
@@ -245,6 +267,7 @@ async function recentPages(req, res) {
 
 export default {
   get,
+  createTopicPage,
   update,
   publish,
   unpublish,
