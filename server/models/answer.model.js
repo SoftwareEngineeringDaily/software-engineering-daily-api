@@ -9,7 +9,7 @@ const AnswerSchema = new mongoose.Schema({
   votes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   dateCreated: { type: Date, default: Date.now },
   dateUpdated: { type: Date, default: Date.now },
-  deleted: { type: Boolean }
+  deleted: { type: Boolean, default: false },
 });
 
 // Export the model
