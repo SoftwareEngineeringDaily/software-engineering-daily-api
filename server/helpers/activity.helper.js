@@ -22,7 +22,7 @@ async function getActivityTree(userId, days) {
     data: postComments,
     field: 'rootEntity',
     postField: 'thread',
-    cachedPosts
+    cache: cachedPosts
   });
 
   await populateTopic({
@@ -41,7 +41,7 @@ async function getActivityTree(userId, days) {
     data: postRelatedLinks,
     field: 'post',
     postField: '_id',
-    cachedPosts
+    cache: cachedPosts
   });
 
   await populateTopic({
@@ -167,7 +167,7 @@ async function populatePosts(options) {
       return options.data;
     }
 
-    let post = options.cachedPosts.find(p => (
+    let post = options.cache.find(p => (
       p[options.postField || '_id'].toString() === find.toString()
     ));
 
@@ -178,7 +178,7 @@ async function populatePosts(options) {
           post = post.toObject();
           post.title = post.title.rendered;
           post.url = `/post/${post._id}/${post.slug}`;
-          options.cachedPosts.push(post);
+          options.cache.push(post);
         }
       } catch (e) {
         console.error(e); // eslint-disable-line
