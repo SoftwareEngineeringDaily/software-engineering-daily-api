@@ -132,7 +132,7 @@ async function getAnsweredQuestions(userId, limitDate) {
       entity: {
         ...a.entity,
         title: a.question.content,
-        url: `${a.question.entityType}/${a.entity.slug}/question/${a.question._id}#answer-${a._id}`,
+        url: `/${a.question.entityType}/${a.entity.slug}/question/${a.question._id}#answer-${a._id}`,
       },
     }));
 }
