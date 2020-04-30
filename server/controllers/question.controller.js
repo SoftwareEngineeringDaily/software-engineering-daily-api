@@ -34,13 +34,7 @@ async function create(req, res) {
 
   questions.forEach((questionContent) => {
     series.push((callback) => {
-      const question = new Question({
-        entityId,
-        entityType,
-        rootEntity: entityId,
-        content: questionContent.trim(),
-      });
-
+      const question = new Question({ entityId, entityType, content: questionContent.trim() });
       question.save()
         .then((dbQuestion) => {
           saved.push(dbQuestion);

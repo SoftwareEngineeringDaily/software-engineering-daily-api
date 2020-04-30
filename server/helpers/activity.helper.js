@@ -25,10 +25,11 @@ async function getActivityTree(userId, days) {
     cachedPosts
   });
 
-  await populateTopicPages({
+  await populateTopic({
     data: topicComments,
     field: 'rootEntity',
-    cachedTopicPages
+    type: 'topicPage',
+    cache: cachedTopicPages
   });
 
   const relatedLinks = await getRelatedLinks(userId, limitDate);
@@ -43,10 +44,11 @@ async function getActivityTree(userId, days) {
     cachedPosts
   });
 
-  await populateTopicPages({
+  await populateTopic({
     data: topicRelatedLinks,
     field: 'topicPage',
-    cachedTopicPages
+    type: 'topicPage',
+    cache: cachedTopicPages
   });
 
   const activities = [].concat(
@@ -119,7 +121,8 @@ async function getAnsweredQuestions(userId, limitDate) {
   await populateTopic({
     data: answers,
     field: 'topic',
-    cachedTopics
+    type: 'topic',
+    cache: cachedTopics
   });
 
   return answers
@@ -187,51 +190,26 @@ async function populatePosts(options) {
   return options.data;
 }
 
-async function populateTopicPages(options) {
-  for (let i = 0; i < options.data.length; i += 1) {
-    const item = options.data[i];
-    const find = item[options.field];
-
-    let topic = options.cachedTopicPages.find(p => (
-      p._id.toString() === find.toString()
-    ));
-
-    if (!topic) {
-      try {
-        topic = await getTopicPage(find); // eslint-disable-line no-await-in-loop
-        if (topic) {
-          topic = topic.toObject();
-          topic.title = topic.name;
-          topic.url = `/topic/${topic.slug}`;
-          options.cachedTopicPages.push(topic);
-        }
-      } catch (e) {
-        console.error(e); // eslint-disable-line
-      }
-    }
-
-    item.entity = topic; // eslint-disable-line no-param-reassign
-  }
-  return options.data;
-}
-
 async function populateTopic(options) {
   for (let i = 0; i < options.data.length; i += 1) {
     const item = options.data[i];
     const find = item[options.field];
 
-    let topic = options.cachedTopics.find(p => (
+    let topic = options.cache.find(p => (
       p._id.toString() === find.toString()
     ));
 
     if (!topic) {
       try {
-        topic = await getTopic(find); // eslint-disable-line no-await-in-loop
+        topic = (options.type === 'topic')
+          ? await getTopic(find) // eslint-disable-line no-await-in-loop
+          : await getTopicPage(find); // eslint-disable-line no-await-in-loop
+
         if (topic) {
           topic = topic.toObject();
           topic.title = topic.name;
           topic.url = `/topic/${topic.slug}`;
-          options.cachedTopics.push(topic);
+          options.cache.push(topic);
         }
       } catch (e) {
         console.error(e); // eslint-disable-line
