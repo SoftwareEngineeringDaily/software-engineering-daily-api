@@ -74,7 +74,7 @@ function get(req, res) {
  * @returns {User}
  */
 // eslint-disable-next-line
-function update(req, res, next) {
+function updateProfile(req, res, next) {
   const user = req.userLoaded;
   const avatarWasSet = req.body.isAvatarSet;
   // We gotta check a few things:
@@ -211,6 +211,39 @@ function requestPasswordReset(req, res, next) {
     });
 }
 
+async function getAll(req, res, next) {
+  try {
+    const query = User.find();
+
+    const users = await query
+      .where('name').ne('Software Engineer')
+      .select('-password')
+      .exec();
+
+    const filtered = users.filter((user) => {
+      return !/(Software Developer-)/.test(user);
+    });
+
+    return res.json(filtered);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function update(req, res, next) {
+  try {
+    const fields = req.body;
+    const user = await User.findOneAndUpdate({ _id: req.params.userId }, fields, { new: true })
+      .select('-password');
+
+    if (!user) return res.status(404).send('User not found');
+
+    return res.json(user.toObject());
+  } catch (err) {
+    return next(err);
+  }
+}
+
 async function list(req, res, next) {
   try {
     const find = searchParser.parse(req, { regexFields: ['name', 'email'] });
@@ -309,11 +342,13 @@ function updateEmailNotiicationSettings(req, res, next) {
 
 export default {
   load,
+  getAll,
+  update,
   get,
   me,
   list,
   listNames,
-  update,
+  updateProfile,
   listBookmarked,
   requestPasswordReset,
   updateEmailNotiicationSettings,
