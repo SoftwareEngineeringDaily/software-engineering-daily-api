@@ -10,6 +10,7 @@ import transferField from '../middleware/transferField';
 import relatedLinkCtrl from '../controllers/relatedLink.controller';
 import bookmarkCtrl from '../controllers/bookmark.controller';
 import listenedCtrl from '../controllers/listened.controller';
+import answerCtrl from '../controllers/answer.controller';
 import config from '../../config/config';
 import loadFullUser from '../middleware/loadFullUser.middleware';
 
@@ -31,6 +32,7 @@ router.route('/')
       credentialsRequired: false,
     }),
     loadFullUser,
+    answerCtrl.list,
     postCtrl.list,
   );
 

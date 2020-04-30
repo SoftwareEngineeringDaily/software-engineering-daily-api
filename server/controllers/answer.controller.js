@@ -1,6 +1,34 @@
 import Answer from '../models/answer.model';
 import Question from '../models/question.model';
 
+async function list(req, res, next) {
+  req.posts = [];
+
+  const options = {};
+
+  if (req.query.createdAfter) {
+    options.dateCreated = { $gt: req.query.createdAfter };
+  } else if (req.query.createdAtBefore) {
+    options.dateCreated = { $lte: req.query.createdAtBefore };
+  }
+
+  try {
+    req.posts = await Answer
+      .find(options)
+      .populate('question');
+
+    req.posts = req.posts
+      .map(p => ({
+        ...p.toObject(),
+        type: 'answer'
+      }));
+  } catch (err) {
+    return next(err);
+  }
+
+  return next();
+}
+
 async function get(req, res) {
   const answer = await Answer.findById(req.params.id);
 
@@ -106,6 +134,7 @@ async function vote(req, res) {
 }
 
 export default {
+  list,
   get,
   create,
   update,

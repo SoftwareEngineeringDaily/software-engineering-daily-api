@@ -169,7 +169,11 @@ function list(req, res, next) {
   Post.list(query)
     .then(async (posts) => {
       const response = await getAdFreePostsIfSubscribed(posts, req.fullUser, next);
-      return res.json(response);
+
+      req.posts = req.posts.concat(response);
+      req.posts.sort((a, b) => b.dateCreated - a.dateCreated);
+
+      return res.json(req.posts);
     })
     .catch(e => next(e));
 }
