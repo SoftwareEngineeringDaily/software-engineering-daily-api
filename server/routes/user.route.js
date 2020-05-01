@@ -4,49 +4,68 @@ import validate from 'express-validation';
 import paramValidation from '../../config/param-validation';
 import userCtrl from '../controllers/user.controller';
 import loadFullUser from '../middleware/loadFullUser.middleware';
+import ensureIsAdmin from '../middleware/ensureIsAdmin.middleware';
+import ensureIsSuperAdmin from '../middleware/ensureIsSuperAdmin.middleware';
 import config from '../../config/config';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
+router.route('/')
+  .get(
+    expressJwt({ secret: config.jwtSecret }),
+    loadFullUser,
+    ensureIsAdmin,
+    userCtrl.getAll
+  );
+
+// Admin CRUDE (don't interfere with profile update for now)
+router.route('/admin/:userId')
+  .put(
+    expressJwt({ secret: config.jwtSecret }),
+    loadFullUser,
+    ensureIsSuperAdmin,
+    userCtrl.update
+  );
+
 router.route('/me')
   /** GET /api/users/:userId - Get user */
   .get(
-    expressJwt({ secret: config.jwtSecret })
-    , userCtrl.me
+    expressJwt({ secret: config.jwtSecret }),
+    userCtrl.me
   );
 
 router.route('/search')
   .get(
-    expressJwt({ secret: config.jwtSecret })
-    , loadFullUser
-    , userCtrl.list
+    expressJwt({ secret: config.jwtSecret }),
+    loadFullUser,
+    userCtrl.list
   );
 
 router.route('/search/names')
   .get(
-    expressJwt({ secret: config.jwtSecret })
-    , userCtrl.listNames
+    expressJwt({ secret: config.jwtSecret }),
+    userCtrl.listNames
   );
 
 router.route('/update-email-notiication-settings')
   .put(
-    expressJwt({ secret: config.jwtSecret })
-    , loadFullUser
-    , validate(paramValidation.updateEmailNotiicationSettings)
-    , userCtrl.updateEmailNotiicationSettings
+    expressJwt({ secret: config.jwtSecret }),
+    loadFullUser,
+    validate(paramValidation.updateEmailNotiicationSettings),
+    userCtrl.updateEmailNotiicationSettings
   );
 
 router.route('/:userId')
   /** GET /api/users/:userId - Get user */
   .get(
-    expressJwt({ secret: config.jwtSecret, credentialsRequired: false })
-    , userCtrl.get
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
+    userCtrl.get
   )
 
   /** PUT /api/users/:userId - Update user */
   .put(
-    expressJwt({ secret: config.jwtSecret })
-    , validate(paramValidation.updateUser), userCtrl.update
+    expressJwt({ secret: config.jwtSecret }),
+    validate(paramValidation.updateUser), userCtrl.updateProfile
   );
 
 router.route('/regain-password')
@@ -64,8 +83,8 @@ router.route('/request-password-reset')
 router.route('/me/bookmarked')
 /** GET /api/users/me/bookmarked - Get bookmarked items for current user */
   .get(
-    expressJwt({ secret: config.jwtSecret })
-    , userCtrl.listBookmarked
+    expressJwt({ secret: config.jwtSecret }),
+    userCtrl.listBookmarked
   );
 
 router.route('/:userId/bookmarked')
