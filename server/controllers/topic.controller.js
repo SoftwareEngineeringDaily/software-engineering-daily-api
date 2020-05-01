@@ -2,7 +2,6 @@ import isArray from 'lodash/isArray';
 import Topic from '../models/topic.model';
 import Post from '../models/post.model';
 import User from '../models/user.model';
-import Tag from '../models/tag.model';
 import { mailTemplate } from '../helpers/mail';
 
 /**
@@ -103,16 +102,41 @@ async function maintainerInterest(req, res) {
 }
 
 async function episodes(req, res) {
-  const tag = await Tag.findOne({ slug: req.params.slug });
-  if (!tag) return res.status(404).send('No tag found for this topic');
+  const topic = await Topic.findOne({ slug: req.params.slug });
+  if (!topic) return res.status(404).send('No topic found');
 
-  const eps = await Post.find({ tags: { $in: [tag.id] } })
+  const eps = await Post.find({ topics: { $in: [topic._id.toString()] } })
     .select('slug title')
     .sort('-date')
     .lean()
     .exec();
 
   return res.json({ episodes: eps.slice(0, 10), total: eps.length });
+}
+
+async function createRelatedEpisode(req, res) {
+  const { postSlug } = req.body;
+
+  if (!postSlug) return res.status(400).send('Missing data');
+
+  const topic = await Topic.findOne({ slug: req.params.slug });
+  if (!topic) return res.status(404).send('No topic found');
+
+  const post = await Post.findOne({ slug: postSlug }).select('topics');
+  if (!post) return res.status(404).send('Episode not found');
+
+  // post already has topic
+  const existingTopic = post.topics.find(t => t === topic._id.toString());
+  if (existingTopic) return res.status(400).send('Episode already has this topic');
+
+  post.topics = post.topics.concat(topic._id.toString());
+
+  try {
+    await post.save();
+    return res.status(201).end();
+  } catch (e) {
+    return res.status(500).json(e);
+  }
 }
 
 async function index(req, res) {
@@ -480,6 +504,7 @@ export default {
   maintainerInterest,
   create,
   episodes,
+  createRelatedEpisode,
   index,
   mostPopular,
   mostPosts,

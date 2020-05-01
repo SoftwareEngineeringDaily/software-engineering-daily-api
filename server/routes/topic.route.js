@@ -6,18 +6,21 @@ import config from '../../config/config';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
+const auth = expressJwt({ secret: config.jwtSecret });
+
 router.route('/:topicId([0-9a-f]{24})') // possible conflict with slug route
-  .get(expressJwt({ secret: config.jwtSecret }), topicCtrl.get)
-  .put(expressJwt({ secret: config.jwtSecret }), topicCtrl.update);
+  .get(auth, topicCtrl.get)
+  .put(auth, topicCtrl.update);
 
 router.route('/')
-  .get(expressJwt({ secret: config.jwtSecret }), topicCtrl.getFull)
-  .post(expressJwt({ secret: config.jwtSecret }), topicCtrl.add);
+  .get(auth, topicCtrl.getFull)
+  .post(auth, topicCtrl.add);
 
 router.route('/:slug')
   .get(topicPageCtrl.showContent);
 
 router.route('/:slug/episodes')
-  .get(topicCtrl.episodes);
+  .get(topicCtrl.episodes)
+  .post(auth, topicCtrl.createRelatedEpisode);
 
 export default router;
