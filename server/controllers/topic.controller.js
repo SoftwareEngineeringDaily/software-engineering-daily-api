@@ -114,6 +114,31 @@ async function episodes(req, res) {
   return res.json({ episodes: eps.slice(0, 10), total: eps.length });
 }
 
+async function createRelatedEpisode(req, res) {
+  const { postSlug } = req.body;
+
+  if (!postSlug) return res.status(400).send('Missing data');
+
+  const topic = await Topic.findOne({ slug: req.params.slug });
+  if (!topic) return res.status(404).send('No topic found');
+
+  const post = await Post.findOne({ slug: postSlug }).select('topics');
+  if (!post) return res.status(404).send('Episode not found');
+
+  // post already has topic
+  const existingTopic = post.topics.find(t => t === topic._id.toString());
+  if (existingTopic) return res.status(400).send('Episode already has this topic');
+
+  post.topics = post.topics.concat(topic._id.toString());
+
+  try {
+    await post.save();
+    return res.status(201).end();
+  } catch (e) {
+    return res.status(500).json(e);
+  }
+}
+
 async function index(req, res) {
   if (req.query.userId) {
     const user = await User.findById(req.query.userId);
@@ -479,6 +504,7 @@ export default {
   maintainerInterest,
   create,
   episodes,
+  createRelatedEpisode,
   index,
   mostPopular,
   mostPosts,
