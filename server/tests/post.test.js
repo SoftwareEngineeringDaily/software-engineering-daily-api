@@ -15,7 +15,7 @@ function saveMongoArrayPromise(model, dataArray) {
 }
 
 function getRandomNumber() {
-  return Math.floor(Math.random() * 10000);
+  return (Date.now() + Math.floor(Math.random() * Math.floor(9999999)));
 }
 
 /**
