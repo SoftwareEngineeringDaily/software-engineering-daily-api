@@ -7,7 +7,8 @@ import config from '../../config/config';
 const router = express.Router(); // eslint-disable-line new-cap
 
 router.route('/:topicId([0-9a-f]{24})') // possible conflict with slug route
-  .get(expressJwt({ secret: config.jwtSecret }), topicCtrl.get)
+  // .get(expressJwt({ secret: config.jwtSecret }), topicCtrl.get)
+  .get(topicCtrl.get)
   .put(expressJwt({ secret: config.jwtSecret }), topicCtrl.update);
 
 router.route('/')

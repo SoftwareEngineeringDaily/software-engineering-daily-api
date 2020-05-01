@@ -4,7 +4,12 @@ import Question from '../models/question.model';
 async function list(req, res, next) {
   req.posts = [];
 
-  const options = {};
+  const options = {
+    $or: [
+      { deleted: false },
+      { deleted: { $exists: false } },
+    ]
+  };
 
   if (req.query.createdAfter) {
     options.dateCreated = { $gt: req.query.createdAfter };
@@ -15,12 +20,16 @@ async function list(req, res, next) {
   try {
     req.posts = await Answer
       .find(options)
-      .populate('question');
+      .populate([
+        'question',
+        'author',
+      ]);
 
     req.posts = req.posts
       .map(p => ({
         ...p.toObject(),
-        type: 'answer'
+        date: p.toObject().dateCreated,
+        type: 'answer',
       }));
   } catch (err) {
     return next(err);
