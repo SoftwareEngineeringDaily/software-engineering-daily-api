@@ -1,3 +1,4 @@
+import isObject from 'lodash/isObject';
 import Answer from '../models/answer.model';
 import Question from '../models/question.model';
 
@@ -26,11 +27,18 @@ async function list(req, res, next) {
       ]);
 
     req.posts = req.posts
-      .map(p => ({
-        ...p.toObject(),
-        date: p.toObject().dateCreated,
-        type: 'answer',
-      }));
+      .map((post) => {
+        const answer = post.toObject();
+
+        answer.type = 'answer';
+        answer.date = answer.dateCreated;
+
+        if (isObject(answer.question)) {
+          answer[`${answer.question.entityType}s`] = [answer.question.entityId];
+        }
+
+        return answer;
+      });
   } catch (err) {
     return next(err);
   }

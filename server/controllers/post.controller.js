@@ -1,5 +1,9 @@
+import uniq from 'lodash/uniq';
+import find from 'lodash/find';
+import flatten from 'lodash/flatten';
 import algoliasearch from 'algoliasearch';
 import Post from '../models/post.model';
+import Topic from '../models/topic.model';
 import {
   addPostData,
   getAdFreePostsIfSubscribed,
@@ -173,6 +177,19 @@ function list(req, res, next) {
       req.posts = req.posts.concat(response);
       req.posts.sort((a, b) => b.date - a.date);
 
+      const _topics = uniq(flatten(req.posts.map(p => p.topics.map(id => id.toString()))));
+      const topics = await Topic.find({ _id: { $in: _topics } });
+
+      req.posts = req.posts.map((post) => {
+        post.topics = post.topics // eslint-disable-line no-param-reassign
+          .map((topicId) => {
+            return find(topics, { id: topicId.toString() });
+          })
+          .filter(t => !!(t));
+
+        return post;
+      });
+
       return res.json(req.posts);
     })
     .catch(e => next(e));
@@ -266,7 +283,7 @@ function search(req, res, next) {
 
       Post.find({ slug: { $in: slugs } })
         .then(async (posts) => {
-          posts = await getAdFreePostsIfSubscribed(posts, req.fullUser, next); //eslint-disable-line
+          posts = await getAdFreePostsIfSubscribed(posts, req.fullUser, next); // eslint-disable-line
           res.json({ posts, isEnd, nextPage });
         })
         .catch(e => next(e));
