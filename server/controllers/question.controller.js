@@ -1,4 +1,5 @@
 import async from 'async';
+import isArray from 'lodash/isArray';
 import Question from '../models/question.model';
 import topicPageCtrl from './topicPage.controller';
 
@@ -54,11 +55,12 @@ async function create(req, res) {
 
 async function getByEntity(req, res) {
   const { entityType, entityId } = req.params;
-  const questions = await Question.find({
-    entityType,
-    entityId,
-    $or: [{ deleted: false }, { deleted: { $exists: false } }]
-  })
+  const questions = await Question
+    .find({
+      entityType,
+      entityId,
+      $or: [{ deleted: false }, { deleted: { $exists: false } }]
+    })
     .populate({
       path: 'answers',
       populate: {
@@ -73,6 +75,12 @@ async function getByEntity(req, res) {
     question.answers.sort((o1, o2) => {
       return o1.votes.length >= o2.votes.length ? -1 : 1;
     });
+  });
+
+  questions.sort((a, b) => {
+    return (b.answers.length === a.answers.length)
+      ? b.dateCreated - a.dateCreated
+      : b.answers.length - a.answers.length;
   });
 
   return res.json(questions);
@@ -113,10 +121,44 @@ async function deleteQuestion(req, res) {
   }
 }
 
+async function getRelated(req, res, next) {
+  if (!isArray(req.topicIds)) {
+    return next();
+  }
+
+  const questions = await Question
+    .find({
+      entityId: { $in: req.topicIds },
+      $or: [
+        { deleted: false },
+        { deleted: { $exists: false } },
+      ],
+    })
+    .sort('-dateUpdated')
+    .populate(['answers'])
+    .limit(20);
+
+  questions.forEach((question) => {
+    question.answers.sort((a, b) => b.votes.length - a.votes.length);
+  });
+
+  questions.sort((a, b) => {
+    return (b.answers.length === a.answers.length)
+      ? b.dateCreated - a.dateCreated
+      : b.answers.length - a.answers.length;
+  });
+
+  req.response = req.response || {};
+  req.response.questions = questions.slice(0, 10);
+
+  return next();
+}
+
 export default {
   get,
   getByEntity,
+  getRelated,
   create,
   update,
-  delete: deleteQuestion
+  delete: deleteQuestion,
 };

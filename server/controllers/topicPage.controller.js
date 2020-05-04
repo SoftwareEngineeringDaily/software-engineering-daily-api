@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import httpStatus from 'http-status';
 import Topic from '../models/topic.model';
 import TopicPage from '../models/topicPage.model';
@@ -38,7 +39,15 @@ async function createTopicPage(topicId) {
 }
 
 async function get(req, res) {
-  const topic = await Topic.findOne({ slug: req.params.slug })
+  const options = {
+    $or: [{ slug: req.params.slug }]
+  };
+
+  if (mongoose.Types.ObjectId.isValid(req.params.slug)) {
+    options.$or.push({ _id: req.params.slug });
+  }
+
+  const topic = await Topic.findOne(options)
     .populate('maintainer', 'name lastName avatarUrl isAdmin');
 
   if (!topic) return res.status(404).send(`Topic ${req.params.slug} not found`);
@@ -123,7 +132,15 @@ async function mailAdminsPublish(topicPage, topic) {
 }
 
 async function showContent(req, res) {
-  const topic = await Topic.findOne({ slug: req.params.slug })
+  const options = {
+    $or: [{ slug: req.params.slug }]
+  };
+
+  if (mongoose.Types.ObjectId.isValid(req.params.slug)) {
+    options.$or.push({ _id: req.params.slug });
+  }
+
+  const topic = await Topic.findOne(options)
     .populate('maintainer', 'name twitter lastName avatarUrl');
 
   if (!topic) return res.status(404).send(`Topic ${req.params.slug} not found`);
