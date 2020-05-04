@@ -221,8 +221,8 @@ async function populateTopic(options) {
   return options.data;
 }
 
-async function getPost(threadId) {
-  return Post.findOne({ thread: threadId })
+async function getPost(id) {
+  return Post.findOne({ $or: [{ thread: id }, { _id: id }] })
     .select('slug title thread')
     .exec();
 }
