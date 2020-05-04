@@ -180,7 +180,8 @@ async function getImages(req, res) {
 async function signS3ImageUpload(req, res) {
   const { fileType } = req.body;
   const randomNumberString = `${Math.random()}`;
-  const newFileName = `topic_images/${randomNumberString.replace('.', '_')}`;
+  const type = getFileType(fileType);
+  const newFileName = `topic_images/${randomNumberString.replace('.', '_')}${type}`;
 
   const cbSuccess = (result) => {
     createImage(req, res, result);
@@ -214,10 +215,22 @@ async function createImage(req, res, result) {
   res.end();
 }
 
+const types = [
+  { type: 'image/png', fileType: '.png' },
+  { type: 'image/gif', fileType: '.gif' },
+  { type: 'image/jpeg', fileType: '.jpg' }
+];
+
+function getFileType(fileType) {
+  const type = types.find(t => t.type === fileType);
+  return type ? type.fileType : '';
+}
+
 async function signS3LogoUpload(req, res) {
   const { fileType } = req.body;
   const randomNumberString = `${Math.random()}`;
-  const newFileName = `topic_images/${randomNumberString.replace('.', '_')}`;
+  const type = getFileType(fileType);
+  const newFileName = `topic_images/${randomNumberString.replace('.', '_')}${type}`;
 
   const cbSuccess = (result) => {
     changeLogo(req, res, result);
