@@ -42,19 +42,21 @@ const CommentSchema = new Schema({
   id: String,
   content: {
     type: String,
-    required: true
   },
   highlight: {
     type: String,
   },
-  score: { type: Number, default: 0 },
+  score: {
+    type: Number,
+    default: 0,
+  },
   dateCreated: {
     type: Date,
     default: Date.now
   },
   parentComment: {
     type: Schema.Types.ObjectId,
-    ref: 'Comment'
+    ref: 'Comment',
   },
   deleted: {
     type: Boolean,

@@ -19,9 +19,9 @@ router.route('/forEntity/:entityId')
     commentCtrl.list
   )
   .post(
-    expressJwt({ secret: config.jwtSecret })
-    , validate(paramValidation.comment)
-    , commentCtrl.create
+    expressJwt({ secret: config.jwtSecret }),
+    validate(paramValidation.comment),
+    commentCtrl.create
   );
 
 router.route('/:commentId/upvote')
