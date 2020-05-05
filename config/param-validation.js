@@ -9,7 +9,7 @@ export default {
       about: Joi.string().allow(''),
       github: Joi.string().allow(''),
       linkedin: Joi.string().allow(''),
-      twitter: Joi.string().allow(''),
+      // twitter: Joi.string().allow(), //alow to be blank and removal
       website: Joi.string().allow(''),
       isAvatarSet: Joi.boolean().required(),
       email: Joi.string().email().allow(''),

@@ -65,7 +65,7 @@ async function getByEntity(req, res) {
       path: 'answers',
       populate: {
         path: 'author',
-        select: 'name lastName avatarUrl',
+        select: 'name lastName avatarUrl twitter',
         where: { $or: [{ deleted: false }, { deleted: { $exists: false } }] }
       }
     })
