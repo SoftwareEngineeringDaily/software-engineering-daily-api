@@ -167,9 +167,11 @@ async function populatePosts(options) {
       return options.data;
     }
 
-    let post = options.cache.find(p => (
-      p[options.postField || '_id'].toString() === find.toString()
-    ));
+    let post = options.cache.find((p) => {
+      const field = p[options.postField || '_id'];
+      if (!field) return false;
+      return field.toString() === find.toString();
+    });
 
     if (!post) {
       try {
