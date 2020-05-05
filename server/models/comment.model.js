@@ -181,6 +181,10 @@ CommentSchema.statics = {
   },
 
   getTopLevelCommentsForItem(entityId) {
+    if (!mongoose.Types.ObjectId.isValid(entityId)) {
+      return Promise.resolve([]);
+    }
+
     return this.find({ rootEntity: entityId, parentComment: null })
       .sort({ dateCreated: -1 })
       .populate('mentions')
