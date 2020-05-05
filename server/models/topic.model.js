@@ -15,7 +15,12 @@ const TopicSchema = new mongoose.Schema({
   maintainer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   topicPage: { type: mongoose.Schema.Types.ObjectId, ref: 'TopicPage' },
   postCount: { type: Number, default: 0 },
-  status: { type: String, default: 'active' }
+  status: { type: String, default: 'active' },
+}, {
+  timestamps: {
+    createdAt: 'dateCreated',
+    updatedAt: 'dateUpdated',
+  },
 });
 
 // Export the model
