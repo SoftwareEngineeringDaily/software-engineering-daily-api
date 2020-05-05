@@ -10,9 +10,11 @@ import transferField from '../middleware/transferField';
 import relatedLinkCtrl from '../controllers/relatedLink.controller';
 import bookmarkCtrl from '../controllers/bookmark.controller';
 import listenedCtrl from '../controllers/listened.controller';
+import questionCtrl from '../controllers/question.controller';
 import answerCtrl from '../controllers/answer.controller';
 import config from '../../config/config';
 import loadFullUser from '../middleware/loadFullUser.middleware';
+import respond from '../middleware/response.middleware';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
@@ -55,6 +57,8 @@ router.route('/:postId')
     expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
     loadFullUser,
     postCtrl.get,
+    questionCtrl.getRelated,
+    respond,
   );
 
 // Get related links associated with postId

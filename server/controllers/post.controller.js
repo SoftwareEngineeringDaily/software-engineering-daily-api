@@ -9,6 +9,21 @@ import {
   getAdFreePostsIfSubscribed,
 } from '../helpers/post.helper';
 
+async function populateTopics(posts) {
+  const _topics = uniq(flatten(posts.map(p => p.topics.map(id => id.toString()))));
+  const topics = await Topic.find({ _id: { $in: _topics } });
+
+  return posts.map((post) => {
+    post.topics = post.topics // eslint-disable-line no-param-reassign
+      .map((topicId) => {
+        return find(topics, { id: topicId.toString() });
+      })
+      .filter(t => !!(t));
+
+    return post;
+  });
+}
+
 /**
  * @swagger
  * tags:
@@ -56,14 +71,15 @@ function load(req, res, next, id) {
  */
 
 async function get(req, res, next) {
-  const response = await addPostData(
+  req.response = await addPostData(
     req.post.toObject(),
     req.fullUser,
     next
   );
 
-  // Load ad free version of podcast episode if subscrbied:
-  return res.json(response);
+  req.topicIds = req.response.topics || [];
+
+  return next();
 }
 
 /**
@@ -176,19 +192,7 @@ function list(req, res, next) {
 
       req.posts = req.posts.concat(response);
       req.posts.sort((a, b) => b.date - a.date);
-
-      const _topics = uniq(flatten(req.posts.map(p => p.topics.map(id => id.toString()))));
-      const topics = await Topic.find({ _id: { $in: _topics } });
-
-      req.posts = req.posts.map((post) => {
-        post.topics = post.topics // eslint-disable-line no-param-reassign
-          .map((topicId) => {
-            return find(topics, { id: topicId.toString() });
-          })
-          .filter(t => !!(t));
-
-        return post;
-      });
+      req.posts = await populateTopics(req.posts || []);
 
       return res.json(req.posts);
     })
@@ -284,6 +288,8 @@ function search(req, res, next) {
       Post.find({ slug: { $in: slugs } })
         .then(async (posts) => {
           posts = await getAdFreePostsIfSubscribed(posts, req.fullUser, next); // eslint-disable-line
+          posts = await populateTopics(posts || []); // eslint-disable-line no-param-reassign
+
           res.json({ posts, isEnd, nextPage });
         })
         .catch(e => next(e));
