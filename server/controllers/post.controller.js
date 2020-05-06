@@ -307,6 +307,84 @@ function downvote(req, res, next) {
   next();
 }
 
+async function getRelatedEpisodes(req, res) {
+  let post = await Post.findById(req.params.postId)
+    .populate('relatedPosts', 'slug title score');
+
+  if (!post) return res.json([]);
+
+  post = post.toObject();
+
+  const topics = uniq(post.topics);
+  let _relatedPosts = [];
+  const relatedPosts = [];
+
+  /* eslint-disable no-await-in-loop */
+  for (let i = 0; i < topics.length; i += 1) {
+    const posts = await Post.find({ topics: { $in: [topics[i]] }, _id: { $ne: post._id } })
+      .select('slug title score')
+      .sort('-score -date')
+      .limit(3)
+      .lean();
+
+    _relatedPosts = _relatedPosts.concat(posts);
+  }
+
+  _relatedPosts.forEach((r) => {
+    r.userGenerated = false; // eslint-disable-line no-param-reassign
+    if (!relatedPosts.map(p => p._id.toString()).includes(r._id.toString())) relatedPosts.push(r);
+  });
+
+  relatedPosts.sort((a, b) => {
+    if (b) return b.score - a.score;
+    return 1;
+  });
+
+  // from saved by users
+  post.relatedPosts.forEach((r) => {
+    r.userGenerated = true; // eslint-disable-line no-param-reassign
+    if (!relatedPosts.map(p => p._id.toString()).includes(r._id.toString())) relatedPosts.push(r);
+  });
+
+  return res.json(relatedPosts);
+}
+
+async function saveRelatedEpisode(req, res) {
+  const { post, params: { episodeSlug } } = req;
+
+  if (!episodeSlug) return res.status(400).end('Missing data');
+
+  const newPost = await Post.findOne({ slug: episodeSlug }).select('slug');
+
+  if (!newPost) return res.status(404).end('Post not found');
+
+  if (post.relatedPosts.find(id => id.toString() === newPost._id.toString())) {
+    return res.status(400).end('Episode already included');
+  }
+
+  post.relatedPosts = post.relatedPosts.concat([newPost._id]);
+
+  await post.save();
+
+  return res.status(201).end();
+}
+
+async function deleteRelatedEpisode(req, res) {
+  const { post, params: { episodeSlug } } = req;
+
+  if (!episodeSlug) return res.status(400).end('Missing data');
+
+  const removePost = await Post.findOne({ slug: episodeSlug }).select('_id');
+
+  if (!removePost) return res.status(404).end('Post not found');
+
+  post.relatedPosts = post.relatedPosts.filter(p => p.toString() !== removePost._id.toString());
+
+  await post.save();
+
+  return res.status(200).end();
+}
+
 export default {
   load,
   get,
@@ -314,5 +392,8 @@ export default {
   search,
   recommendations,
   downvote,
-  upvote
+  upvote,
+  getRelatedEpisodes,
+  saveRelatedEpisode,
+  deleteRelatedEpisode
 };
