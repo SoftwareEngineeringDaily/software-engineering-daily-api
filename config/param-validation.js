@@ -68,12 +68,13 @@ export default {
   register: {
     body: {
       password: Joi.string().required(),
+
       // Should be required once mobile apps get updated:
       name: Joi.string(),
       lastName: Joi.string(),
       bio: Joi.string().allow(''),
       website: Joi.string().allow(''),
-      email: Joi.string().email().allow('')
+      email: Joi.string().email().allow(''),
     }
   },
 
@@ -86,7 +87,7 @@ export default {
 
   comment: {
     body: {
-      content: Joi.string().required()
+      content: Joi.string().allow(''),
     }
   }
 };

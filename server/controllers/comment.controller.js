@@ -279,7 +279,11 @@ async function create(req, res, next) {
   const { user } = req;
 
   const comment = new Comment();
-  comment.content = content;
+  comment.content = content || '';
+
+  if (!highlight && !content) {
+    return res.status(500).json({ Error: 'Property `content` is required when not a highlight' });
+  }
 
   let usersMentioned = [];
   if (mentions) {
@@ -302,7 +306,7 @@ async function create(req, res, next) {
   }
   comment.author = user._id;
 
-  comment
+  return comment
     .save()
     .then(async (commentSaved) => {
       subscribeAndNotifyCommenter(entityId, entityType, user, mentions); // don't await
@@ -313,7 +317,7 @@ async function create(req, res, next) {
         ForumThread.increaseCommentCount(entityId);
       }
 
-      res.status(201).json({ result: commentSaved });
+      return res.status(201).json({ result: commentSaved });
     })
     .catch(err => next(err));
 }
