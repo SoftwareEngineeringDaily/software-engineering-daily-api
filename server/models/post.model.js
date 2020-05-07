@@ -82,6 +82,10 @@ const PostSchema = new mongoose.Schema({
   },
   relatedTweet: { type: String },
   relatedTweetUsers: { type: Array },
+  relatedPosts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Post'
+  }],
   date: { type: Date, default: Date.now },
   transcriptUrl: { type: String, default: '' },
   topics: Array,

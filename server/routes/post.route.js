@@ -61,6 +61,24 @@ router.route('/:postId')
     respond,
   );
 
+router.route('/:postId/related-episodes')
+  .get(
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
+    postCtrl.getRelatedEpisodes,
+  );
+
+router.route('/:postId/related-episodes/:episodeSlug')
+  .post(
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
+    postCtrl.load,
+    postCtrl.saveRelatedEpisode,
+  )
+  .delete(
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
+    postCtrl.load,
+    postCtrl.deleteRelatedEpisode,
+  );
+
 // Get related links associated with postId
 router.route('/:postId/related-links')
   .get(
