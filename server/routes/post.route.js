@@ -61,6 +61,13 @@ router.route('/:postId')
     respond,
   );
 
+router.route('/:postId/topics')
+  .put(
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
+    postCtrl.get,
+    postCtrl.updateTopics,
+  );
+
 router.route('/:postId/related-episodes')
   .get(
     expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),

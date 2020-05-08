@@ -385,6 +385,35 @@ async function deleteRelatedEpisode(req, res) {
   return res.status(200).end();
 }
 
+async function updateTopics(req, res) {
+  const { post, body: { topics } } = req;
+
+  if (!topics) return res.status(400).end('Missing data');
+
+  const createTopics = topics.filter(t => !t._id);
+  const newTopics = topics.filter(t => t._id);
+
+  if (newTopics.length) {
+    /* eslint-disable no-await-in-loop */
+    for (let i = 0; i < createTopics.length; i += 1) {
+      const exist = await Topic.findOne({ name: new RegExp(createTopics[i].name, 'i') });
+      if (exist) {
+        newTopics.push(exist);
+      } else {
+        const topic = new Topic({ name: createTopics[i].name });
+        const saved = await topic.save();
+        newTopics.push(saved);
+      }
+    }
+  }
+
+  post.topics = newTopics.map(t => t._id.toString());
+
+  await post.save();
+
+  return res.json(newTopics);
+}
+
 export default {
   load,
   get,
@@ -395,5 +424,6 @@ export default {
   upvote,
   getRelatedEpisodes,
   saveRelatedEpisode,
-  deleteRelatedEpisode
+  deleteRelatedEpisode,
+  updateTopics
 };
