@@ -11,7 +11,7 @@ import User from '../models/user.model';
 
 function checkMaintainer(req, topic) {
   const maintainers = topic.maintainers || [];
-  const hasMaintainers = (maintainers.length > 0 || every(maintainers, '_id'));
+  const hasMaintainers = (maintainers.length > 0 && every(maintainers, '_id'));
   const hasUser = (req.user && req.user._id);
 
   return (

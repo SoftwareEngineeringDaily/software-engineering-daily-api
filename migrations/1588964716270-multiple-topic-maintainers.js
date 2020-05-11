@@ -1,5 +1,3 @@
-
-
 import mongoose from 'mongoose';
 import Topic from '../server/models/topic.model';
 import User from '../server/models/user.model'; // eslint-disable-line
