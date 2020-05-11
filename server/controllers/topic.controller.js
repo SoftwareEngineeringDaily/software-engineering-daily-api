@@ -23,8 +23,16 @@ import { mailTemplate } from '../helpers/mail';
  */
 
 async function create(req, res) {
+  const { name, maintainer, isUserGenerated } = req.body;
+
+  const exist = await Topic.findOne({ name: new RegExp(name, 'i') });
+  if (exist) return res.status(400).send(`A ${name} Topic already exists`);
+
   const topic = new Topic();
-  topic.name = req.body.name;
+
+  topic.name = name;
+  if (maintainer) topic.maintainer = maintainer;
+  if (isUserGenerated) topic.isUserGenerated = isUserGenerated;
 
   if (req.body.postId) {
     topic.postCount = 1;
@@ -36,12 +44,12 @@ async function create(req, res) {
     });
   }
 
-  topic
+  return topic
     .save()
     .then((topicSaved) => {
       res.status(201).json(topicSaved);
     })
-    .catch(err => res.status(422).json(err.errmsg));
+    .catch(err => res.status(500).json(err.errmsg));
 }
 
 async function add(req, res) {
