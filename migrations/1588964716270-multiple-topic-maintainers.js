@@ -10,7 +10,7 @@ Promise = require('bluebird'); // eslint-disable-line no-global-assign
 
 // plugin bluebird promise in mongoose
 mongoose.Promise = Promise;
-mongoose.connect(config.mongo.host);
+mongoose.connect(config.mongo.host, { useMongoClient: true });
 
 // eslint-disable-next-line
 module.exports.up = function (next) {
