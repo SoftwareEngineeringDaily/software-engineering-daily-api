@@ -263,7 +263,7 @@ async function update(req, res) {
     res.send('Topic udpated.');
 
     data.maintainers.forEach((maintainer) => {
-      if (topic.maintainer.toString() !== maintainer.toString()) {
+      if (!topic.maintainers.filter(m => m.toString() === maintainer._id).length) {
         mailNewMaintainer(topic, maintainer);
       }
     });
