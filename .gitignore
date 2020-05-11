@@ -54,6 +54,9 @@ node_modules
 *.swp
 *.swo
 
+# Database Migrations
+.migrate
+
 # Redis Database File
 *.rdb
 
