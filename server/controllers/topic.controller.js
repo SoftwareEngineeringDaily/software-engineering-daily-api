@@ -31,7 +31,7 @@ async function create(req, res) {
   const topic = new Topic();
 
   topic.name = name;
-  if (maintainer) topic.maintainer = maintainer;
+  if (maintainer) topic.maintainers = [maintainer];
   if (isUserGenerated) topic.isUserGenerated = isUserGenerated;
 
   if (req.body.postId) {
