@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import every from 'lodash/every';
 import httpStatus from 'http-status';
 import Topic from '../models/topic.model';
 import TopicPage from '../models/topicPage.model';
@@ -9,10 +10,15 @@ import { mailTemplate } from '../helpers/mail';
 import User from '../models/user.model';
 
 function checkMaintainer(req, topic) {
-  if (!topic.maintainer || !topic.maintainer._id) return false;
-  if (!req.user || !req.user._id) return false;
-  if (req.user._id.toString() !== topic.maintainer._id.toString()) return false;
-  return true;
+  const maintainers = topic.maintainers || [];
+  const hasMaintainers = (maintainers.length > 0 || every(maintainers, '_id'));
+  const hasUser = (req.user && req.user._id);
+
+  return (
+    hasUser &&
+    hasMaintainers &&
+    maintainers.filter(m => req.user._id.toString() === m._id.toString()).length
+  );
 }
 
 async function createTopicPage(topicId) {
@@ -47,10 +53,13 @@ async function get(req, res) {
     options.$or.push({ _id: req.params.slug });
   }
 
-  const topic = await Topic.findOne(options)
-    .populate('maintainer', 'name lastName avatarUrl isAdmin');
+  const topic = await Topic
+    .findOne(options)
+    .populate('maintainers', 'name lastName email website avatarUrl isAdmin bio');
 
-  if (!topic) return res.status(404).send(`Topic ${req.params.slug} not found`);
+  if (!topic) {
+    return res.status(404).send(`Topic ${req.params.slug} not found`);
+  }
 
   let topicPage = await TopicPage.findOne({ topic: topic._id })
     .populate('history.user', 'name avatarUrl isAdmin');
@@ -66,7 +75,7 @@ async function get(req, res) {
 
 async function update(req, res) {
   const topic = await Topic.findOne({ slug: req.params.slug })
-    .populate('maintainer', 'name lastName email avatarUrl isAdmin');
+    .populate('maintainers', 'name lastName email avatarUrl isAdmin');
 
   if (!topic) return res.status(404).send(`Topic ${req.params.slug} not found`);
 
@@ -140,10 +149,13 @@ async function showContent(req, res) {
     options.$or.push({ _id: req.params.slug });
   }
 
-  const topic = await Topic.findOne(options)
-    .populate('maintainer', 'name twitter lastName avatarUrl');
+  const topic = await Topic
+    .findOne(options)
+    .populate('maintainers', 'name lastName email website avatarUrl isAdmin bio');
 
-  if (!topic) return res.status(404).send(`Topic ${req.params.slug} not found`);
+  if (!topic) {
+    return res.status(404).send(`Topic ${req.params.slug} not found`);
+  }
 
   const topicPage = await TopicPage.findOne({ topic: topic._id });
 
