@@ -329,6 +329,15 @@ function listBookmarked(req, res, next) {
     });
 }
 
+function removeBookmarked(req, res) {
+  const userId = req.userLoaded ? req.userLoaded._id : req.user._id;
+
+  Favorite.findOne({ userId, postId: req.params.postId })
+    .remove()
+    .then(() => res.end('Ok'))
+    .catch(err => res.status(400).end(err.message));
+}
+
 function updateEmailNotiicationSettings(req, res, next) {
   const user = req.fullUser;
   user.emailNotiicationSettings = req.body; // eslint-disable-line no-param-reassign
@@ -350,6 +359,7 @@ export default {
   listNames,
   updateProfile,
   listBookmarked,
+  removeBookmarked,
   requestPasswordReset,
   updateEmailNotiicationSettings,
   regainPassword

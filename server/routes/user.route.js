@@ -81,14 +81,18 @@ router.route('/request-password-reset')
   );
 
 router.route('/me/bookmarked')
-/** GET /api/users/me/bookmarked - Get bookmarked items for current user */
   .get(
     expressJwt({ secret: config.jwtSecret }),
     userCtrl.listBookmarked
   );
 
+router.route('/me/bookmarked/:postId')
+  .delete(
+    expressJwt({ secret: config.jwtSecret }),
+    userCtrl.removeBookmarked
+  );
+
 router.route('/:userId/bookmarked')
-/** GET /api/users/:userId/bookmarked - Get bookmarked items for specified user */
   .get(userCtrl.listBookmarked);
 
 /** Load user when API with userId route parameter is hit */
