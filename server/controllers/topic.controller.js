@@ -57,14 +57,16 @@ async function add(req, res) {
 }
 
 async function get(req, res) {
-  const topic = await Topic.findById(req.params.topicId)
-    .populate('maintainer', 'name lastName email website avatarUrl isAdmin bio');
+  const topic = await Topic
+    .findById(req.params.topicId)
+    .populate('maintainers', 'name lastName email website avatarUrl isAdmin bio');
+
   res.send(topic);
 }
 
 async function getFull(req, res) {
   const topics = await Topic.find()
-    .populate('maintainer', 'name lastName email website avatarUrl isAdmin');
+    .populate('maintainers', 'name lastName email website avatarUrl isAdmin bio');
   res.send(topics);
 }
 
@@ -244,21 +246,27 @@ function show(req, res) {
 
 async function update(req, res) {
   const data = req.body;
-  if (!data.maintainer) data.maintainer = null;
+
+  if (!data.maintainers) {
+    data.maintainers = [];
+  }
 
   const topic = await Topic.findById(req.params.topicId).lean().exec();
 
   if (!topic) return res.status(404).send('Topic not found');
 
   return Topic.findByIdAndUpdate(req.params.topicId, { $set: data }, (err) => {
-    if (err) return;
-    res.send('Topic udpated.');
-    if (
-      data.maintainer &&
-      (!topic.maintainer || topic.maintainer.toString() !== data.maintainer.toString())
-    ) {
-      mailNewMaintainer(topic, data.maintainer);
+    if (err) {
+      return;
     }
+
+    res.send('Topic udpated.');
+
+    data.maintainers.forEach((maintainer) => {
+      if (!topic.maintainers.filter(m => m.toString() === maintainer._id).length) {
+        mailNewMaintainer(topic, maintainer);
+      }
+    });
   });
 }
 
@@ -274,7 +282,10 @@ async function mailNewMaintainer(topic, maintainerId) {
     subject: 'New topic maintainer!',
     data: { user: user.name, topic: topic.name, topicLink }
   });
-  if (!send) console.error('[mailTemplate] Send e-mail failed!');
+
+  if (!send) {
+    console.error('[mailTemplate] Send e-mail failed!'); // eslint-disable-line
+  }
 }
 
 async function deleteTopic(req, res) {

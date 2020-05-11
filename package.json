@@ -12,6 +12,7 @@
   "scripts": {
     "build": "gulp",
     "launch": "npm run build && node dist/index.js",
+    "migrate": "./node_modules/.bin/migrate up --compiler js:babel-register",
     "lint": "esw *.js server config --color",
     "lint:watch": "npm run lint -- --watch",
     "precommit": "lint-staged",
@@ -97,6 +98,7 @@
     "jstoxml": "1.6.5",
     "lodash": "^4.17.15",
     "method-override": "2.3.9",
+    "migrate": "^1.6.2",
     "mocha": "3.5.0",
     "moment": "^2.24.0",
     "mongodb": "^3.1.13",
