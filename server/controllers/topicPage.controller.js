@@ -13,14 +13,14 @@ import config from '../../config/config';
 import { mailTemplate } from '../helpers/mail';
 import User from '../models/user.model';
 
-const client = algoliasearch(
-  process.env.ALGOLIA_APP_ID,
-  process.env.ALGOLIA_API_KEY,
-);
-
-const index = client.initIndex(`${process.env.NODE_ENV}_TOPICS`);
-
 async function indexTopic(topicId) {
+  const client = algoliasearch(
+    process.env.ALGOLIA_APP_ID,
+    process.env.ALGOLIA_API_KEY,
+  );
+
+  const index = client.initIndex(`${process.env.NODE_ENV}_TOPICS`);
+
   const topicPage = await TopicPage
     .findOne({ topic: topicId })
     .populate('topic');
