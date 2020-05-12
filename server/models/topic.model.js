@@ -19,6 +19,7 @@ const TopicSchema = new mongoose.Schema({
   topicPage: { type: mongoose.Schema.Types.ObjectId, ref: 'TopicPage' },
   postCount: { type: Number, default: 0 },
   status: { type: String, default: 'active' },
+  isUserGenerated: { type: Boolean, default: false },
 }, {
   timestamps: {
     createdAt: 'dateCreated',

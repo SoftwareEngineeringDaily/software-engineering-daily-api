@@ -400,7 +400,7 @@ async function updateTopics(req, res) {
       if (exist) {
         newTopics.push(exist);
       } else {
-        const topic = new Topic({ name: createTopics[i].name });
+        const topic = new Topic({ name: createTopics[i].name, isUserGenerated: true });
         const saved = await topic.save();
         newTopics.push(saved);
       }
