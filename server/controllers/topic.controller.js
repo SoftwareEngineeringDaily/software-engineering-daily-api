@@ -247,13 +247,12 @@ function show(req, res) {
 async function update(req, res) {
   const data = req.body;
 
-  if (!data.maintainers) {
-    data.maintainers = [];
-  }
-
   const topic = await Topic.findById(req.params.topicId).lean().exec();
 
   if (!topic) return res.status(404).send('Topic not found');
+
+  data.maintainers = data.maintainers || [];
+  topic.maintainers = topic.maintainers || [];
 
   return Topic.findByIdAndUpdate(req.params.topicId, { $set: data }, (err) => {
     if (err) {
