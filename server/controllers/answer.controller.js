@@ -1,6 +1,7 @@
 import isObject from 'lodash/isObject';
 import Answer from '../models/answer.model';
 import Question from '../models/question.model';
+import { indexTopic } from './topicPage.controller';
 
 async function list(req, res, next) {
   req.posts = [];
@@ -77,6 +78,10 @@ async function create(req, res) {
     question.answers = question.answers.concat([saved._id]);
     await question.save();
 
+    if (question && question.entityId) {
+      indexTopic(question.entityId);
+    }
+
     return res.json(saved.toObject());
   } catch (e) {
     return res.status(500).end(e.message ? e.message : e.toString());
@@ -86,7 +91,9 @@ async function create(req, res) {
 async function update(req, res) {
   if (!req.body.content) return res.status(400).send('Missing data');
 
-  const answer = await Answer.findById(req.params.id);
+  const answer = await Answer
+    .findById(req.params.id)
+    .populate('question');
 
   if (!answer) return res.status(404).send('Not found');
 
@@ -101,6 +108,11 @@ async function update(req, res) {
 
   try {
     const saved = await answer.save();
+
+    if (answer.question && answer.question.entityId) {
+      indexTopic(answer.question.entityId);
+    }
+
     return res.json(saved.toObject());
   } catch (e) {
     return res.status(500).end(e.message ? e.message : e.toString());

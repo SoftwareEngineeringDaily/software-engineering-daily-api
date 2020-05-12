@@ -20,21 +20,22 @@ module.exports.up = function (next) {
         maintainer: { $exists: true },
         maintainers: { $exists: false },
       })
-      .exec()
       .then((topics) => {
+        const promises = [];
+
         topics.forEach((topic) => {
           if (topic._id && topic.maintainer) {
-            Topic
+            promises.push(Topic
               .findByIdAndUpdate(topic._id, {
                 $set: {
                   maintainers: [topic.maintainer]
                 }
               })
-              .exec();
+              .exec());
           }
         });
 
-        return Promise.resolve();
+        return Promise.all(promises).then(Promise.resolve);
       })
       .then(() => {
         db.close();
