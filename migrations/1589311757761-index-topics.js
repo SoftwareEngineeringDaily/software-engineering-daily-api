@@ -27,7 +27,6 @@ function indexTopic(topicId) {
     .populate('topic')
     .exec()
     .then((topicPage) => {
-      console.log('topicPage: ', topicPage);
       return Question
         .find({ entityId: topicId })
         .populate('answers')
