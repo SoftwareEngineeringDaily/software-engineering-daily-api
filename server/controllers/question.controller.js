@@ -22,6 +22,7 @@ async function create(req, res) {
 
   if (!entityId || !entityType || (!content && !questions)) return res.status(400).send('Missing data');
 
+  const author = req.user._id;
   const series = [];
   const saved = [];
   let contents = [];
@@ -35,7 +36,12 @@ async function create(req, res) {
 
   questions.forEach((questionContent) => {
     series.push((callback) => {
-      const question = new Question({ entityId, entityType, content: questionContent.trim() });
+      const question = new Question({
+        author,
+        entityId,
+        entityType,
+        content: questionContent.trim()
+      });
       question.save()
         .then((dbQuestion) => {
           saved.push(dbQuestion);
