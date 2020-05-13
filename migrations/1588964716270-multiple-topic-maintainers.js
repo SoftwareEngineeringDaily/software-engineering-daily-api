@@ -6,12 +6,12 @@ import config from './../config/config';
 // make bluebird default Promise
 Promise = require('bluebird'); // eslint-disable-line no-global-assign
 
-// plugin bluebird promise in mongoose
-mongoose.Promise = Promise;
-mongoose.connect(config.mongo.host, { useMongoClient: true });
-
 // eslint-disable-next-line
 module.exports.up = function (next) {
+  // plugin bluebird promise in mongoose
+  mongoose.Promise = Promise;
+  mongoose.connect(config.mongo.host, { useMongoClient: true });
+
   const db = mongoose.connection;
 
   db.once('open', () => {
@@ -22,26 +22,31 @@ module.exports.up = function (next) {
       })
       .exec()
       .then((topics) => {
+        const promises = [];
+
         topics.forEach((topic) => {
           if (topic._id && topic.maintainer) {
-            Topic
+            promises.push(Topic
               .findByIdAndUpdate(topic._id, {
                 $set: {
                   maintainers: [topic.maintainer]
                 }
               })
-              .exec();
+              .exec());
           }
         });
 
-        return Promise.resolve();
+        return Promise.all(promises).then(Promise.resolve);
       })
       .then(() => {
         db.close();
-        return next();
+        next();
+        return Promise.resolve();
       })
       .catch((err) => {
-        return next(err);
+        db.close();
+        next(err);
+        return Promise.resolve();
       });
   });
 };

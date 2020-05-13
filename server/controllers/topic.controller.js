@@ -240,7 +240,7 @@ function show(req, res) {
     if (limit) query.limit = limit;
     if (createdAtBefore) query.createdAtBefore = createdAtBefore;
     if (createdAfter) query.createdAfter = createdAfter;
-    if (isArray(topic) && topic[0]._id) query.topic = [topic[0]._id.toString()];
+    if (isArray(topic) && topic[0] && topic[0]._id) query.topic = [topic[0]._id.toString()];
 
     const posts = await Post.list(query);
 

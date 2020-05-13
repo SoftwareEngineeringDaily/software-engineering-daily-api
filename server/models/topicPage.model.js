@@ -22,7 +22,8 @@ const TopicPageSchema = new mongoose.Schema({
   logo: { type: String, default: '' },
   published: { type: Boolean, default: false },
   history: [TopicPageHistorySchema],
-  images: [TopicPageImageSchema]
+  images: [TopicPageImageSchema],
+  searchIndex: { type: String },
 });
 
 TopicPageSchema.pre('save', function onSave(next) {

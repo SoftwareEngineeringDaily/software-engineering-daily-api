@@ -1,13 +1,74 @@
 import mongoose from 'mongoose';
+import algoliasearch from 'algoliasearch';
 import every from 'lodash/every';
+import omit from 'lodash/omit';
+import flatten from 'lodash/flatten';
 import httpStatus from 'http-status';
 import Topic from '../models/topic.model';
 import TopicPage from '../models/topicPage.model';
+import Question from '../models/question.model';
 import RelatedLink from '../models/relatedLink.model';
 import { signS3 } from '../helpers/s3';
 import config from '../../config/config';
 import { mailTemplate } from '../helpers/mail';
 import User from '../models/user.model';
+
+async function indexTopic(topicId) {
+  const client = algoliasearch(
+    process.env.ALGOLIA_APP_ID,
+    process.env.ALGOLIA_API_KEY,
+  );
+
+  const index = client.initIndex(process.env.ALGOLIA_TOPICS_INDEX);
+
+  const topicPage = await TopicPage
+    .findOne({ topic: topicId })
+    .populate('topic');
+
+  const questions = await Question
+    .find({ entityId: topicId })
+    .populate('answers');
+
+  let answers = questions
+    .filter(q => q.answers.length)
+    .map((q) => {
+      return q.answers.map(a => a.content);
+    });
+
+  answers = flatten(answers);
+
+  const _topicPage = topicPage.toObject();
+  const slug = (_topicPage.topic && _topicPage.topic.slug) ? _topicPage.topic.slug : '';
+  const objectID = _topicPage.searchIndex;
+  const updateObject = {
+    ...omit(_topicPage, [
+      'history',
+      '__v',
+      'images',
+      'searchIndex',
+    ]),
+    slug,
+    answers,
+  };
+
+  if (updateObject.topic && updateObject.topic.name) {
+    updateObject.topic = updateObject.topic.name;
+    updateObject._title = updateObject.topic;
+  }
+
+  if (objectID) {
+    updateObject.objectID = objectID; // eslint-disable-line
+  }
+
+  index
+    [objectID ? 'saveObject' : 'addObject'](updateObject) // eslint-disable-line
+    .then(({ objectID }) => { // eslint-disable-line
+      topicPage.searchIndex = objectID;
+      topicPage.save();
+    });
+
+  return Promise.resolve();
+}
 
 function checkMaintainer(req, topic) {
   const maintainers = topic.maintainers || [];
@@ -99,11 +160,20 @@ async function update(req, res) {
   try {
     await topic.save();
     await topicPage.save();
-    if (req.body.published !== undefined) mailAdminsPublish(topicPage, topic);
-    return res.status(200).send('Saved');
+
+    if (req.body.published !== undefined) {
+      mailAdminsPublish(topicPage, topic);
+    }
   } catch (e) {
     return res.status(404).send(`Error saving: ${e.message || e}`);
   }
+
+  // Let's not wait on this to respond
+  if (topicPage.content && topicPage.published) {
+    indexTopic(topic._id);
+  }
+
+  return res.status(200).send('Saved');
 }
 
 async function publish(req, res) {
@@ -176,6 +246,11 @@ async function relatedLinks(req, res) {
 async function getImages(req, res) {
   const { slug } = req.params;
   const topic = await Topic.findOne({ slug });
+
+  if (!topic) {
+    return res.json([]);
+  }
+
   const topicPage = await TopicPage.findOne({ topic: topic._id })
     .lean()
     .exec();
@@ -319,5 +394,6 @@ export default {
   signS3ImageUpload,
   signS3LogoUpload,
   deleteImage,
-  recentPages
+  recentPages,
+  indexTopic,
 };
