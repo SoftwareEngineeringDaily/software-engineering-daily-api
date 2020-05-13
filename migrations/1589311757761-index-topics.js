@@ -10,10 +10,6 @@ import config from './../config/config';
 // make bluebird default Promise
 Promise = require('bluebird'); // eslint-disable-line no-global-assign
 
-// plugin bluebird promise in mongoose
-mongoose.Promise = Promise;
-mongoose.connect(config.mongo.host, { useMongoClient: true });
-
 function indexTopic(topicId) {
   const client = algoliasearch(
     process.env.ALGOLIA_APP_ID,
