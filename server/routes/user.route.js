@@ -56,16 +56,19 @@ router.route('/update-email-notiication-settings')
   );
 
 router.route('/:userId')
-  /** GET /api/users/:userId - Get user */
   .get(
     expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
     userCtrl.get
   )
-
-  /** PUT /api/users/:userId - Update user */
   .put(
     expressJwt({ secret: config.jwtSecret }),
     validate(paramValidation.updateUser), userCtrl.updateProfile
+  );
+
+router.route('/:userId/topics')
+  .get(
+    expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
+    userCtrl.getTopics
   );
 
 router.route('/regain-password')

@@ -9,6 +9,7 @@ import PasswordReset from '../models/passwordReset.model';
 import config from '../../config/config';
 import { getPrivateRss } from '../helpers/rss.helper';
 import searchParser from '../helpers/searchParser.helper';
+import Topic from '../models/topic.model';
 
 const sgMail = require('@sendgrid/mail');
 // TODO: move this out of here, probably in it's own file:
@@ -349,6 +350,16 @@ function updateEmailNotiicationSettings(req, res, next) {
     });
 }
 
+async function getTopics(req, res) {
+  const { userId } = req.params;
+  try {
+    const topics = await Topic.find({ maintainers: { $in: [userId] } });
+    res.json(topics);
+  } catch (e) {
+    res.status(500).send(e.errmsg || e);
+  }
+}
+
 export default {
   load,
   getAll,
@@ -362,5 +373,6 @@ export default {
   removeBookmarked,
   requestPasswordReset,
   updateEmailNotiicationSettings,
-  regainPassword
+  regainPassword,
+  getTopics
 };
