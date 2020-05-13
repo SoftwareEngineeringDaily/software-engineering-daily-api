@@ -19,7 +19,7 @@ async function indexTopic(topicId) {
     process.env.ALGOLIA_API_KEY,
   );
 
-  const index = client.initIndex(`${process.env.NODE_ENV}_TOPICS`);
+  const index = client.initIndex(process.env.ALGOLIA_TOPICS_INDEX);
 
   const topicPage = await TopicPage
     .findOne({ topic: topicId })

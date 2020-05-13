@@ -7,8 +7,6 @@ import Question from '../server/models/question.model';
 import Answer from '../server/models/answer.model'; // eslint-disable-line
 import config from './../config/config';
 
-require('dotenv'); // eslint-disable-line
-
 // make bluebird default Promise
 Promise = require('bluebird'); // eslint-disable-line no-global-assign
 
@@ -22,7 +20,7 @@ function indexTopic(topicId) {
     process.env.ALGOLIA_API_KEY,
   );
 
-  const index = client.initIndex(`${process.env.NODE_ENV}_TOPICS`);
+  const index = client.initIndex(process.env.ALGOLIA_TOPICS_INDEX);
 
   return TopicPage
     .findOne({ topic: topicId })
