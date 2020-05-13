@@ -25,7 +25,9 @@ function indexTopic(topicId) {
   return TopicPage
     .findOne({ topic: topicId })
     .populate('topic')
+    .exec()
     .then((topicPage) => {
+      console.log('topicPage: ', topicPage);
       return Question
         .find({ entityId: topicId })
         .populate('answers')
@@ -74,6 +76,10 @@ function indexTopic(topicId) {
 
 // eslint-disable-next-line
 module.exports.up = function (next) {
+  // plugin bluebird promise in mongoose
+  mongoose.Promise = Promise;
+  mongoose.connect(config.mongo.host, { useMongoClient: true });
+
   const db = mongoose.connection;
 
   db.once('open', () => {
@@ -82,6 +88,7 @@ module.exports.up = function (next) {
         searchIndex: { $exists: false },
         published: true,
       })
+      .exec()
       .then((topicPages) => {
         const promises = [];
 
@@ -93,10 +100,13 @@ module.exports.up = function (next) {
       })
       .then(() => {
         db.close();
-        return next();
+        next();
+        return Promise.resolve();
       })
       .catch((err) => {
-        return next(err);
+        db.close();
+        next(err);
+        return Promise.resolve();
       });
   });
 };
