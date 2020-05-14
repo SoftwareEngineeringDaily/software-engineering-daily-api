@@ -25,16 +25,16 @@ async function create(req, res) {
   const author = req.user._id;
   const series = [];
   const saved = [];
-  let contents = [];
+  let saveQuestions = [];
 
   if (content) {
-    contents.push(content.trim());
+    saveQuestions.push(content.trim());
   }
   if (questions) {
-    contents = questions.filter(q => !!q);
+    saveQuestions = questions.filter(q => !!q);
   }
 
-  questions.forEach((questionContent) => {
+  saveQuestions.forEach((questionContent) => {
     series.push((callback) => {
       const question = new Question({
         author,
@@ -93,9 +93,19 @@ async function getByEntity(req, res) {
 }
 
 async function update(req, res) {
+  const { fullUser: user } = req;
   const question = await Question.findById(req.params.id);
 
   if (!question) return res.status(404).send('Not found');
+
+  if (question.author &&
+    (!user._id || !user.isAdmin || user._id.toString() !== question.author.toString())) {
+    return res.status(401).send('Not enough permissions to modify question');
+  }
+
+  if (!question.author && !user.isAdmin) {
+    return res.status(401).send('Not enough permissions to modify question');
+  }
 
   Object.keys(req.body).forEach((key) => {
     question[key] = typeof req.body[key] === 'string' ? req.body[key].trim() : req.body[key];
@@ -112,9 +122,19 @@ async function update(req, res) {
 }
 
 async function deleteQuestion(req, res) {
+  const { fullUser: user } = req;
   const question = await Question.findById(req.params.id);
 
   if (!question) return res.status(404).send('Not found');
+
+  if (question.author &&
+    (!user._id || !user.isAdmin || user._id.toString() !== question.author.toString())) {
+    return res.status(401).send('Not enough permissions to modify question');
+  }
+
+  if (!question.author && !user.isAdmin) {
+    return res.status(401).send('Not enough permissions to modify question');
+  }
 
   question.deleted = true;
   question.dateUpdated = new Date();

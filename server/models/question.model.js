@@ -4,7 +4,7 @@ import config from '../../config/config';
 // Create schema
 const QuestionSchema = new mongoose.Schema({
   entityId: { type: String },
-  author: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   entityType: { type: String },
   content: { type: String },
   dateCreated: { type: Date, default: Date.now },
