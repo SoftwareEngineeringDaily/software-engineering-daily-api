@@ -1,5 +1,6 @@
 import isArray from 'lodash/isArray';
 import Topic from '../models/topic.model';
+import Job from '../models/job.model';
 import Post from '../models/post.model';
 import User from '../models/user.model';
 import { mailTemplate } from '../helpers/mail';
@@ -122,6 +123,29 @@ async function episodes(req, res) {
     .exec();
 
   return res.json({ episodes: eps.slice(0, 10), total: eps.length });
+}
+
+async function jobs(req, res) {
+  const topic = await Topic.findOne({ slug: req.params.slug });
+
+  if (!topic) return res.status(404).send('No topic found');
+
+  const _jobs = await Job
+    .find({
+      isDeleted: false,
+      topics: {
+        $in: [topic._id.toString()]
+      }
+    })
+    .select('slug title')
+    .sort('-postedDate')
+    .lean()
+    .exec();
+
+  return res.json({
+    jobs: _jobs.slice(0, 10),
+    total: _jobs.length
+  });
 }
 
 async function createRelatedEpisode(req, res) {
@@ -522,6 +546,7 @@ export default {
   maintainerInterest,
   create,
   episodes,
+  jobs,
   createRelatedEpisode,
   index,
   mostPopular,

@@ -9,7 +9,6 @@ const router = express.Router(); // eslint-disable-line new-cap
 const auth = expressJwt({ secret: config.jwtSecret });
 
 router.route('/:topicId([0-9a-f]{24})') // possible conflict with slug route
-  // .get(auth, topicCtrl.get)
   .get(topicCtrl.get)
   .put(auth, topicCtrl.update);
 
@@ -23,5 +22,8 @@ router.route('/:slug')
 router.route('/:slug/episodes')
   .get(topicCtrl.episodes)
   .post(auth, topicCtrl.createRelatedEpisode);
+
+router.route('/:slug/jobs')
+  .get(topicCtrl.jobs);
 
 export default router;
