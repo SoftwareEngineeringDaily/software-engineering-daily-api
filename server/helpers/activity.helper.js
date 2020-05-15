@@ -51,11 +51,14 @@ async function getActivityTree(userId, days) {
     cache: cachedTopicPages
   });
 
+  const topicChanges = await getTopicChanges(userId);
+
   const activities = [].concat(
     postComments,
     topicComments,
     answeredQuestions,
     relatedLinks,
+    topicChanges
   );
 
   if (!activities.length) {
@@ -67,6 +70,41 @@ async function getActivityTree(userId, days) {
   });
 
   return groupBy(activities, 'groupDate');
+}
+
+async function getTopicChanges(userId) {
+  const pages = await TopicPage.find({ 'history.user': userId });
+
+  await populateTopic({
+    data: pages,
+    field: 'topic',
+    type: 'topic',
+    cache: cachedTopics
+  });
+
+  const activities = [];
+
+  pages.forEach((page) => {
+    page.history.forEach((event) => {
+      if (event.user.toString() !== userId.toString()) return;
+      if (event.event === 'unpublish') return;
+      const eventDate = moment(event.dateCreated);
+      const groupDate = eventDate.format('YYYY-MM-DD');
+      const activity = activities.find(a => a.groupDate === groupDate && a.event === event.event);
+      if (!activity) { // just one change per day
+        activities.push({
+          dateCreated: eventDate.toDate(),
+          groupDate,
+          event: event.event,
+          activityType: event.event === 'edit' ? 'topicPageChange' : 'topicPagePublish',
+          entity: page.entity,
+          topic: page.topic
+        });
+      }
+    });
+  });
+
+  return activities;
 }
 
 async function getComments(userId, limitDate) {
