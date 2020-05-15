@@ -42,7 +42,7 @@ export default {
         query.where({ tags: { $in: tagsAsNumbers } });
       }
 
-      const jobs = await query.sort('-postedDate').exec();
+      const jobs = await query.sort('-postedDate').populate('topics').exec();
       const transformedJobs = map(jobs, job => transform(job, false));
 
       return res.json(transformedJobs);
@@ -134,7 +134,8 @@ export default {
   get: async (req, res, next) => {
     try {
       const job = await Job
-        .findById(req.params.jobId);
+        .findById(req.params.jobId)
+        .populate('topics');
 
       if (!job) {
         return next(new APIError('Job not found', httpStatus.NOT_FOUND));

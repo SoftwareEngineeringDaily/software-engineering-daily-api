@@ -89,6 +89,9 @@ const JobSchema = new mongoose.Schema({
   tags: [{
     type: Number
   }],
+  topics: [{
+    type: mongoose.Schema.Types.ObjectId, ref: 'Topic'
+  }],
   employmentType: {
     type: String,
     required: true,
