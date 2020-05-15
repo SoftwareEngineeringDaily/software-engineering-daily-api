@@ -1,3 +1,4 @@
+import shuffle from 'lodash/shuffle';
 import isArray from 'lodash/isArray';
 import Topic from '../models/topic.model';
 import Job from '../models/job.model';
@@ -138,13 +139,12 @@ async function jobs(req, res) {
       }
     })
     .select('slug title')
-    .sort('-postedDate')
     .lean()
     .exec();
 
   return res.json({
-    jobs: _jobs.slice(0, 10),
-    total: _jobs.length
+    jobs: shuffle(_jobs).slice(0, 5),
+    total: _jobs.length,
   });
 }
 
