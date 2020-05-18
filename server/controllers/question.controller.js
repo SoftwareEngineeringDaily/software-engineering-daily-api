@@ -29,7 +29,7 @@ async function getUnanswered(req, res) {
     })
     .populate('author', 'name lastName email website avatarUrl bio');
 
-  if (!questions.length) {
+  if (!questions) {
     return res.status(404).send('Not found');
   }
 
