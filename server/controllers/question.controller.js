@@ -1,6 +1,9 @@
 import async from 'async';
+import find from 'lodash/find';
 import isArray from 'lodash/isArray';
+import shuffle from 'lodash/shuffle';
 import Question from '../models/question.model';
+import Topic from '../models/topic.model';
 import topicPageCtrl from './topicPage.controller';
 
 async function get(req, res) {
@@ -13,6 +16,41 @@ async function get(req, res) {
   });
 
   return res.json(question.toObject());
+}
+
+async function getUnanswered(req, res) {
+  let questions = await Question
+    .find({
+      answers: { $size: 0 },
+      $or: [
+        { deleted: false },
+        { deleted: { $exists: false } },
+      ],
+    })
+    .populate('author', 'name lastName email website avatarUrl bio');
+
+  if (!questions) {
+    return res.status(404).send('Not found');
+  }
+
+  questions = shuffle(questions)
+    .slice(0, parseInt(req.params.limit || 10, 10));
+
+  const topicIds = questions.map(q => q.entityId);
+  let topics = await Topic.find({ _id: { $in: topicIds } });
+
+  topics = topics
+    .map(t => ({
+      ...t.toObject(),
+      _id: t._id.toString(),
+    }));
+
+  questions = questions.map(q => ({
+    topic: find(topics, { _id: q.entityId }),
+    ...q.toObject(),
+  }));
+
+  return res.json(questions);
 }
 
 async function create(req, res) {
@@ -182,6 +220,7 @@ async function getRelated(req, res, next) {
 
 export default {
   get,
+  getUnanswered,
   getByEntity,
   getRelated,
   create,

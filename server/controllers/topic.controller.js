@@ -81,7 +81,16 @@ async function getFull(req, res) {
 }
 
 function top(req, res) {
-  Topic.find({ status: 'active' }).sort({ postCount: -1 }).limit(parseInt(req.params.count, 10))
+  Topic
+    .find({
+      status: 'active',
+      $or: [
+        { maintainers: { $size: 0 } },
+        { maintainers: { $exists: false } },
+      ]
+    })
+    .sort({ postCount: -1 })
+    .limit(parseInt(req.params.count, 10))
     .then((topics) => {
       res.send(topics);
     })

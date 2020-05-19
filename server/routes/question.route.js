@@ -11,6 +11,9 @@ router.route('/')
 // .get(jwt, questionCtrl.search) // if needed in admin
   .post(jwt, loadFullUser, questionCtrl.create);
 
+router.route('/unanswered')
+  .get(questionCtrl.getUnanswered);
+
 router.route('/:id')
   .get(questionCtrl.get)
   .put(jwt, loadFullUser, questionCtrl.update)
