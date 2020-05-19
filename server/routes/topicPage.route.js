@@ -5,39 +5,39 @@ import config from '../../config/config';
 import loadFullUser from '../middleware/loadFullUser.middleware';
 
 const router = express.Router();
-
+const jwt = expressJwt({ secret: config.jwtSecret });
 
 router.route('/recentPages')
   .get(topicPageCtrl.recentPages);
 
 router.route('/:slug')
   .get(topicPageCtrl.showContent)
-  .put(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.update);
+  .put(jwt, topicPageCtrl.update);
 
 router.route('/:slug/publish')
-  .put(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.publish);
+  .put(jwt, topicPageCtrl.publish);
 
 router.route('/:slug/unpublish')
-  .put(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.unpublish);
+  .put(jwt, topicPageCtrl.unpublish);
 
 router.route('/:slug/edit')
-  .get(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.get);
+  .get(jwt, topicPageCtrl.get);
 
 router.route('/:slug/images')
   .get(topicPageCtrl.getImages)
   .post(
-    expressJwt({ secret: config.jwtSecret }),
+    jwt,
     loadFullUser,
     topicPageCtrl.signS3ImageUpload
   );
 
 router.route('/:slug/logo')
   .post(
-    expressJwt({ secret: config.jwtSecret }),
+    jwt,
     loadFullUser,
     topicPageCtrl.signS3LogoUpload
   );
 
 router.route('/:slug/images/:imageId')
-  .delete(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.deleteImage);
+  .delete(jwt, topicPageCtrl.deleteImage);
 export default router;

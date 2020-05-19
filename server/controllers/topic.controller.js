@@ -4,7 +4,9 @@ import Topic from '../models/topic.model';
 import Job from '../models/job.model';
 import Post from '../models/post.model';
 import User from '../models/user.model';
+import TopicPage from '../models/topicPage.model';
 import { mailTemplate } from '../helpers/mail';
+import topicPageCtrl from './topicPage.controller';
 
 /**
  * @swagger
@@ -92,25 +94,45 @@ function top(req, res) {
     });
 }
 
-async function maintainerInterest(req, res) {
+async function setMaintainer(req, res) {
+  const { topicSlug, event } = req.body;
+  const { user } = req;
+  const topic = await Topic.findOne({ slug: topicSlug });
+
+  if (!topic) return res.status(404).send('Topic not found');
+
+  if (topic.maintainers && topic.maintainers.length) return res.status(400).send('Topic already has maintainers');
+
+  topic.maintainers = topic.maintainers.concat(user._id);
+
+  await topic.save();
+
+  const topicPage = await topicPageCtrl.createTopicPage(topic._id);
+
+  topicPage.history = topicPage.history.concat(new TopicPage.History({
+    user: user._id,
+    event
+  }));
+
+  await topicPage.save();
+
+  res.end('Saved');
+
   const admins = await User.find({ isAdmin: true }).lean().exec();
 
-  if (!admins.length) return;
-
-  admins.forEach((admin) => {
-    mailTemplate.topicInterest({
-      to: admin.email,
-      subject: 'New topic publish status',
+  return admins.forEach((admin) => {
+    mailTemplate.topicNewMaintainer({
+      // to: admin.email,
+      to: 'marcos.schlup@x-team.com',
+      subject: `New topic maintainer - ${topic.name}`,
       data: {
         user: admin.name,
-        maintainer: req.body.userName,
-        email: req.body.userEmail,
-        topic: req.body.topicName,
+        maintainer: `${user.name} ${user.lastName}`,
+        email: user.email,
+        topic: topic.name,
       }
     });
   });
-
-  res.send('Registered');
 }
 
 async function episodes(req, res) {
@@ -543,7 +565,7 @@ export default {
   get,
   getFull,
   top,
-  maintainerInterest,
+  setMaintainer,
   create,
   episodes,
   jobs,

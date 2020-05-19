@@ -12,6 +12,7 @@ import { signS3 } from '../helpers/s3';
 import config from '../../config/config';
 import { mailTemplate } from '../helpers/mail';
 import User from '../models/user.model';
+import topicPageRevisionCtrl from './topicPageRevision.controller';
 
 async function indexTopic(topicId) {
   const client = algoliasearch(
@@ -131,10 +132,13 @@ async function get(req, res) {
     topicPage = await createTopicPage(topic._id);
     status = 201;
   }
-  return res.status(status).send({ topic, topicPage });
+
+  const revisions = await topicPageRevisionCtrl.getAll(topicPage._id);
+
+  return res.status(status).send({ topic, topicPage, revisions });
 }
 
-async function update(req, res) {
+async function update(req, res, updateRevision = true) {
   const topic = await Topic.findOne({ slug: req.params.slug })
     .populate('maintainers', 'name lastName email avatarUrl isAdmin');
 
@@ -146,10 +150,19 @@ async function update(req, res) {
 
   if (!checkMaintainer(req, topic)) return res.status(403).send('Not authorized');
 
+  if (!topicPage.lastRevision) {
+    // secure old content for new revision schemma
+    await topicPageRevisionCtrl.create(topicPage, req.user);
+    topicPage.revision = 1;
+    topicPage.lastRevision = 1;
+  }
+
   topicPage.history = topicPage.history.concat(new TopicPage.History({
     user: req.user._id,
     event: req.body.event
   }));
+
+  const changedPublished = topicPage.published !== req.body.published;
 
   if (req.body.content) topicPage.content = req.body.content;
   if (req.body.logo) topicPage.logo = req.body.logo;
@@ -158,11 +171,19 @@ async function update(req, res) {
   topic.topicPage = topicPage._id;
 
   try {
+    if (updateRevision) {
+      const topicPageRevision = await topicPageRevisionCtrl.create(topicPage, req.user);
+      if (topicPageRevision) {
+        topicPage.revision = topicPageRevision.revision;
+        topicPage.lastRevision = topicPageRevision.revision;
+      }
+    }
+
     await topic.save();
     await topicPage.save();
 
-    if (req.body.published !== undefined) {
-      mailAdminsPublish(topicPage, topic);
+    if (req.body.published !== undefined && changedPublished) {
+      mailAdminsPublish(topicPage, topic, req.user);
     }
   } catch (e) {
     return res.status(404).send(`Error saving: ${e.message || e}`);
@@ -180,17 +201,17 @@ async function publish(req, res) {
   req.body.event = 'publish';
   req.body.published = true;
 
-  update(req, res);
+  update(req, res, false);
 }
 
 async function unpublish(req, res) {
   req.body.event = 'unpublish';
   req.body.published = false;
 
-  update(req, res);
+  update(req, res, false);
 }
 
-async function mailAdminsPublish(topicPage, topic) {
+async function mailAdminsPublish(topicPage, topic, user) {
   const admins = await User.find({ isAdmin: true }).lean().exec();
 
   if (!admins.length) return;
@@ -201,7 +222,7 @@ async function mailAdminsPublish(topicPage, topic) {
       subject: 'New topic publish status',
       data: {
         user: admin.name,
-        maintainer: (topic.maintainer) ? topic.maintainer.name : '-',
+        maintainer: `${user.name} ${user.lastName}`,
         publish: (topicPage.published) ? 'Published' : 'Unpublished',
         topicPage: topic.name,
         topicLink: `http://softwaredaily.com/topic/${topic.slug}`

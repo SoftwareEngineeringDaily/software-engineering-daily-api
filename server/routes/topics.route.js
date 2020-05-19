@@ -5,6 +5,8 @@ import config from '../../config/config';
 
 const router = express.Router(); // eslint-disable-line new-cap
 
+const jwt = expressJwt({ secret: config.jwtSecret });
+
 router.route('/mostPopular')
   .get(topicCtrl.mostPopular);
 
@@ -30,13 +32,13 @@ router.route('/searchTopics')
 router.route('/top/:count')
   .get(topicCtrl.top);
 
-router.route('/interest')
-  .post(topicCtrl.maintainerInterest);
+router.route('/maintainer')
+  .post(jwt, topicCtrl.setMaintainer);
 
 router.route('/:slug')
   .get(topicCtrl.show)
   // .put(expressJwt({ secret: config.jwtSecret }), topicCtrl.update)
-  .delete(expressJwt({ secret: config.jwtSecret }), topicCtrl.deleteTopic);
+  .delete(jwt, topicCtrl.deleteTopic);
 
 
 export default router;
