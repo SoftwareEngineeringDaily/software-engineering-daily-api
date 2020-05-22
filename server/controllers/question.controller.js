@@ -5,6 +5,8 @@ import shuffle from 'lodash/shuffle';
 import Question from '../models/question.model';
 import Topic from '../models/topic.model';
 import topicPageCtrl from './topicPage.controller';
+import { saveAndNotifyUser } from './notification.controller';
+import { mailTemplate } from '../helpers/mail';
 
 async function get(req, res) {
   const question = await Question.findById(req.params.id).populate('answers');
@@ -58,12 +60,17 @@ async function create(req, res) {
     entityId, entityType, content, questions
   } = req.body;
 
-  if (!entityId || !entityType || (!content && !questions)) return res.status(400).send('Missing data');
+  if (!entityId || !entityType || (!content && !questions)) {
+    return res.status(400).send('Missing data');
+  }
 
   const author = req.user._id;
   const series = [];
   const saved = [];
   let saveQuestions = [];
+  const topic = await Topic
+    .findOne({ _id: entityId })
+    .populate('maintainers');
 
   if (content) {
     saveQuestions.push(content.trim());
@@ -80,6 +87,7 @@ async function create(req, res) {
         entityType,
         content: questionContent.trim()
       });
+
       question.save()
         .then((dbQuestion) => {
           saved.push(dbQuestion);
@@ -90,10 +98,60 @@ async function create(req, res) {
   });
 
   return async.series(series, (err) => {
-    if (err) return res.status(500).end(err.message ? err.message : err.toString());
-    if (entityType === 'topic') topicPageCtrl.createTopicPage(entityId);
-    if (saved.length === 1) return res.json(saved[0]);
-    return res.json(saved);
+    if (err) {
+      return res.status(500).end(err.message ? err.message : err.toString());
+    }
+
+    if (entityType === 'topic') {
+      topicPageCtrl.createTopicPage(entityId);
+    }
+
+    // Handle notifications
+    topic.maintainers = topic.maintainers || [];
+    topic.maintainers.forEach((maintainer) => {
+      const canSend = (
+        maintainer &&
+        req.user &&
+        maintainer.email &&
+        maintainer.email !== req.user.email
+      );
+
+      const qCount = (saveQuestions.length);
+      const payload = {
+        notification: {
+          title: `${qCount > 1 ? `${qCount} ` : ''}New question${qCount > 1 ? 's' : ''} asked about ${topic.name}`,
+          body: saveQuestions[0],
+          data: {
+            user: req.user.username,
+            mentioned: maintainer._id,
+            slug: topic.slug,
+            url: `/topic/${topic.slug}/question/${saved[0]._id}`,
+          }
+        },
+        type: 'question',
+        entity: topic._id
+      };
+
+      if (canSend) {
+        // notify maintainer
+        saveAndNotifyUser(payload, maintainer._id);
+
+        // email maintainer
+        mailTemplate.topicQuestion({
+          to: maintainer.email,
+          subject: 'New question',
+          data: {
+            user: maintainer.name,
+            topic: topic.name,
+            actionLabel: qCount > 1 ? 'Go to topic' : 'Review question',
+            actionLink: `http://softwaredaily.com/topic/${topic.slug}${qCount > 1 ? '' : `/question/${saved[0]._id}`}`,
+            questions: saveQuestions,
+          }
+        });
+      }
+    });
+
+    return res.json(saved.length === 1 ? saved[0] : saved);
   });
 }
 

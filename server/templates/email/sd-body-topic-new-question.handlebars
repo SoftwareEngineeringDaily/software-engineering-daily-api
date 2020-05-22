@@ -1,0 +1,17 @@
+{{#> sd-simple-template}}
+<h2>New question</h2>
+<p>Hi {{user}},</p>
+<p>A new question has been added to <b>{{topic}}</b>.</p>
+{{#each questions}}
+  <p>"{{this}}"</p>
+{{/each}}
+<table>
+  <tr>
+    <td align="center">
+      <p>
+        <a href="{{actionLink}}" class="button">{{actionLabel}}</a>
+      </p>
+    </td>
+  </tr>
+</table>
+{{/sd-simple-template}}
