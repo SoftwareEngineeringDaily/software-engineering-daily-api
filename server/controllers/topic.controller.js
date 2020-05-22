@@ -28,6 +28,9 @@ import topicPageCtrl from './topicPage.controller';
 
 async function create(req, res) {
   const { name, maintainer, isUserGenerated } = req.body;
+  const { user } = req;
+
+  if (user.blockedTopicEdit) return res.status(400).send('Not enough permissions to create a topic');
 
   const exist = await Topic.findOne({ name: new RegExp(name, 'i') });
   if (exist) return res.status(400).send(`A ${name} Topic already exists`);
@@ -71,7 +74,7 @@ async function add(req, res) {
 async function get(req, res) {
   const topic = await Topic
     .findById(req.params.topicId)
-    .populate('maintainers', 'name lastName email website avatarUrl isAdmin bio');
+    .populate('maintainers', 'name lastName email website avatarUrl isAdmin bio blockedTopicEdit');
 
   res.send(topic);
 }

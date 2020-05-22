@@ -61,6 +61,14 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  isSuperAdmin: {
+    type: Boolean,
+    default: false
+  },
+  blockedTopicEdit: {
+    type: Boolean,
+    default: false
+  },
   email: {
     type: String
   },

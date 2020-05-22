@@ -107,6 +107,8 @@ async function createTopicPage(topicId) {
 }
 
 async function get(req, res) {
+  if (req.user.blockedTopicEdit) return res.status(400).send('Not enough permissions to edit this page');
+
   const options = {
     $or: [{ slug: req.params.slug }]
   };
@@ -139,6 +141,8 @@ async function get(req, res) {
 }
 
 async function update(req, res, updateRevision = true) {
+  if (req.user.blockedTopicEdit) return res.status(400).send('Not enough permissions to edit this page');
+
   const topic = await Topic.findOne({ slug: req.params.slug })
     .populate('maintainers', 'name lastName email avatarUrl isAdmin');
 
@@ -157,11 +161,6 @@ async function update(req, res, updateRevision = true) {
     topicPage.lastRevision = 1;
   }
 
-  topicPage.history = topicPage.history.concat(new TopicPage.History({
-    user: req.user._id,
-    event: req.body.event
-  }));
-
   const changedPublished = topicPage.published !== req.body.published;
 
   if (req.body.content) topicPage.content = req.body.content;
@@ -178,6 +177,12 @@ async function update(req, res, updateRevision = true) {
         topicPage.lastRevision = topicPageRevision.revision;
       }
     }
+
+    topicPage.history = topicPage.history.concat(new TopicPage.History({
+      user: req.user._id,
+      event: req.body.event,
+      revision: topicPage.revision
+    }));
 
     await topic.save();
     await topicPage.save();
@@ -362,6 +367,26 @@ async function changeLogo(req, res, result) {
 
   if (topicPage) {
     topicPage.logo = result.url;
+
+    if (!topicPage.lastRevision) {
+      // secure old content for new revision schemma
+      await topicPageRevisionCtrl.create(topicPage, req.user);
+      topicPage.revision = 1;
+      topicPage.lastRevision = 1;
+    }
+
+    const topicPageRevision = await topicPageRevisionCtrl.create(topicPage, req.user);
+    if (topicPageRevision) {
+      topicPage.revision = topicPageRevision.revision;
+      topicPage.lastRevision = topicPageRevision.revision;
+    }
+
+    topicPage.history = topicPage.history.concat(new TopicPage.History({
+      user: req.user._id,
+      event: 'editLogo',
+      revision: topicPage.revision
+    }));
+
     await topicPage.save();
   }
 

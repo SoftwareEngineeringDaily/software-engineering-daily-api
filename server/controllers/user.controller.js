@@ -231,6 +231,23 @@ async function getAll(req, res, next) {
   }
 }
 
+async function adminGet(req, res, next) {
+  try {
+    const user = await User.findById(req.params.userId)
+      .select('-password')
+      .lean()
+      .exec();
+
+    if (!user) return res.status(404).send('User not found');
+
+    user.maintainedTopics = await Topic.find({ maintainers: { $in: [user._id] } });
+
+    return res.json(user);
+  } catch (err) {
+    return next(err);
+  }
+}
+
 async function update(req, res, next) {
   try {
     const fields = req.body;
@@ -364,6 +381,7 @@ export default {
   load,
   getAll,
   update,
+  adminGet,
   get,
   me,
   list,
