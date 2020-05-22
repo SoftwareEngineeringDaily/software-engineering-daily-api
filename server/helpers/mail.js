@@ -11,7 +11,7 @@ const options = {
     'sd-simple-body',
     'sd-body-topic-maintainer',
     'sd-body-topic-publish',
-    'sd-body-topic-interest',
+    'sd-body-topic-new-maintainer',
     'sd-body-post-comment-author',
     'sd-body-post-comment-reply',
     'sd-body-post-comment-mention'
@@ -26,8 +26,8 @@ const options = {
     name: 'topicPublish',
     body: 'sd-body-topic-publish'
   }, {
-    name: 'topicInterest',
-    body: 'sd-body-topic-interest'
+    name: 'topicNewMaintainer',
+    body: 'sd-body-topic-new-maintainer'
   }, {
     name: 'postNewCommentAuthor',
     body: 'sd-body-post-comment-author'
