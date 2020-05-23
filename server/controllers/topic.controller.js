@@ -111,9 +111,15 @@ async function setMaintainer(req, res) {
   const { user } = req;
   const topic = await Topic.findOne({ slug: topicSlug });
 
-  if (!topic) return res.status(404).send('Topic not found');
+  if (!topic) {
+    return res.status(404).send('Topic not found');
+  }
 
-  if (topic.maintainers && topic.maintainers.length) return res.status(400).send('Topic already has maintainers');
+  topic.maintainers = topic.maintainers || [];
+
+  if (topic.maintainers.indexOf(user._id) >= 0) {
+    return res.status(400).send('You are already a maintainer');
+  }
 
   topic.maintainers = topic.maintainers.concat(user._id);
 
@@ -134,8 +140,7 @@ async function setMaintainer(req, res) {
 
   return admins.forEach((admin) => {
     mailTemplate.topicNewMaintainer({
-      // to: admin.email,
-      to: 'marcos.schlup@x-team.com',
+      to: admin.email,
       subject: `New topic maintainer - ${topic.name}`,
       data: {
         user: admin.name,
