@@ -5,7 +5,6 @@ import paramValidation from '../../config/param-validation';
 import userCtrl from '../controllers/user.controller';
 import loadFullUser from '../middleware/loadFullUser.middleware';
 import ensureIsAdmin from '../middleware/ensureIsAdmin.middleware';
-import ensureIsSuperAdmin from '../middleware/ensureIsSuperAdmin.middleware';
 import config from '../../config/config';
 
 const router = express.Router(); // eslint-disable-line new-cap
@@ -20,10 +19,16 @@ router.route('/')
 
 // Admin CRUDE (don't interfere with profile update for now)
 router.route('/admin/:userId')
+  .get(
+    expressJwt({ secret: config.jwtSecret }),
+    loadFullUser,
+    ensureIsAdmin,
+    userCtrl.adminGet
+  )
   .put(
     expressJwt({ secret: config.jwtSecret }),
     loadFullUser,
-    ensureIsSuperAdmin,
+    ensureIsAdmin,
     userCtrl.update
   );
 

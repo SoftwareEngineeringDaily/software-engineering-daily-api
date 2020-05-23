@@ -1,43 +1,48 @@
 import express from 'express';
 import expressJwt from 'express-jwt';
 import topicPageCtrl from '../controllers/topicPage.controller';
+import topicPageRevisionCtrl from '../controllers/topicPageRevision.controller';
 import config from '../../config/config';
 import loadFullUser from '../middleware/loadFullUser.middleware';
 
 const router = express.Router();
-
+const auth = expressJwt({ secret: config.jwtSecret });
 
 router.route('/recentPages')
   .get(topicPageCtrl.recentPages);
 
 router.route('/:slug')
   .get(topicPageCtrl.showContent)
-  .put(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.update);
+  .put(auth, loadFullUser, topicPageCtrl.update);
 
 router.route('/:slug/publish')
-  .put(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.publish);
+  .put(auth, topicPageCtrl.publish);
 
 router.route('/:slug/unpublish')
-  .put(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.unpublish);
+  .put(auth, topicPageCtrl.unpublish);
 
 router.route('/:slug/edit')
-  .get(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.get);
+  .get(auth, loadFullUser, topicPageCtrl.get);
+
+router.route('/:slug/revision/:revisionNumber')
+  .get(auth, topicPageRevisionCtrl.get)
+  .post(auth, topicPageRevisionCtrl.set);
 
 router.route('/:slug/images')
   .get(topicPageCtrl.getImages)
   .post(
-    expressJwt({ secret: config.jwtSecret }),
+    auth,
     loadFullUser,
     topicPageCtrl.signS3ImageUpload
   );
 
 router.route('/:slug/logo')
   .post(
-    expressJwt({ secret: config.jwtSecret }),
+    auth,
     loadFullUser,
     topicPageCtrl.signS3LogoUpload
   );
 
 router.route('/:slug/images/:imageId')
-  .delete(expressJwt({ secret: config.jwtSecret }), topicPageCtrl.deleteImage);
+  .delete(auth, topicPageCtrl.deleteImage);
 export default router;
