@@ -15,7 +15,6 @@ const options = {
     'sd-simple-body',
     'sd-body-topic-maintainer',
     'sd-body-topic-publish',
-    'sd-body-topic-interest',
     'sd-body-topic-new-question',
     'sd-body-topic-new-maintainer',
     'sd-body-post-comment-author',
