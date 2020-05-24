@@ -4,6 +4,11 @@ import Question from '../models/question.model';
 import { indexTopic } from './topicPage.controller';
 
 async function list(req, res, next) {
+  if (process.env.NODE_ENV === 'production' &&
+    req.headers.origin.indexOf('softwaredaily.com') < 0) {
+    return next();
+  }
+
   req.posts = [];
 
   const options = {
