@@ -54,6 +54,7 @@ router.route('/recommendations')
 
 router.route('/:postId')
   .get(
+    jwtCleanUp,
     expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
     loadFullUser,
     postCtrl.get,
