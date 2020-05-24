@@ -64,6 +64,7 @@ router.route('/:postId')
 
 router.route('/:postId/topics')
   .put(
+    jwtCleanUp,
     expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
     postCtrl.get,
     postCtrl.updateTopics,
@@ -151,6 +152,7 @@ router.route('/:postId/unfavorite')
 
 router.route('/:postId/listened')
   .post(
+    jwtCleanUp,
     expressJwt({ secret: config.jwtSecret }),
     listenedCtrl.create,
   );
