@@ -54,7 +54,6 @@ router.route('/recommendations')
 
 router.route('/:postId')
   .get(
-    jwtCleanUp,
     expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
     loadFullUser,
     postCtrl.get,
@@ -64,7 +63,6 @@ router.route('/:postId')
 
 router.route('/:postId/topics')
   .put(
-    jwtCleanUp,
     expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
     postCtrl.get,
     postCtrl.updateTopics,
@@ -152,7 +150,6 @@ router.route('/:postId/unfavorite')
 
 router.route('/:postId/listened')
   .post(
-    jwtCleanUp,
     expressJwt({ secret: config.jwtSecret }),
     listenedCtrl.create,
   );

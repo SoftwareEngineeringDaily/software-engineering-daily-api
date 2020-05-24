@@ -7,13 +7,13 @@ import { indexTopic } from './topicPage.controller';
 async function list(req, res, next) {
   req.posts = [];
 
-  console.log('req.headers ', req.headers);
-
-  // if (process.env.NODE_ENV === 'production' &&
-  if (
+  const isProduction = (process.env.NODE_ENV === 'production');
+  const isMobile = (
     !req.headers.origin ||
     (isString(req.headers.origin) && req.headers.origin.indexOf('softwaredaily.com') < 0)
-  ) {
+  );
+
+  if (isProduction && isMobile) {
     return next();
   }
 
