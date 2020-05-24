@@ -1,4 +1,5 @@
 import isObject from 'lodash/isObject';
+import isString from 'lodash/isString';
 import Answer from '../models/answer.model';
 import Question from '../models/question.model';
 import { indexTopic } from './topicPage.controller';
@@ -6,8 +7,13 @@ import { indexTopic } from './topicPage.controller';
 async function list(req, res, next) {
   req.posts = [];
 
-  if (process.env.NODE_ENV === 'production' &&
-    req.headers.origin.indexOf('softwaredaily.com') < 0) {
+  console.log('req.headers ', req.headers);
+
+  // if (process.env.NODE_ENV === 'production' &&
+  if (
+    !req.headers.origin ||
+    (isString(req.headers.origin) && req.headers.origin.indexOf('softwaredaily.com') < 0)
+  ) {
     return next();
   }
 
