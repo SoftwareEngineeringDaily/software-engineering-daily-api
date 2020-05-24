@@ -1,10 +1,21 @@
 import isObject from 'lodash/isObject';
+import isString from 'lodash/isString';
 import Answer from '../models/answer.model';
 import Question from '../models/question.model';
 import { indexTopic } from './topicPage.controller';
 
 async function list(req, res, next) {
   req.posts = [];
+
+  const isProduction = (process.env.NODE_ENV === 'production');
+  const isMobile = (
+    !req.headers.origin ||
+    (isString(req.headers.origin) && req.headers.origin.indexOf('softwaredaily.com') < 0)
+  );
+
+  if (isProduction && isMobile) {
+    return next();
+  }
 
   const options = {
     $or: [
