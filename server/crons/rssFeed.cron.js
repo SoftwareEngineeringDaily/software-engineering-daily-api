@@ -83,6 +83,7 @@ async function callback() {
     return o1.date >= o2.date ? -1 : 1;
   });
 
+  const publicFeedAllConfig = cloneDeep(rawFeedConfig);
   const publicFeedConfig = cloneDeep(rawFeedConfig);
   const privateFeedConfig = cloneDeep(rawFeedConfig);
 
@@ -183,6 +184,7 @@ async function callback() {
     });
   });
 
+  publicFeedAllConfig._content.channel = publicFeedConfig._content.channel;
   publicFeedConfig._content.channel = publicFeedConfig._content.channel.slice(0, 300);
   privateFeedConfig._content.channel = privateFeedConfig._content.channel.slice(0, 300);
 
@@ -191,6 +193,7 @@ async function callback() {
     indent: '  '
   };
 
+  app.set('rssFeedPublicAll', toXML(publicFeedAllConfig, xmlOptions));
   app.set('rssFeedPublic', toXML(publicFeedConfig, xmlOptions));
   app.set('rssFeedPrivate', toXML(privateFeedConfig, xmlOptions));
 }
