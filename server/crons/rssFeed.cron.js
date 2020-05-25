@@ -128,7 +128,7 @@ async function callback() {
           }
         },
         guid: parseInt(post.id, 10).toString(36),
-        pubDate: moment.utc(post.date_gmt).toDate(),
+        pubDate: moment.utc(post.date_gmt).format('ddd, DD MMM YYYY HH:mm:ss ZZ'),
         'itunes:explicit': 'no',
         'itunes:category': {
           _attrs: {
@@ -167,7 +167,7 @@ async function callback() {
           }
         },
         guid: parseInt(post.id, 10).toString(36),
-        pubDate: moment.utc(post.date_gmt).toDate(),
+        pubDate: moment.utc(post.date_gmt).format('ddd, DD MMM YYYY HH:mm:ss ZZ'),
         'itunes:explicit': 'no',
         'itunes:category': {
           _attrs: {
