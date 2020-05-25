@@ -247,7 +247,7 @@ async function showContent(req, res) {
 
   const topic = await Topic
     .findOne(options)
-    .populate('maintainers', 'name lastName email website avatarUrl isAdmin bio');
+    .populate('maintainers', 'name lastName email website avatarUrl isAdmin bio twitter');
 
   if (!topic) {
     return res.status(404).send(`Topic ${req.params.slug} not found`);
