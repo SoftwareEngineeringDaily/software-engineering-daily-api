@@ -1,5 +1,10 @@
 import { isActive } from './subscription.controller';
 
+function publicFeedAll(req, res) {
+  res.setHeader('Content-Type', 'text/xml; charset=utf-8');
+  res.status(200).send(req.app.get('rssFeedPublicAll'));
+}
+
 function publicFeed(req, res) {
   res.setHeader('Content-Type', 'text/xml; charset=utf-8');
   res.status(200).send(req.app.get('rssFeedPublic'));
@@ -16,6 +21,7 @@ async function privateFeed(req, res) {
 }
 
 export default {
+  publicFeedAll,
   publicFeed,
   privateFeed
 };
