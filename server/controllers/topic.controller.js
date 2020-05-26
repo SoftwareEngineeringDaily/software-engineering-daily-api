@@ -307,6 +307,25 @@ function show(req, res) {
 
     const posts = await Post.list(query);
 
+    // manually populate (as Post can't have a reference to topic in model right now)
+    const topicsIds = posts.reduce((arr, post) => {
+      post.topics.forEach((t) => {
+        if (!arr.includes(t)) arr.push(t);
+      });
+      return arr;
+    }, []);
+
+    const topics = await Topic.find({ _id: { $in: topicsIds } })
+      .select('name slug')
+      .lean()
+      .exec();
+
+    posts.forEach((post) => {
+      post.topics = post.topics.map((postTopic) => { // eslint-disable-line no-param-reassign
+        return topics.find(t => t._id.toString() === postTopic);
+      });
+    });
+
     const body = {
       topic,
       posts
