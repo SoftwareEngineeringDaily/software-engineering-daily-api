@@ -16,17 +16,17 @@ router.route('/:slug')
   .put(auth, loadFullUser, topicPageCtrl.update);
 
 router.route('/:slug/publish')
-  .put(auth, topicPageCtrl.publish);
+  .put(auth, loadFullUser, topicPageCtrl.publish);
 
 router.route('/:slug/unpublish')
-  .put(auth, topicPageCtrl.unpublish);
+  .put(auth, loadFullUser, topicPageCtrl.unpublish);
 
 router.route('/:slug/edit')
   .get(auth, loadFullUser, topicPageCtrl.get);
 
 router.route('/:slug/revision/:revisionNumber')
-  .get(auth, topicPageRevisionCtrl.get)
-  .post(auth, topicPageRevisionCtrl.set);
+  .get(auth, loadFullUser, topicPageRevisionCtrl.get)
+  .post(auth, loadFullUser, topicPageRevisionCtrl.set);
 
 router.route('/:slug/images')
   .get(topicPageCtrl.getImages)

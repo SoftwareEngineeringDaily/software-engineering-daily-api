@@ -112,8 +112,8 @@ async function callback() {
         'itunes:episodeType': 'full',
         'itunes:episode': episode,
         'itunes:season': seasonYear - moment(post.date_gmt).year(),
-        title: post.title.rendered,
-        'itunes:title': post.title.rendered,
+        title: encode(post.title.rendered),
+        'itunes:title': encode(post.title.rendered),
         description: `<![CDATA[${description || post.title.rendered}]]>`,
         'itunes:image': {
           _attrs: {
@@ -151,8 +151,8 @@ async function callback() {
         'itunes:episodeType': 'full',
         'itunes:episode': episode,
         'itunes:season': seasonYear - moment(post.date_gmt).year(),
-        title: post.title.rendered,
-        'itunes:title': post.title.rendered,
+        title: encode(post.title.rendered),
+        'itunes:title': encode(post.title.rendered),
         description: `<![CDATA[${description || post.title.rendered}]]>`,
         'itunes:image': {
           _attrs: {
