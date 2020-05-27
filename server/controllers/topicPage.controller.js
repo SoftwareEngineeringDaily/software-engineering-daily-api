@@ -107,7 +107,9 @@ async function createTopicPage(topicId) {
 }
 
 async function get(req, res) {
-  if (req.user.blockedTopicEdit) return res.status(400).send('Not enough permissions to edit this page');
+  if (req.fullUser.blockedTopicEdit) {
+    return res.status(400).send('Not enough permissions to edit this page');
+  }
 
   const options = {
     $or: [{ slug: req.params.slug }]
@@ -141,7 +143,8 @@ async function get(req, res) {
 }
 
 async function update(req, res, updateRevision = true) {
-  if (req.user.blockedTopicEdit) return res.status(400).send('Not enough permissions to edit this page');
+  const { fullUser: user } = req;
+  if (user.blockedTopicEdit) return res.status(400).send('Not enough permissions to edit this page');
 
   const topic = await Topic.findOne({ slug: req.params.slug })
     .populate('maintainers', 'name lastName email avatarUrl isAdmin');
@@ -152,11 +155,11 @@ async function update(req, res, updateRevision = true) {
 
   if (!topicPage) return res.status(404).send(`Topic Page ${req.params.slug} not found`);
 
-  if (!checkMaintainer(req, topic)) return res.status(403).send('Not authorized');
+  if (!checkMaintainer(req, topic) && !user.isAdmin) return res.status(403).send('Not authorized');
 
   if (!topicPage.lastRevision) {
     // secure old content for new revision schemma
-    await topicPageRevisionCtrl.create(topicPage, req.user);
+    await topicPageRevisionCtrl.create(topicPage, user);
     topicPage.revision = 1;
     topicPage.lastRevision = 1;
   }
@@ -171,7 +174,7 @@ async function update(req, res, updateRevision = true) {
 
   try {
     if (updateRevision) {
-      const topicPageRevision = await topicPageRevisionCtrl.create(topicPage, req.user);
+      const topicPageRevision = await topicPageRevisionCtrl.create(topicPage, user);
       if (topicPageRevision) {
         topicPage.revision = topicPageRevision.revision;
         topicPage.lastRevision = topicPageRevision.revision;
@@ -179,7 +182,7 @@ async function update(req, res, updateRevision = true) {
     }
 
     topicPage.history = topicPage.history.concat(new TopicPage.History({
-      user: req.user._id,
+      user: user._id,
       event: req.body.event,
       revision: topicPage.revision
     }));
@@ -188,7 +191,7 @@ async function update(req, res, updateRevision = true) {
     await topicPage.save();
 
     if (req.body.published !== undefined && changedPublished) {
-      mailAdminsPublish(topicPage, topic, req.user);
+      mailAdminsPublish(topicPage, topic, user);
     }
   } catch (e) {
     return res.status(404).send(`Error saving: ${e.message || e}`);

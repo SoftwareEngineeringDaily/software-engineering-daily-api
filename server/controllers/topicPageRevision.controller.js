@@ -1,7 +1,20 @@
 
+import every from 'lodash/every';
 import Topic from '../models/topic.model';
 import TopicPage from '../models/topicPage.model';
 import TopicPageRevision from '../models/topicPageRevision.model';
+
+function checkMaintainer(req, topic) {
+  const maintainers = topic.maintainers || [];
+  const hasMaintainers = (maintainers.length > 0 && every(maintainers, '_id'));
+  const hasUser = (req.user && req.user._id);
+
+  return (
+    hasUser &&
+    hasMaintainers &&
+    maintainers.filter(m => req.user._id.toString() === m._id.toString()).length
+  );
+}
 
 async function create(topicPage, user) {
   const revision = new TopicPageRevision({
@@ -48,14 +61,19 @@ async function get(req, res) {
 }
 
 async function set(req, res) {
+  const { fullUser: user } = req;
   const { revisionNumber, slug } = req.params;
 
   try {
-    const topic = await Topic.findOne({ slug }).select('topicPage');
+    const topic = await Topic.findOne({ slug })
+      .select('topicPage maintainers')
+      .populate('maintainers', '_id');
 
     if (!topic) {
       return res.status(404).send(`Topic ${slug} not found`);
     }
+
+    if (!checkMaintainer(req, topic) && !user.isAdmin) return res.status(403).send('Not authorized');
 
     const revision = await TopicPageRevision.findOne({
       topicPage: topic.topicPage,
