@@ -21,6 +21,7 @@ import profileRoutes from './profile.route';
 import topicPageRoutes from './topicPage.route';
 import questionRoutes from './question.route';
 import answerRoutes from './answer.route';
+import twitterRoutes from './twitter.route';
 // import userRoutes from './user.route';
 
 const router = express.Router(); // eslint-disable-line new-cap
@@ -70,5 +71,6 @@ router.use('/profile', profileRoutes);
 router.use('/topicpage', topicPageRoutes);
 router.use('/question', questionRoutes);
 router.use('/answer', answerRoutes);
+router.use('/twitter', twitterRoutes);
 
 export default router;

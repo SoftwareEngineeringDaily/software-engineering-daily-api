@@ -24,6 +24,7 @@ const TopicPageSchema = new mongoose.Schema({
   published: { type: Boolean, default: false },
   revision: { type: Number },
   lastRevision: { type: Number },
+  twitterAccounts: { type: Array, default: [] },
   history: [TopicPageHistorySchema],
   images: [TopicPageImageSchema],
   searchIndex: { type: String },
