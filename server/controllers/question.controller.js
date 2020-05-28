@@ -181,7 +181,7 @@ async function getByEntity(req, res) {
 
   questions.sort((a, b) => {
     return (b.answers.length === a.answers.length)
-      ? b.dateCreated - a.dateCreated
+      ? a.dateCreated - b.dateCreated
       : b.answers.length - a.answers.length;
   });
 
