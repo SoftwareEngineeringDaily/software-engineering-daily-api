@@ -168,6 +168,8 @@ async function update(req, res, updateRevision = true) {
 
   if (req.body.content) topicPage.content = req.body.content;
   if (req.body.logo) topicPage.logo = req.body.logo;
+  if (req.body.twitterAccounts) topicPage.twitterAccounts = req.body.twitterAccounts;
+
   topicPage.published = req.body.published || false;
 
   topic.topicPage = topicPage._id;
