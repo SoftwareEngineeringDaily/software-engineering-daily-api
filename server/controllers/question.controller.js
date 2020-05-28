@@ -9,7 +9,21 @@ import { saveAndNotifyUser } from './notification.controller';
 import { mailTemplate } from '../helpers/mail';
 
 async function get(req, res) {
-  const question = await Question.findById(req.params.id).populate('answers');
+  const question = await Question
+    .findById(req.params.id)
+    .populate({
+      path: 'answers',
+      populate: {
+        path: 'author',
+        select: 'name lastName avatarUrl twitter',
+        where: {
+          $or: [
+            { deleted: false },
+            { deleted: { $exists: false } }
+          ]
+        },
+      }
+    });
 
   if (!question) return res.status(404).send('Not found');
 
@@ -163,14 +177,20 @@ async function getByEntity(req, res) {
       entityId,
       $or: [{ deleted: false }, { deleted: { $exists: false } }]
     })
-    .populate({
-      path: 'answers',
-      populate: {
+    .populate([
+      {
         path: 'author',
         select: 'name lastName avatarUrl twitter',
-        where: { $or: [{ deleted: false }, { deleted: { $exists: false } }] }
-      }
-    })
+      },
+      {
+        path: 'answers',
+        where: { $or: [{ deleted: false }, { deleted: { $exists: false } }] },
+        populate: {
+          path: 'author',
+          select: 'name lastName avatarUrl twitter',
+        }
+      },
+    ])
     .exec();
 
   questions.forEach((question) => {

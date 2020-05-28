@@ -16,6 +16,7 @@ const options = {
     'sd-body-topic-maintainer',
     'sd-body-topic-publish',
     'sd-body-topic-new-question',
+    'sd-body-topic-new-answer',
     'sd-body-topic-new-maintainer',
     'sd-body-post-comment-author',
     'sd-body-post-comment-reply',
@@ -37,6 +38,9 @@ const options = {
   }, {
     name: 'topicQuestion',
     body: 'sd-body-topic-new-question'
+  }, {
+    name: 'topicAnswer',
+    body: 'sd-body-topic-new-answer'
   }, {
     name: 'postNewCommentAuthor',
     body: 'sd-body-post-comment-author'
