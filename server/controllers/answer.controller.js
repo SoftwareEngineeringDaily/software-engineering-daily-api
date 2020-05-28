@@ -2,6 +2,9 @@ import isObject from 'lodash/isObject';
 import isString from 'lodash/isString';
 import Answer from '../models/answer.model';
 import Question from '../models/question.model';
+import Topic from '../models/topic.model';
+import { saveAndNotifyUser } from './notification.controller';
+import { mailTemplate } from '../helpers/mail';
 import { indexTopic } from './topicPage.controller';
 
 async function list(req, res, next) {
@@ -71,7 +74,12 @@ async function create(req, res) {
 
   if (!questionId || !content) return res.status(400).send('Missing data');
 
-  const question = await Question.findById(questionId);
+  const question = await Question
+    .findById(questionId)
+    .populate('author');
+
+  const topic = await Topic
+    .findOne({ _id: question.entityId });
 
   if (!question) return res.status(404).send('Question not found');
 
@@ -91,6 +99,47 @@ async function create(req, res) {
 
     if (question && question.entityId) {
       indexTopic(question.entityId);
+    }
+
+    const canSend = !!(
+      question.author &&
+      req.user &&
+      question.author.email &&
+      question.author.email !== req.user.email
+    );
+
+    const questionUrl = `/topic/${topic.slug}/question/${question._id}`;
+    const payload = {
+      notification: {
+        title: 'Someone answered your question',
+        body: saved.content,
+        data: {
+          user: req.user.username,
+          mentioned: question.author._id,
+          slug: topic.slug,
+          url: questionUrl,
+        }
+      },
+      type: 'question',
+      entity: topic._id
+    };
+
+    if (canSend) {
+      // notify maintainer
+      saveAndNotifyUser(payload, question.author._id);
+
+      // email maintainer
+      mailTemplate.topicAnswer({
+        to: question.author.email,
+        subject: 'Someone answered your question',
+        data: {
+          user: question.author.name || '',
+          topic: topic.name,
+          actionLabel: 'View answer',
+          actionLink: `http://softwaredaily.com${questionUrl}`,
+          question: question.content || '',
+        }
+      });
     }
 
     return res.json(saved.toObject());
