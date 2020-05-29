@@ -106,6 +106,48 @@ function top(req, res) {
     });
 }
 
+/* eslint-disable consistent-return */
+async function removeMaintainer(req, res) {
+  const { topicSlug: slug, event } = req.body;
+  const { user } = req;
+
+  try {
+    await Topic
+      .updateOne(
+        { slug },
+        {
+          $pullAll: {
+            maintainers: [
+              user._id
+            ]
+          }
+        }
+      );
+
+    res.end('Saved');
+
+    // Update history
+    const topic = await Topic.findOne({ slug });
+
+    if (topic) {
+      const topicPage = await topicPageCtrl.createTopicPage(topic._id);
+
+      topicPage.history = topicPage.history.concat(new TopicPage.History({
+        user: user._id,
+        event
+      }));
+
+      await topicPage.save();
+    }
+  } catch (e) {
+    return res.status(500).json(e);
+  }
+
+  if (!res.headersSent) {
+    return res.end('Saved');
+  }
+}
+
 async function setMaintainer(req, res) {
   const { topicSlug, event } = req.body;
   const { user } = req;
@@ -144,7 +186,7 @@ async function setMaintainer(req, res) {
       subject: `New topic maintainer - ${topic.name}`,
       data: {
         user: admin.name,
-        maintainer: `${user.name} ${user.lastName}`,
+        maintainer: `${user.name} ${user.lastName || ''}`,
         email: user.email,
         topic: topic.name,
       }
@@ -602,6 +644,7 @@ export default {
   getFull,
   top,
   setMaintainer,
+  removeMaintainer,
   create,
   episodes,
   jobs,
