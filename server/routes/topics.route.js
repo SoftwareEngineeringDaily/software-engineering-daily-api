@@ -34,7 +34,8 @@ router.route('/top/:count')
   .get(topicCtrl.top);
 
 router.route('/maintainer')
-  .post(auth, topicCtrl.setMaintainer);
+  .post(auth, topicCtrl.setMaintainer)
+  .delete(auth, topicCtrl.removeMaintainer);
 
 router.route('/:slug')
   .get(topicCtrl.show)
