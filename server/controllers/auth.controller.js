@@ -3,9 +3,11 @@ import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import httpStatus from 'http-status';
 import ReCAPTCHA from 'recaptcha2';
+import Twitter from 'twitter-lite';
 import APIError from '../helpers/APIError';
 import config from '../../config/config';
 import User from '../models/user.model';
+import Passport from '../models/passport.model';
 import { signS3 } from '../helpers/s3';
 
 const http = require('http'); // For mailchimp api call
@@ -16,6 +18,14 @@ const reCaptcha = new ReCAPTCHA({
   secretKey: config.recaptcha.secretKey
 });
 
+const twitterOptions = {
+  access_token_key: process.env.OAUTH_TWITTER_ACCESS_TOKEN_KEY,
+  access_token_secret: process.env.OAUTH_TWITTER_ACCESS_TOKEN_SECRET,
+  consumer_key: process.env.OAUTH_TWITTER_CONSUMER_KEY,
+  consumer_secret: process.env.OAUTH_TWITTER_CONSUMER_SECRET,
+};
+
+const client = new Twitter(twitterOptions);
 const REGEX_CASE_INSENSITIVE_MOD = 'i';
 
 /**
@@ -116,6 +126,120 @@ function loginWithEmail(req, res, next) {
     });
 }
 
+function twitterRequest(req, res) {
+  client
+    .getRequestToken(req.body.callback)
+    .then((reply) => {
+      return res.status(200).json(reply);
+    })
+    .catch((err) => {
+      return res.status(404).json({ message: err.message || err.toString() });
+    });
+}
+
+async function twitterAccess(req, res) {
+  try {
+    let user = null;
+    let newPassport = null;
+
+    const jwtOptions = { expiresIn: '40000h' };
+    const { oauth_token, oauth_token_secret } = await client
+      .getAccessToken({
+        oauth_token: req.body.oauth_token,
+        oauth_verifier: req.body.oauth_verifier,
+      });
+
+    const clientUser = new Twitter({
+      ...twitterOptions,
+      access_token_key: oauth_token,
+      access_token_secret: oauth_token_secret,
+    });
+
+    const twitterUser = await clientUser.get('account/verify_credentials', {
+      include_email: true,
+    });
+
+    const existingPassport = await Passport
+      .findOne({
+        provider: 'twitter',
+        identifier: twitterUser.screen_name,
+        accessToken: oauth_token,
+        user: { $exists: true },
+      })
+      .exec();
+
+    if (!twitterUser) {
+      return res.status(404).json({ message: 'Error logging you in' });
+    }
+
+    if (existingPassport && existingPassport.user) {
+      user = await User
+        .findOne({ _id: existingPassport.user })
+        .exec();
+    } else {
+      // No passport, let's find user via email
+      user = await User
+        .findOne({ email: twitterUser.email })
+        .exec();
+
+      newPassport = new Passport({
+        identifier: twitterUser.screen_name,
+        accessToken: oauth_token,
+        tokens: {
+          oauth_token,
+          oauth_token_secret,
+        }
+      });
+
+      if (user) {
+        newPassport.user = user._id;
+        await newPassport.save();
+      }
+    }
+
+    if (user) {
+      return res.status(201).json({
+        user,
+        token: jwt.sign(user.toJSON(), config.jwtSecret, jwtOptions),
+      });
+    }
+
+    // No user, let's create one
+    const newUser = new User();
+    const newValues = {
+      name: twitterUser.name,
+      username: twitterUser.screen_name,
+      twitter: twitterUser.twitter,
+      avatarUrl: twitterUser.profile_image_url_https,
+      bio: twitterUser.description,
+      about: twitterUser.description,
+      website: twitterUser.url,
+      email: twitterUser.email,
+      password: User.generateHash(oauth_token_secret),
+    };
+
+    Object.assign(newUser, newValues);
+
+    user = await newUser.save();
+
+    newPassport.user = user._id;
+    newPassport.save();
+
+    return res.status(201).json({
+      user,
+      token: jwt.sign(user.toJSON(), config.jwtSecret, jwtOptions),
+    });
+  } catch (err) {
+    if (err && _.isArray(err.errors)) {
+      return res.status(401).json(err.errors);
+    }
+
+    return res.status(401).json({
+      message: err.message || err.toString()
+    });
+  }
+}
+
 /**
  * @swagger
  *   /auth/register:
@@ -158,7 +282,7 @@ function register(req, res, next) {
     .toUpperCase();
 
   if (!password) {
-    let err = new APIError('Password is required to register.', httpStatus.UNAUTHORIZED, true); //eslint-disable-line
+    let err = new APIError('Password is required to register.', httpStatus.UNAUTHORIZED, true); // eslint-disable-line
     return next(err);
   }
   const { email } = req.body;
@@ -201,22 +325,22 @@ function register(req, res, next) {
       const mailchimpReq = http.request(options, (mailchimpRes) => {
         mailchimpRes.setEncoding('utf8');
         mailchimpRes.on('data', (body) => {
-          console.log(`Body: ${body}`);
+          console.log(`Body: ${body}`); // eslint-disable-line
         });
       });
       mailchimpReq.on('error', (e) => {
-        console.log(`mailchimp error: ${e}`);
+        console.log(`mailchimp error: ${e}`); // eslint-disable-line
         const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
-        console.log('newsletter error', error);
+        console.log('newsletter error', error); // eslint-disable-line
         // return next(error); // This will prevent registration which we dont want
       });
       mailchimpReq.write(postData);
       mailchimpReq.end();
     }
   } catch (e) {
-    console.log(`mailchimp error: ${e}`);
+    console.log(`mailchimp error: ${e}`); // eslint-disable-line
     const error = new APIError('Mailchimp error', httpStatus.UNAUTHORIZED, true);
-    console.log('newsletter error2', error);
+    console.log('newsletter error2', error); // eslint-disable-line
     // return next(error); // This will prevent registration which we dont want
   }
 
@@ -322,6 +446,8 @@ function validateRecaptcha(req, res) {
 export default {
   login,
   loginWithEmail,
+  twitterRequest,
+  twitterAccess,
   getRandomNumber,
   register,
   socialAuth,
