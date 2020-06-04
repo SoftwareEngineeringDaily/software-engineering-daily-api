@@ -84,6 +84,34 @@ async function get(req, res, next) {
 
 /**
  * @swagger
+ * /posts/popular:
+ *   get:
+ *     summary: Get posts by score
+ *     description: Get posts by score
+ *     responses:
+ *       '200':
+ *         description: successful operation
+ *         schema:
+ *           $ref: '#/definitions/Post'
+ *       '404':
+ *         $ref: '#/responses/NotFound'
+ */
+
+async function popular(req, res) {
+  try {
+    const posts = await Post
+      .find()
+      .limit(parseInt(req.query.limit || 5, 10))
+      .sort('-score');
+
+    return res.json({ posts });
+  } catch (err) {
+    return res.status(404).json({ message: err.message || err.toString() });
+  }
+}
+
+/**
+ * @swagger
  * /posts:
  *   get:
  *     summary: Get list of episodes
@@ -417,6 +445,7 @@ async function updateTopics(req, res) {
 export default {
   load,
   get,
+  popular,
   list,
   search,
   recommendations,
