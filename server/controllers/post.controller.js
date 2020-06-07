@@ -1,6 +1,7 @@
 import uniq from 'lodash/uniq';
 import find from 'lodash/find';
 import flatten from 'lodash/flatten';
+import moment from 'moment';
 import algoliasearch from 'algoliasearch';
 import Post from '../models/post.model';
 import Topic from '../models/topic.model';
@@ -98,9 +99,11 @@ async function get(req, res, next) {
  */
 
 async function popular(req, res) {
+  const oneMonthAgo = moment().subtract(1, 'month').toDate();
+
   try {
     const posts = await Post
-      .find()
+      .find({ date: { $gte: oneMonthAgo } })
       .limit(parseInt(req.query.limit || 5, 10))
       .sort('-score');
 
