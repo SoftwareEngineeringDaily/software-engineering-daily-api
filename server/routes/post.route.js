@@ -38,6 +38,9 @@ router.route('/')
     postCtrl.list,
   );
 
+router.route('/popular')
+  .get(postCtrl.popular);
+
 router.route('/search')
   .get(
     expressJwt({ secret: config.jwtSecret, credentialsRequired: false }),
