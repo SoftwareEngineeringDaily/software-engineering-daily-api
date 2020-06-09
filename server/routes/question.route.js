@@ -22,4 +22,7 @@ router.route('/:id')
 router.route('/entity/:entityType/:entityId')
   .get(questionCtrl.getByEntity);
 
+router.route('/entity/:entityType/:entityId/order')
+  .put(questionCtrl.updateOrder);
+
 export default router;

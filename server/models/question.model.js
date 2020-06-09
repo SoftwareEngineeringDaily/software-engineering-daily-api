@@ -10,7 +10,8 @@ const QuestionSchema = new mongoose.Schema({
   dateCreated: { type: Date, default: Date.now },
   dateUpdated: { type: Date, default: Date.now },
   answers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Answer' }],
-  deleted: { type: Boolean }
+  deleted: { type: Boolean },
+  order: { type: Number },
 });
 
 // Export the model
