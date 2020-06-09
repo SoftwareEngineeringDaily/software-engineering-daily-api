@@ -1,6 +1,7 @@
 import async from 'async';
 import find from 'lodash/find';
 import isArray from 'lodash/isArray';
+import isNumber from 'lodash/isNumber';
 import shuffle from 'lodash/shuffle';
 import Question from '../models/question.model';
 import Topic from '../models/topic.model';
@@ -71,7 +72,11 @@ async function getUnanswered(req, res) {
 
 async function create(req, res) {
   const {
-    entityId, entityType, content, questions
+    entityId,
+    entityType,
+    content,
+    questions,
+    startOrder = 0,
   } = req.body;
 
   if (!entityId || !entityType || (!content && !questions)) {
@@ -89,17 +94,19 @@ async function create(req, res) {
   if (content) {
     saveQuestions.push(content.trim());
   }
+
   if (questions) {
     saveQuestions = questions.filter(q => !!q);
   }
 
-  saveQuestions.forEach((questionContent) => {
+  saveQuestions.forEach((questionContent, index) => {
     series.push((callback) => {
       const question = new Question({
         author,
         entityId,
         entityType,
-        content: questionContent.trim()
+        content: questionContent.trim(),
+        order: index + startOrder,
       });
 
       question.save()
@@ -200,9 +207,15 @@ async function getByEntity(req, res) {
   });
 
   questions.sort((a, b) => {
-    return (b.answers.length === a.answers.length)
-      ? a.dateCreated - b.dateCreated
-      : b.answers.length - a.answers.length;
+    if (b.answers.length === a.answers.length) {
+      if (isNumber(a.order)) {
+        return a.order - b.order;
+      }
+
+      return a.dateCreated - b.dateCreated;
+    }
+
+    return b.answers.length - a.answers.length;
   });
 
   return res.json(questions);
@@ -235,6 +248,39 @@ async function update(req, res) {
   } catch (e) {
     return res.status(500).end(e.message ? e.message : e.toString());
   }
+}
+
+function updateOrder(req, res) {
+  const { questions = [] } = req.body;
+  const series = [];
+
+  questions.forEach((question, index) => {
+    series.push(async (callback) => {
+      try {
+        await Question
+          .updateOne(
+            { _id: question.id },
+            {
+              $set: {
+                order: isNumber(question.order) ? question.order : index,
+              },
+            },
+          );
+      } catch (e) {
+        console.error('Err updating question order: ', e);
+      }
+
+      callback();
+    });
+  });
+
+  return async.series(series, (err) => {
+    if (err) {
+      return res.status(500).end(err.message ? err.message : err.toString());
+    }
+
+    return res.status(200).end('Saved');
+  });
 }
 
 async function deleteQuestion(req, res) {
@@ -303,5 +349,6 @@ export default {
   getRelated,
   create,
   update,
+  updateOrder,
   delete: deleteQuestion,
 };
