@@ -209,7 +209,7 @@ async function twitterAccess(req, res) {
     const newValues = {
       name: twitterUser.name,
       username: twitterUser.screen_name,
-      twitter: twitterUser.twitter,
+      twitter: twitterUser.screen_name,
       avatarUrl: twitterUser.profile_image_url_https,
       bio: twitterUser.description,
       about: twitterUser.description,
