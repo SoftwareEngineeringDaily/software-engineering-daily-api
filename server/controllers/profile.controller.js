@@ -24,12 +24,10 @@ async function getPublic(req, res) {
 
 async function getActivities(req, res) {
   const { userId } = req.params;
-  const badges = await getBadges(userId);
   const activities = await getActivityTree(userId, activityDays);
 
   return res.status(200).send({
     activities,
-    badges,
     activityDays
   });
 }
