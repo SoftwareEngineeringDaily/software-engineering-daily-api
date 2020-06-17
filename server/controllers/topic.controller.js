@@ -391,7 +391,7 @@ async function update(req, res) {
       return;
     }
 
-    res.send('Topic udpated.');
+    res.send('Topic updated.');
 
     data.maintainers.forEach((maintainer) => {
       if (!topic.maintainers.filter(m => m.toString() === maintainer._id).length) {
