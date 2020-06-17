@@ -141,6 +141,11 @@ UserSchema.method({
   }
 });
 
+UserSchema.pre('save', function (next) {
+  this.dateUpdated = Date.now;
+  next();
+});
+
 /**
  * Statics
  */
@@ -184,6 +189,7 @@ UserSchema.statics = {
   isValidHash: function validPassword({ original, hash }) {
     return bcrypt.compareSync(original, hash);
   },
+
   updatableFields: ['username', 'website', 'bio', 'publicEmail', 'twitter', 'github', 'linkedin', 'about', 'name', 'lastName', 'email']
 };
 

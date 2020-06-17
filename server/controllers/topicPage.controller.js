@@ -121,7 +121,7 @@ async function get(req, res) {
 
   const topic = await Topic
     .findOne(options)
-    .populate('maintainers', 'name lastName email website avatarUrl isAdmin bio');
+    .populate('maintainers', 'name lastName email website twitter avatarUrl isAdmin bio dateUpdated');
 
   if (!topic) {
     return res.status(404).send(`Topic ${req.params.slug} not found`);
@@ -252,7 +252,7 @@ async function showContent(req, res) {
 
   const topic = await Topic
     .findOne(options)
-    .populate('maintainers', 'name lastName email website avatarUrl isAdmin bio twitter');
+    .populate('maintainers', 'name lastName email website twitter avatarUrl isAdmin bio dateUpdated');
 
   if (!topic) {
     return res.status(404).send(`Topic ${req.params.slug} not found`);
