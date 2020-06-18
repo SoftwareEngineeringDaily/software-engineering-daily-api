@@ -203,6 +203,7 @@ export default {
       if (job.postedUser.toString() === req.user._id.toString()) {
         return next(new APIError('Unable to apply for a job you posted', httpStatus.FORBIDDEN));
       }
+
       const today = new Date().getDate();
 
       if (job.isDeleted || (job.expirationDate && job.expirationDate < today)) {
@@ -233,6 +234,7 @@ export default {
       };
 
       await sgMail.send(msg);
+
       return res.sendStatus(httpStatus.OK);
     } catch (err) {
       return next(err);
