@@ -176,22 +176,22 @@ async function setMaintainer(req, res) {
 
   await topicPage.save();
 
-  res.end('Saved');
+  return res.end('Saved');
 
-  const admins = await User.find({ isAdmin: true }).lean().exec();
+  // const admins = await User.find({ isAdmin: true }).lean().exec();
 
-  return admins.forEach((admin) => {
-    mailTemplate.topicNewMaintainer({
-      to: admin.email,
-      subject: `New topic maintainer - ${topic.name}`,
-      data: {
-        user: admin.name,
-        maintainer: `${user.name} ${user.lastName || ''}`,
-        email: user.email,
-        topic: topic.name,
-      }
-    });
-  });
+  // return admins.forEach((admin) => {
+  //   mailTemplate.topicNewMaintainer({
+  //     to: admin.email,
+  //     subject: `New topic maintainer - ${topic.name}`,
+  //     data: {
+  //       user: admin.name,
+  //       maintainer: `${user.name} ${user.lastName || ''}`,
+  //       email: user.email,
+  //       topic: topic.name,
+  //     }
+  //   });
+  // });
 }
 
 async function episodes(req, res) {
