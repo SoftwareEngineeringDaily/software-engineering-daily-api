@@ -1,5 +1,6 @@
 import express from 'express';
 import logger from 'morgan';
+import * as Sentry from '@sentry/node';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import compress from 'compression';
@@ -16,6 +17,16 @@ import config from './config';
 import APIError from '../server/helpers/APIError';
 
 const app = express();
+
+// Setup Sentry
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV,
+  debug: (config.env === 'development'),
+});
+
+// The request handler must be the first middleware on the app
+app.use(Sentry.Handlers.requestHandler());
 
 if (config.env === 'development') {
   app.use(logger('dev'));
@@ -51,6 +62,9 @@ if (config.env === 'development') {
 
 // mount all routes on /api path
 app.use('/api', routes);
+
+// The error handler must be before any other error middleware
+app.use(Sentry.Handlers.errorHandler());
 
 // if error is not an instanceOf APIError, convert it.
 app.use((err, req, res, next) => {

@@ -1,5 +1,3 @@
-import * as Sentry from '@sentry/node';
-
 // adding comment
 import mongoose from 'mongoose';
 import util from 'util';
@@ -21,11 +19,6 @@ websocket.setServer(io);
 const cron = new Cron();
 
 const debug = require('debug')('express-mongoose-es6-rest-api:index');
-
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  environment: process.env.NODE_ENV,
-});
 
 // make bluebird default Promise
 Promise = require('bluebird'); // eslint-disable-line no-global-assign
