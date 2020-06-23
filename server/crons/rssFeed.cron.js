@@ -7,6 +7,26 @@ import { getAdFreeMp3 } from '../helpers/mp3.helper';
 import app from '../../config/express';
 import Post from '../models/post.model';
 
+const itunesImage = toXML({
+  _name: 'itunes:image',
+  _attrs: {
+    href: 'https://www.softwaredaily.com/static/sedailywords.png'
+  }
+});
+
+const itunesCategory = toXML({
+  _name: 'itunes:category',
+  _attrs: {
+    text: 'News'
+  },
+  _content: {
+    _name: 'itunes:category',
+    _attrs: {
+      text: 'Tech News'
+    },
+  }
+});
+
 // RSS header
 const rawFeedConfig = {
   _name: 'rss',
@@ -33,25 +53,8 @@ const rawFeedConfig = {
           'itunes:email': 'jeff@softwareengineeringdaily.com',
         }
       },
-      {
-        'itunes:image': {
-          _attrs: {
-            href: 'https://www.softwaredaily.com/static/sedailywords.png'
-          }
-        }
-      },
-      {
-        'itunes:category': {
-          _attrs: {
-            text: 'News'
-          },
-          'itunes:category': {
-            _attrs: {
-              text: 'Tech News'
-            }
-          }
-        }
-      }
+      itunesImage,
+      itunesCategory,
     ]
   }
 };
@@ -106,82 +109,42 @@ async function callback() {
       description = decode(description);
     }
 
+    const item = [
+      {
+        _name: 'enclosure',
+        _attrs: {
+          type: 'audio/mpeg',
+          url: post.mp3,
+          length: '1000'
+        },
+      },
+      { 'itunes:episodeType': 'full' },
+      { 'itunes:episode': episode },
+      { 'itunes:season': seasonYear - moment(post.date_gmt).year() },
+      { title: encode(post.title.rendered) },
+      { 'itunes:title': encode(post.title.rendered) },
+      { description: `<![CDATA[${description || post.title.rendered}]]>` },
+      {
+        _name: 'itunes:image',
+        _attrs: {
+          href: encode(post.mainImage)
+        },
+      },
+      { link: encode(post.link) },
+      { guid: parseInt(post.id, 10).toString(36) },
+      { pubDate: moment.utc(post.date_gmt).format('ddd, DD MMM YYYY HH:mm:ss ZZ') },
+      { 'itunes:explicit': 'no' },
+      itunesCategory,
+    ];
+
     // RSS item for each episode
-    publicFeedConfig._content.channel.push({
-      item: {
-        'itunes:episodeType': 'full',
-        'itunes:episode': episode,
-        'itunes:season': seasonYear - moment(post.date_gmt).year(),
-        title: encode(post.title.rendered),
-        'itunes:title': encode(post.title.rendered),
-        description: `<![CDATA[${description || post.title.rendered}]]>`,
-        'itunes:image': {
-          _attrs: {
-            href: encode(post.mainImage)
-          }
-        },
-        link: encode(post.link),
-        enclosure: {
-          _attrs: {
-            type: 'audio/mpeg',
-            url: post.mp3,
-            length: '1000'
-          }
-        },
-        guid: parseInt(post.id, 10).toString(36),
-        pubDate: moment.utc(post.date_gmt).format('ddd, DD MMM YYYY HH:mm:ss ZZ'),
-        'itunes:explicit': 'no',
-        'itunes:category': {
-          _attrs: {
-            text: 'News'
-          },
-          'itunes:category': {
-            _attrs: {
-              text: 'Tech News'
-            }
-          }
-        }
-      }
-    });
+    publicFeedConfig._content.channel.push({ item });
 
     const privateMp3 = getAdFreeMp3(post.mp3);
+    const privateItem = cloneDeep(item);
 
-    privateFeedConfig._content.channel.push({
-      item: {
-        'itunes:episodeType': 'full',
-        'itunes:episode': episode,
-        'itunes:season': seasonYear - moment(post.date_gmt).year(),
-        title: encode(post.title.rendered),
-        'itunes:title': encode(post.title.rendered),
-        description: `<![CDATA[${description || post.title.rendered}]]>`,
-        'itunes:image': {
-          _attrs: {
-            href: encode(post.mainImage)
-          }
-        },
-        link: encode(post.link),
-        enclosure: {
-          _attrs: {
-            type: 'audio/mpeg',
-            url: privateMp3,
-            length: '1000'
-          }
-        },
-        guid: parseInt(post.id, 10).toString(36),
-        pubDate: moment.utc(post.date_gmt).format('ddd, DD MMM YYYY HH:mm:ss ZZ'),
-        'itunes:explicit': 'no',
-        'itunes:category': {
-          _attrs: {
-            text: 'News'
-          },
-          'itunes:category': {
-            _attrs: {
-              text: 'Tech News'
-            }
-          }
-        }
-      }
-    });
+    privateItem[0]._attrs.url = privateMp3;
+    privateFeedConfig._content.channel.push({ item: privateItem });
   });
 
   publicFeedAllConfig._content.channel = publicFeedConfig._content.channel;
