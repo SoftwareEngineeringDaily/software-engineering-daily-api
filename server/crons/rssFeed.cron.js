@@ -59,6 +59,15 @@ const rawFeedConfig = {
   }
 };
 
+function decode(text) {
+  return (text || '')
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, '') // Corrention
+    .replace(/amp;/g, '') // Correction in malformed links
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
 function encode(text) {
   return (text || '')
     .replace(/&/g, '&#038;')
@@ -91,6 +100,15 @@ async function callback() {
 
     if (!post.mp3) return; // missing mp3 breaks the rss list
 
+    let description;
+
+    const extractedDescription = post.excerpt.rendered.match(/ Download (.*?)[<]/) || post.excerpt.rendered.match(/[>](.*?)[<]/);
+
+    if (extractedDescription && extractedDescription.length && extractedDescription[1]) {
+      [, description] = extractedDescription;
+      description = decode(description);
+    }
+
     const item = [
       {
         _name: 'enclosure',
@@ -105,7 +123,7 @@ async function callback() {
       { 'itunes:season': seasonYear - moment(post.date_gmt).year() },
       { title: encode(post.title.rendered) },
       { 'itunes:title': encode(post.title.rendered) },
-      { description: `<![CDATA[${post.description || post.title.rendered}]]>` },
+      { description: `<![CDATA[${post.description || description || post.title.rendered}]]>` },
       {
         _name: 'itunes:image',
         _attrs: {
