@@ -123,7 +123,7 @@ async function callback() {
       { 'itunes:season': seasonYear - moment(post.date_gmt).year() },
       { title: encode(post.title.rendered) },
       { 'itunes:title': encode(post.title.rendered) },
-      { description: `<![CDATA[${description || post.title.rendered}]]>` },
+      { description: `<![CDATA[${post.description || description || post.title.rendered}]]>` },
       {
         _name: 'itunes:image',
         _attrs: {

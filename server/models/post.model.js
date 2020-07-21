@@ -80,6 +80,7 @@ const PostSchema = new mongoose.Schema({
   content: {
     rendered: String,
   },
+  description: { type: String },
   relatedTweet: { type: String },
   relatedTweetUsers: { type: Array },
   relatedPosts: [{
