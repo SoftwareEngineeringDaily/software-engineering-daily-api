@@ -1,14 +1,12 @@
 import { toXML } from 'jstoxml';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import jsdom from 'jsdom';
 import config from '../../config/config';
 import CronItem from '../helpers/cronItem.helper';
 import { getAdFreeMp3 } from '../helpers/mp3.helper';
 import app from '../../config/express';
 import Post from '../models/post.model';
 
-const { JSDOM } = jsdom;
 const itunesImage = toXML({
   _name: 'itunes:image',
   _attrs: {
@@ -61,6 +59,15 @@ const rawFeedConfig = {
   }
 };
 
+function decode(text) {
+  return (text || '')
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, '') // Corrention
+    .replace(/amp;/g, '') // Correction in malformed links
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
 function encode(text) {
   return (text || '')
     .replace(/&/g, '&#038;')
@@ -93,20 +100,14 @@ async function callback() {
 
     if (!post.mp3) return; // missing mp3 breaks the rss list
 
-    const { document } = (new JSDOM(post.content.rendered)).window;
+    let description;
 
-    const paragraphs = document.querySelectorAll('p');
-    let description = '';
+    const extractedDescription = post.excerpt.rendered.match(/ Download (.*?)[<]/) || post.excerpt.rendered.match(/[>](.*?)[<]/);
 
-    paragraphs.forEach((p) => {
-      if (
-        !p.querySelector('img') &&
-        p.textContent.trim() &&
-        !p.textContent.match('Podcast: Play in new window | Download')
-      ) {
-        description += `<p>${p.textContent}</p>`;
-      }
-    });
+    if (extractedDescription && extractedDescription.length && extractedDescription[1]) {
+      [, description] = extractedDescription;
+      description = decode(description);
+    }
 
     const item = [
       {
