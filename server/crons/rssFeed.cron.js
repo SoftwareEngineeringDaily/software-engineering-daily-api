@@ -1,14 +1,12 @@
 import { toXML } from 'jstoxml';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import jsdom from 'jsdom';
 import config from '../../config/config';
 import CronItem from '../helpers/cronItem.helper';
 import { getAdFreeMp3 } from '../helpers/mp3.helper';
 import app from '../../config/express';
 import Post from '../models/post.model';
 
-const { JSDOM } = jsdom;
 const itunesImage = toXML({
   _name: 'itunes:image',
   _attrs: {
@@ -93,21 +91,6 @@ async function callback() {
 
     if (!post.mp3) return; // missing mp3 breaks the rss list
 
-    const { document } = (new JSDOM(post.content.rendered)).window;
-
-    const paragraphs = document.querySelectorAll('p');
-    let description = '';
-
-    paragraphs.forEach((p) => {
-      if (
-        !p.querySelector('img') &&
-        p.textContent.trim() &&
-        !p.textContent.match('Podcast: Play in new window | Download')
-      ) {
-        description += `<p>${p.textContent}</p>`;
-      }
-    });
-
     const item = [
       {
         _name: 'enclosure',
@@ -122,7 +105,7 @@ async function callback() {
       { 'itunes:season': seasonYear - moment(post.date_gmt).year() },
       { title: encode(post.title.rendered) },
       { 'itunes:title': encode(post.title.rendered) },
-      { description: `<![CDATA[${description || post.title.rendered}]]>` },
+      { description: `<![CDATA[${post.description || post.title.rendered}]]>` },
       {
         _name: 'itunes:image',
         _attrs: {
