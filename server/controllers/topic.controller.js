@@ -32,7 +32,7 @@ async function create(req, res) {
 
   if (user.blockedTopicEdit) return res.status(400).send('Not enough permissions to create a topic');
 
-  const exist = await Topic.findOne({ name: new RegExp(name, 'i') });
+  const exist = await Topic.findOne({ name: new RegExp(`^${name}`, 'i') });
   if (exist) return res.status(400).send(`A ${name} Topic already exists`);
 
   const topic = new Topic();
