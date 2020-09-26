@@ -1,7 +1,7 @@
 import { toXML } from 'jstoxml';
 import { find, cloneDeep } from 'lodash';
 import moment from 'moment';
-import megaphone from '../../megaphone-all_fields.json';
+import megaphone from './megaphone.json.js'; // eslint-disable-line import/extensions
 import config from '../../config/config';
 import CronItem from '../helpers/cronItem.helper';
 import { getAdFreeMp3 } from '../helpers/mp3.helper';
@@ -104,7 +104,7 @@ async function callback() {
     let description;
 
     const extractedDescription = post.excerpt.rendered.match(/ Download (.*?)[<]/) || post.excerpt.rendered.match(/[>](.*?)[<]/);
-    const megaphonePodcast = find(megaphone.Podcasts, ['Episodes Title', post.title.rendered]) || {};
+    const megaphonePodcast = find(megaphone, ['Episodes Title', post.title.rendered]) || {};
 
     if (extractedDescription && extractedDescription.length && extractedDescription[1]) {
       [, description] = extractedDescription;
