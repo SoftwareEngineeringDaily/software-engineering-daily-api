@@ -10,6 +10,11 @@ function publicFeed(req, res) {
   res.status(200).send(req.app.get('rssFeedPublic'));
 }
 
+function adFreeFeed(req, res) {
+  res.setHeader('Content-Type', 'text/xml; charset=utf-8');
+  res.status(200).send(req.app.get('rssFeedAdFree'));
+}
+
 async function privateFeed(req, res) {
   res.setHeader('Content-Type', 'text/xml; charset=utf-8');
 
@@ -23,5 +28,6 @@ async function privateFeed(req, res) {
 export default {
   publicFeedAll,
   publicFeed,
-  privateFeed
+  privateFeed,
+  adFreeFeed,
 };

@@ -1,6 +1,7 @@
 import { toXML } from 'jstoxml';
-import { cloneDeep } from 'lodash';
+import { find, cloneDeep } from 'lodash';
 import moment from 'moment';
+import megaphone from '../../megaphone-all_fields.json';
 import config from '../../config/config';
 import CronItem from '../helpers/cronItem.helper';
 import { getAdFreeMp3 } from '../helpers/mp3.helper';
@@ -79,16 +80,18 @@ function encode(text) {
 }
 
 async function callback() {
-  const posts = await Post.find().where('status').equals('publish').lean();
-
-  // mongoose sort is slower
-  posts.sort((o1, o2) => {
-    return o1.date >= o2.date ? -1 : 1;
-  });
+  const posts = await Post
+    .find({
+      status: 'publish',
+      mp3: { $exists: true },
+    })
+    .sort({ date: -1 })
+    .lean();
 
   const publicFeedAllConfig = cloneDeep(rawFeedConfig);
   const publicFeedConfig = cloneDeep(rawFeedConfig);
   const privateFeedConfig = cloneDeep(rawFeedConfig);
+  const adFreeFeedConfig = cloneDeep(rawFeedConfig);
 
   const lastPost = posts[posts.length - 1];
 
@@ -98,11 +101,10 @@ async function callback() {
   posts.forEach((post) => {
     episode -= 1;
 
-    if (!post.mp3) return; // missing mp3 breaks the rss list
-
     let description;
 
     const extractedDescription = post.excerpt.rendered.match(/ Download (.*?)[<]/) || post.excerpt.rendered.match(/[>](.*?)[<]/);
+    const megaphonePodcast = find(megaphone.Podcasts, ['Episodes Title', post.title.rendered]) || {};
 
     if (extractedDescription && extractedDescription.length && extractedDescription[1]) {
       [, description] = extractedDescription;
@@ -140,11 +142,25 @@ async function callback() {
     // RSS item for each episode
     publicFeedConfig._content.channel.push({ item });
 
-    const privateMp3 = getAdFreeMp3(post.mp3);
+    const privateMp3 = getAdFreeMp3(megaphonePodcast['Episodes Original URL'] ||
+      post.mp3);
+
     const privateItem = cloneDeep(item);
 
     privateItem[0]._attrs.url = privateMp3;
     privateFeedConfig._content.channel.push({ item: privateItem });
+
+    // RSS for Megaphone Import
+    if (Object.keys(megaphonePodcast).length) {
+      privateItem.push({ megaphonePodcastsUid: megaphonePodcast['Podcasts Uid'] });
+      privateItem.push({ megaphoneGuid: megaphonePodcast['Episodes Guid'] });
+      privateItem.push({ megaphoneId: megaphonePodcast['Episodes ID'] });
+      privateItem.push({ megaphoneUid: megaphonePodcast['Episodes Uid'] });
+    }
+
+    adFreeFeedConfig._content.channel.push({
+      item: privateItem,
+    });
   });
 
   publicFeedAllConfig._content.channel = publicFeedConfig._content.channel;
@@ -158,6 +174,7 @@ async function callback() {
   app.set('rssFeedPublicAll', toXML(publicFeedAllConfig, xmlOptions));
   app.set('rssFeedPublic', toXML(publicFeedConfig, xmlOptions));
   app.set('rssFeedPrivate', toXML(privateFeedConfig, xmlOptions));
+  app.set('rssFeedAdFree', toXML(adFreeFeedConfig, xmlOptions));
 }
 
 const rssFeed = {
