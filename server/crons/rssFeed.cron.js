@@ -80,13 +80,20 @@ function encode(text) {
 }
 
 async function callback() {
-  const posts = await Post
-    .find({
-      status: 'publish',
-      mp3: { $exists: true },
-    })
-    .sort({ date: -1 })
-    .lean();
+  // const posts = await Post
+  //   .find({
+  //     status: 'publish',
+  //     mp3: { $exists: true },
+  //   })
+  //   .sort({ date: -1 })
+  //   .lean();
+
+  const posts = await Post.find().where('status').equals('publish').lean();
+
+  // mongoose sort is slower
+  posts.sort((o1, o2) => {
+    return o1.date >= o2.date ? -1 : 1;
+  });
 
   const publicFeedAllConfig = cloneDeep(rawFeedConfig);
   const publicFeedConfig = cloneDeep(rawFeedConfig);
@@ -100,6 +107,8 @@ async function callback() {
 
   posts.forEach((post) => {
     episode -= 1;
+
+    if (!post.mp3) return; // missing mp3 breaks the rss list
 
     let description;
 
