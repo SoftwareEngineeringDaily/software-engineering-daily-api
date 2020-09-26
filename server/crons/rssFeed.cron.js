@@ -1,7 +1,7 @@
 import { toXML } from 'jstoxml';
 import { find, cloneDeep } from 'lodash';
 import moment from 'moment';
-import megaphone from '../../megaphone-all_fields.json';
+import megaphone from './megaphone.json.js'; // eslint-disable-line import/extensions
 import config from '../../config/config';
 import CronItem from '../helpers/cronItem.helper';
 import { getAdFreeMp3 } from '../helpers/mp3.helper';
@@ -80,13 +80,12 @@ function encode(text) {
 }
 
 async function callback() {
-  const posts = await Post
-    .find({
-      status: 'publish',
-      mp3: { $exists: true },
-    })
-    .sort({ date: -1 })
-    .lean();
+  const posts = await Post.find().where('status').equals('publish').lean();
+
+  // mongoose sort is slower
+  posts.sort((o1, o2) => {
+    return o1.date >= o2.date ? -1 : 1;
+  });
 
   const publicFeedAllConfig = cloneDeep(rawFeedConfig);
   const publicFeedConfig = cloneDeep(rawFeedConfig);
@@ -101,10 +100,12 @@ async function callback() {
   posts.forEach((post) => {
     episode -= 1;
 
+    if (!post.mp3) return; // missing mp3 breaks the rss list
+
     let description;
 
     const extractedDescription = post.excerpt.rendered.match(/ Download (.*?)[<]/) || post.excerpt.rendered.match(/[>](.*?)[<]/);
-    const megaphonePodcast = find(megaphone.Podcasts, ['Episodes Title', post.title.rendered]) || {};
+    const megaphonePodcast = find(megaphone, ['Episodes Title', post.title.rendered]) || {};
 
     if (extractedDescription && extractedDescription.length && extractedDescription[1]) {
       [, description] = extractedDescription;
