@@ -80,14 +80,6 @@ function encode(text) {
 }
 
 async function callback() {
-  // const posts = await Post
-  //   .find({
-  //     status: 'publish',
-  //     mp3: { $exists: true },
-  //   })
-  //   .sort({ date: -1 })
-  //   .lean();
-
   const posts = await Post.find().where('status').equals('publish').lean();
 
   // mongoose sort is slower
