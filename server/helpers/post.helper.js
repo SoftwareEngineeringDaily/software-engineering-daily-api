@@ -5,7 +5,7 @@ import { getAdFreeMp3 } from '../helpers/mp3.helper';
 import { getPrivateRss } from '../helpers/rss.helper';
 
 function replaceWithAdFree(post, fullUser) {
-  post.mp3 = getAdFreeMp3(post.mp3) // eslint-disable-line
+  post.mp3 = post.adFreeMp3 || getAdFreeMp3(post.mp3) // eslint-disable-line
   post.rss = getPrivateRss(fullUser) // eslint-disable-line
 }
 
@@ -64,6 +64,8 @@ async function addPostData(post, fullUser) {
 
   if (fullUser && fullUser.subscription && fullUser.subscription.active) {
     replaceWithAdFree(post, fullUser);
+  } else {
+    post.adFreeMp3 = null; // eslint-disable-line
   }
 
   return post;
