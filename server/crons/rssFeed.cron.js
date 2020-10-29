@@ -1,7 +1,6 @@
 import { toXML } from 'jstoxml';
-import { find, cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash';
 import moment from 'moment';
-import megaphone from './megaphone.json.js'; // eslint-disable-line import/extensions
 import config from '../../config/config';
 import CronItem from '../helpers/cronItem.helper';
 import { getAdFreeMp3 } from '../helpers/mp3.helper';
@@ -90,8 +89,6 @@ async function callback() {
   const publicFeedAllConfig = cloneDeep(rawFeedConfig);
   const publicFeedConfig = cloneDeep(rawFeedConfig);
   const privateFeedConfig = cloneDeep(rawFeedConfig);
-  const adFreeFeedConfig = cloneDeep(rawFeedConfig);
-
   const lastPost = posts[posts.length - 1];
 
   let episode = posts.length + 1;
@@ -105,7 +102,6 @@ async function callback() {
     let description;
 
     const extractedDescription = post.excerpt.rendered.match(/ Download (.*?)[<]/) || post.excerpt.rendered.match(/[>](.*?)[<]/);
-    const megaphonePodcast = find(megaphone, ['Episodes Title', post.title.rendered]) || {};
 
     if (extractedDescription && extractedDescription.length && extractedDescription[1]) {
       [, description] = extractedDescription;
@@ -143,25 +139,11 @@ async function callback() {
     // RSS item for each episode
     publicFeedConfig._content.channel.push({ item });
 
-    const privateMp3 = getAdFreeMp3(megaphonePodcast['Episodes Original URL'] ||
-      post.mp3);
-
+    const privateMp3 = post.adFreeMp3 || getAdFreeMp3(post.mp3);
     const privateItem = cloneDeep(item);
 
     privateItem[0]._attrs.url = privateMp3;
     privateFeedConfig._content.channel.push({ item: privateItem });
-
-    // RSS for Megaphone Import
-    if (Object.keys(megaphonePodcast).length) {
-      privateItem.push({ megaphonePodcastsUid: megaphonePodcast['Podcasts Uid'] });
-      privateItem.push({ megaphoneGuid: megaphonePodcast['Episodes Guid'] });
-      privateItem.push({ megaphoneId: megaphonePodcast['Episodes ID'] });
-      privateItem.push({ megaphoneUid: megaphonePodcast['Episodes Uid'] });
-    }
-
-    adFreeFeedConfig._content.channel.push({
-      item: privateItem,
-    });
   });
 
   publicFeedAllConfig._content.channel = publicFeedConfig._content.channel;
@@ -175,7 +157,6 @@ async function callback() {
   app.set('rssFeedPublicAll', toXML(publicFeedAllConfig, xmlOptions));
   app.set('rssFeedPublic', toXML(publicFeedConfig, xmlOptions));
   app.set('rssFeedPrivate', toXML(privateFeedConfig, xmlOptions));
-  app.set('rssFeedAdFree', toXML(adFreeFeedConfig, xmlOptions));
 }
 
 const rssFeed = {
