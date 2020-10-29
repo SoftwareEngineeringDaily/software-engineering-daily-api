@@ -143,6 +143,7 @@ PostSchema.statics = {
     'title',
     'date',
     'mp3',
+    'adFreeMp3',
     'link',
     'score',
     'slug',
