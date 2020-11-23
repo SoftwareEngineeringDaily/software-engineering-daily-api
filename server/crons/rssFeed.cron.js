@@ -79,7 +79,13 @@ function encode(text) {
 }
 
 async function callback() {
-  const posts = await Post.find().where('status').equals('publish').lean();
+  // const posts = await Post.find().where('status').equals('publish').lean();
+  const posts = await Post
+    .find()
+    .where('status')
+    .equals('publish')
+    .select('id mp3 adFreeMp3 title excerpt description mainImage link date_gmt')
+    .lean();
 
   // mongoose sort is slower
   posts.sort((o1, o2) => {
