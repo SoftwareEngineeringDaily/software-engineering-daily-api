@@ -101,11 +101,11 @@ if (config.env !== 'test') {
 
 // handle static IP proxy
 if (config.serverUrl) {
-  const staticIP = request.defaults({
+  const staticIP = request({
     proxy: process.env.QUOTAGUARDSTATIC_URL,
   });
 
-  staticIP(process.env.SERVER_URL, (err, res, body) => {
+  staticIP(config.serverUrl, (err, res) => {
     console.log(`Got response: ${res.statusCode}`);
   });
 }
