@@ -11,6 +11,8 @@ import httpStatus from 'http-status';
 import expressWinston from 'express-winston';
 import expressValidation from 'express-validation';
 import helmet from 'helmet';
+import request from 'request';
+
 import winstonInstance from './winston';
 import routes from '../server/routes/index.route';
 import config from './config';
@@ -95,6 +97,17 @@ if (config.env !== 'test') {
   app.use(expressWinston.errorLogger({
     winstonInstance
   }));
+}
+
+// handle static IP proxy
+if (config.serverUrl) {
+  const staticIP = request.defaults({
+    proxy: process.env.QUOTAGUARDSTATIC_URL,
+  });
+
+  staticIP(process.env.SERVER_URL, (err, res, body) => {
+    console.log(`Got response: ${res.statusCode}`);
+  });
 }
 
 // error handler, send stacktrace only during development

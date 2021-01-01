@@ -79,7 +79,6 @@ function encode(text) {
 }
 
 async function callback() {
-  // const posts = await Post.find().where('status').equals('publish').lean();
   const posts = await Post
     .find()
     .where('status')
