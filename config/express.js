@@ -11,8 +11,11 @@ import httpStatus from 'http-status';
 import expressWinston from 'express-winston';
 import expressValidation from 'express-validation';
 import helmet from 'helmet';
-import HttpsProxyAgent from 'https-proxy-agent';
-import request from 'request';
+
+import http from 'http';
+import url from 'url';
+// import HttpsProxyAgent from 'https-proxy-agent';
+// import request from 'request';
 
 import winstonInstance from './winston';
 import routes from '../server/routes/index.route';
@@ -102,25 +105,44 @@ if (config.env !== 'test') {
 
 // handle static IP proxy
 if (config.serverUrl) {
-  const proxy = process.env.QUOTAGUARDSTATIC_URL;
-  const agent = new HttpsProxyAgent(proxy);
+  // const proxy = process.env.QUOTAGUARDSTATIC_URL;
+  // const agent = new HttpsProxyAgent(proxy);
+  // const options = {
+  //   uri: config.serverUrl,
+  //   method: 'POST',
+  //   headers: {
+  //     'content-type': 'application/x-www-form-urlencoded'
+  //   },
+  //   agent,
+  //   timeout: 10000,
+  //   followRedirect: true,
+  //   maxRedirects: 10,
+  //   // body: "name=john"
+  // };
+
+  // request(options, (error, response, body) => {
+  //   console.log(`uri: ${config.serverUrl}`);
+  //   console.log(`Error ${error}`);
+  //   console.log(`Response: ${response}`);
+  //   console.log(`Body: ${body}`);
+  // });
+
+  const proxy = url.parse(process.env.QUOTAGUARDSTATIC_URL);
+  const target = url.parse(config.serverUrl);
   const options = {
-    uri: config.serverUrl,
-    method: 'POST',
+    hostname: proxy.hostname,
+    port: proxy.port || 80,
+    path: target.href,
     headers: {
-      'content-type': 'application/x-www-form-urlencoded'
-    },
-    agent,
-    // timeout: 10000,
-    // followRedirect: true,
-    // maxRedirects: 10,
-    // body: "name=john"
+      'Proxy-Authorization': `Basic ${new Buffer(proxy.auth).toString('base64')}`, // eslint-disable-line no-buffer-constructor
+      Host: target.hostname
+    }
   };
 
-  request(options, (error, response, body) => {
-    console.log(`Error ${error}`);
-    console.log(`Response: ${response}`);
-    console.log(`Body: ${body}`);
+  http.get(options, (res) => {
+    console.log('config.serverUrl ', config.serverUrl);
+    res.pipe(process.stdout);
+    return console.log('status code', res.statusCode);
   });
 }
 
