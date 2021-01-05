@@ -13,9 +13,11 @@ import expressValidation from 'express-validation';
 import helmet from 'helmet';
 
 // import http from 'http';
+// import https from 'https';
 // import url from 'url';
 // import HttpsProxyAgent from 'https-proxy-agent';
-import request from 'request';
+import { createProxyMiddleware } from 'http-proxy-middleware';
+// import request from 'request';
 
 import winstonInstance from './winston';
 import routes from '../server/routes/index.route';
@@ -105,24 +107,47 @@ if (config.env !== 'test') {
 
 // handle static IP proxy
 if (config.serverUrl) {
-  const options = {
-    proxy: process.env.QUOTAGUARDSTATIC_URL,
-    url: config.serverUrl,
+  app.use(process.env.QUOTAGUARDSTATIC_URL, createProxyMiddleware({
+    target: config.serverUrl,
     headers: {
-      'User-Agent': 'node.js',
+      accept: 'application/json',
+      method: 'GET',
     },
-  };
+    changeOrigin: true
+  }));
 
-  request(options, (error, response, body) => {
-    console.log(`uri: ${config.serverUrl}`);
-    console.log(`Error ${error}`);
-    console.log(`Response: ${response}`);
-    console.log(`Body: ${body}`);
+  // HTTP/HTTPS proxy to connect to
+  // const proxy = process.env.QUOTAGUARDSTATIC_URL;
+  // const endpoint = config.serverUrl;
+  // var options = url.parse(endpoint);
 
-    if (!error && response.statusCode === 200) {
-      console.log(body);
-    }
-  });
+  // // create an instance of the `HttpsProxyAgent` class with the proxy server information
+  // var agent = new HttpsProxyAgent(proxy);
+  // options.agent = agent;
+
+  // https.get(options, function (res) {
+  //   console.log('"response" event!', res.headers);
+  //   res.pipe(process.stdout);
+  // });
+
+  // const options = {
+  //   proxy: process.env.QUOTAGUARDSTATIC_URL,
+  //   url: config.serverUrl,
+  //   headers: {
+  //     'User-Agent': 'node.js',
+  //   },
+  // };
+
+  // request(options, (error, response, body) => {
+  //   console.log(`uri: ${config.serverUrl}`);
+  //   console.log(`Error ${error}`);
+  //   console.log(`Response: ${response}`);
+  //   console.log(`Body: ${body}`);
+
+  //   if (!error && response.statusCode === 200) {
+  //     console.log(body);
+  //   }
+  // });
 
 
   // const proxy = process.env.QUOTAGUARDSTATIC_URL;
