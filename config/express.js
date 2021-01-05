@@ -11,6 +11,14 @@ import httpStatus from 'http-status';
 import expressWinston from 'express-winston';
 import expressValidation from 'express-validation';
 import helmet from 'helmet';
+
+// import http from 'http';
+// import https from 'https';
+// import url from 'url';
+// import HttpsProxyAgent from 'https-proxy-agent';
+import { createProxyMiddleware } from 'http-proxy-middleware';
+// import request from 'request';
+
 import winstonInstance from './winston';
 import routes from '../server/routes/index.route';
 import config from './config';
@@ -95,6 +103,94 @@ if (config.env !== 'test') {
   app.use(expressWinston.errorLogger({
     winstonInstance
   }));
+}
+
+// handle static IP proxy
+if (config.serverUrl) {
+  app.use(process.env.QUOTAGUARDSTATIC_URL, createProxyMiddleware({
+    target: config.serverUrl,
+    headers: {
+      accept: 'application/json',
+      method: 'GET',
+    },
+    changeOrigin: true
+  }));
+
+  // HTTP/HTTPS proxy to connect to
+  // const proxy = process.env.QUOTAGUARDSTATIC_URL;
+  // const endpoint = config.serverUrl;
+  // var options = url.parse(endpoint);
+
+  // // create an instance of the `HttpsProxyAgent` class with the proxy server information
+  // var agent = new HttpsProxyAgent(proxy);
+  // options.agent = agent;
+
+  // https.get(options, function (res) {
+  //   console.log('"response" event!', res.headers);
+  //   res.pipe(process.stdout);
+  // });
+
+  // const options = {
+  //   proxy: process.env.QUOTAGUARDSTATIC_URL,
+  //   url: config.serverUrl,
+  //   headers: {
+  //     'User-Agent': 'node.js',
+  //   },
+  // };
+
+  // request(options, (error, response, body) => {
+  //   console.log(`uri: ${config.serverUrl}`);
+  //   console.log(`Error ${error}`);
+  //   console.log(`Response: ${response}`);
+  //   console.log(`Body: ${body}`);
+
+  //   if (!error && response.statusCode === 200) {
+  //     console.log(body);
+  //   }
+  // });
+
+
+  // const proxy = process.env.QUOTAGUARDSTATIC_URL;
+  // const agent = new HttpsProxyAgent(proxy);
+  // const options = {
+  //   uri: config.serverUrl,
+  //   method: 'POST',
+  //   headers: {
+  //     'content-type': 'application/x-www-form-urlencoded'
+  //   },
+  //   agent,
+  //   timeout: 10000,
+  //   followRedirect: true,
+  //   maxRedirects: 10,
+  //   // body: "name=john"
+  // };
+
+  // request(options, (error, response, body) => {
+  //   console.log(`uri: ${config.serverUrl}`);
+  //   console.log(`Error ${error}`);
+  //   console.log(`Response: ${response}`);
+  //   console.log(`Body: ${body}`);
+  // });
+
+
+  // const proxy = url.parse(process.env.QUOTAGUARDSTATIC_URL);
+  // const target = url.parse(config.serverUrl);
+  // const options = {
+  //   hostname: proxy.hostname,
+  //   port: proxy.port || 80,
+  //   path: target.href,
+  //   headers: {
+  //     // eslint-disable no-buffer-constructor
+  //     'Proxy-Authorization': `Basic ${new Buffer(proxy.auth).toString('base64')}`,
+  //     Host: target.hostname,
+  //   }
+  // };
+
+  // http.get(options, (res) => {
+  //   console.log('config.serverUrl ', config.serverUrl);
+  //   res.pipe(process.stdout);
+  //   return console.log('status code', res.statusCode);
+  // });
 }
 
 // error handler, send stacktrace only during development

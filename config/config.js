@@ -53,6 +53,7 @@ const config = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   baseUrl: envVars.BASE_URL,
+  serverUrl: envVars.SERVER_URL,
   sendGridKey: envVars.SEND_GRID_KEY,
   mongooseDebug: envVars.MONGOOSE_DEBUG,
   jwtSecret: envVars.JWT_SECRET,
