@@ -11,6 +11,7 @@ import httpStatus from 'http-status';
 import expressWinston from 'express-winston';
 import expressValidation from 'express-validation';
 import helmet from 'helmet';
+import HttpsProxyAgent from 'https-proxy-agent';
 import request from 'request';
 
 import winstonInstance from './winston';
@@ -101,12 +102,25 @@ if (config.env !== 'test') {
 
 // handle static IP proxy
 if (config.serverUrl) {
-  const staticIP = request({
-    proxy: process.env.QUOTAGUARDSTATIC_URL,
-  });
+  const proxy = process.env.QUOTAGUARDSTATIC_URL;
+  const agent = new HttpsProxyAgent(proxy);
+  const options = {
+    uri: process.env.SERVER_URL,
+    // method: "POST",
+    // headers: {
+    //   'content-type': 'application/x-www-form-urlencoded'
+    // },
+    agent,
+    // timeout: 10000,
+    // followRedirect: true,
+    // maxRedirects: 10,
+    // body: "name=john"
+  };
 
-  staticIP(config.serverUrl, (err, res) => {
-    console.log(`Got response: ${res.statusCode}`);
+  request(options, (error, response, body) => {
+    console.log(`Error${error}`);
+    console.log(`Response: ${response}`);
+    console.log(`Body: ${body}`);
   });
 }
 
