@@ -105,11 +105,11 @@ if (config.serverUrl) {
   const proxy = process.env.QUOTAGUARDSTATIC_URL;
   const agent = new HttpsProxyAgent(proxy);
   const options = {
-    uri: process.env.SERVER_URL,
-    // method: "POST",
-    // headers: {
-    //   'content-type': 'application/x-www-form-urlencoded'
-    // },
+    uri: config.serverUrl,
+    method: 'POST',
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded'
+    },
     agent,
     // timeout: 10000,
     // followRedirect: true,
@@ -118,7 +118,7 @@ if (config.serverUrl) {
   };
 
   request(options, (error, response, body) => {
-    console.log(`Error${error}`);
+    console.log(`Error ${error}`);
     console.log(`Response: ${response}`);
     console.log(`Body: ${body}`);
   });
