@@ -12,10 +12,10 @@ import expressWinston from 'express-winston';
 import expressValidation from 'express-validation';
 import helmet from 'helmet';
 
-import http from 'http';
-import url from 'url';
+// import http from 'http';
+// import url from 'url';
 // import HttpsProxyAgent from 'https-proxy-agent';
-// import request from 'request';
+import request from 'request';
 
 import winstonInstance from './winston';
 import routes from '../server/routes/index.route';
@@ -105,6 +105,26 @@ if (config.env !== 'test') {
 
 // handle static IP proxy
 if (config.serverUrl) {
+  const options = {
+    proxy: process.env.QUOTAGUARDSTATIC_URL,
+    url: config.serverUrl,
+    headers: {
+      'User-Agent': 'node.js',
+    },
+  };
+
+  request(options, (error, response, body) => {
+    console.log(`uri: ${config.serverUrl}`);
+    console.log(`Error ${error}`);
+    console.log(`Response: ${response}`);
+    console.log(`Body: ${body}`);
+
+    if (!error && response.statusCode === 200) {
+      console.log(body);
+    }
+  });
+
+
   // const proxy = process.env.QUOTAGUARDSTATIC_URL;
   // const agent = new HttpsProxyAgent(proxy);
   // const options = {
@@ -127,23 +147,25 @@ if (config.serverUrl) {
   //   console.log(`Body: ${body}`);
   // });
 
-  const proxy = url.parse(process.env.QUOTAGUARDSTATIC_URL);
-  const target = url.parse(config.serverUrl);
-  const options = {
-    hostname: proxy.hostname,
-    port: proxy.port || 80,
-    path: target.href,
-    headers: {
-      'Proxy-Authorization': `Basic ${new Buffer(proxy.auth).toString('base64')}`, // eslint-disable-line no-buffer-constructor
-      Host: target.hostname
-    }
-  };
 
-  http.get(options, (res) => {
-    console.log('config.serverUrl ', config.serverUrl);
-    res.pipe(process.stdout);
-    return console.log('status code', res.statusCode);
-  });
+  // const proxy = url.parse(process.env.QUOTAGUARDSTATIC_URL);
+  // const target = url.parse(config.serverUrl);
+  // const options = {
+  //   hostname: proxy.hostname,
+  //   port: proxy.port || 80,
+  //   path: target.href,
+  //   headers: {
+  //     // eslint-disable no-buffer-constructor
+  //     'Proxy-Authorization': `Basic ${new Buffer(proxy.auth).toString('base64')}`,
+  //     Host: target.hostname,
+  //   }
+  // };
+
+  // http.get(options, (res) => {
+  //   console.log('config.serverUrl ', config.serverUrl);
+  //   res.pipe(process.stdout);
+  //   return console.log('status code', res.statusCode);
+  // });
 }
 
 // error handler, send stacktrace only during development
