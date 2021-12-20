@@ -65,7 +65,6 @@
     "commitizen": "2.9.6",
     "compression": "1.7.0",
     "cookie-parser": "1.4.3",
-    "cors": "2.8.4",
     "coveralls": "2.13.1",
     "cross-env": "5.0.5",
     "cz-conventional-changelog": "2.0.0",
@@ -131,6 +130,7 @@
   "devDependencies": {
     "babel-polyfill": "^6.26.0",
     "babel-register": "^6.26.0",
+    "cors": "^2.8.5",
     "cross-fetch": "^3.1.4",
     "husky": "^0.14.3",
     "lint-staged": "^6.0.0",
